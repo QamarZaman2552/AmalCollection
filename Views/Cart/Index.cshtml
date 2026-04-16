@@ -1,0 +1,56 @@
+@model List<ShoppingApp.Models.CartItem>
+@{
+    ViewData["Title"] = "Shopping Cart";
+    decimal total = Model.Sum(i => (i.Product?.FinalPrice ?? 0) * i.Quantity);
+}
+
+<section class="section">
+    <h1 class="section-title">🛒 Your Cart</h1>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+            <p>Your cart is empty!</p>
+            <a href="/" class="btn-primary">Start Shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+            <div class="cart-items">
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item">
+                        <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
+                        <div class="cart-item-info">
+                            <h3>@item.Product?.Name</h3>
+                            <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Brand</div>
+                            <div class="cart-item-price">PKR @item.Product?.FinalPrice.ToString("N0") each</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
+                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.submit()" />
+                            </form>
+                            <div class="cart-item-subtotal">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+                            <form method="post" action="/Cart/Remove">
+                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                <button type="submit" class="btn-remove">✕</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="cart-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @Model.Sum(i => (i.Product?.FinalPrice ?? 0) * i.Quantity).ToString("N0")</span></div>
+                <div class="summary-row"><span>Delivery</span><span class="text-green">Free</span></div>
+                <div class="summary-total"><span>Total</span><span>PKR @total.ToString("N0")</span></div>
+                <a href="/Orders/Checkout" class="btn-primary btn-full">Proceed to Checkout →</a>
+                <a href="/" class="btn-glass btn-full" style="margin-top:0.5rem;">Continue Shopping</a>
+            </div>
+        </div>
+    }
+</section>

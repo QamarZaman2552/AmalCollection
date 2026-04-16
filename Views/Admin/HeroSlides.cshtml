@@ -1,0 +1,92 @@
+@model List<ShoppingApp.Models.HeroSlide>
+@{
+    ViewData["Title"] = "Admin – Hero Slides";
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">🖼️ Hero Slider Management</h1>
+        <div class="admin-header-actions">
+            <a href="/Admin/Analytics"  class="btn-glass">📊 Analytics</a>
+            <a href="/Admin/Orders"     class="btn-glass">📦 Orders</a>
+            <a href="/Admin/Products"   class="btn-glass">⚙️ Products</a>
+            <a href="/Admin/AddSlide"   class="btn-primary">+ Add Slide</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🖼️</div>
+            <p>No hero slides yet. Add your first slide to power the homepage banner.</p>
+            <a href="/Admin/AddSlide" class="btn-primary">+ Add First Slide</a>
+        </div>
+    }
+    else
+    {
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Tagline</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Hashtag</th>
+                        <th>Link</th>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(s.ImagePath))
+                                {
+                                    <img src="@s.ImagePath" onerror="this.src='/images/placeholder.jpg'"
+                                         style="width:80px;height:48px;object-fit:cover;border-radius:6px;" />
+                                }
+                                else
+                                {
+                                    <div style="width:80px;height:48px;background:var(--bg-3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🖼️</div>
+                                }
+                            </td>
+                            <td><span style="font-size:0.78rem;color:var(--text-3);">@s.Tagline</span></td>
+                            <td><strong>@s.Title</strong></td>
+                            <td>@s.CategoryLabel</td>
+                            <td style="color:var(--accent-2);">@s.Hashtag</td>
+                            <td style="font-size:0.8rem;color:var(--text-3);">@s.LinkUrl</td>
+                            <td style="text-align:center;">@s.SortOrder</td>
+                            <td>
+                                <form method="post" action="/Admin/ToggleSlide/@s.Id" style="display:inline">
+                                    <button type="submit" class="@(s.IsActive ? "btn-status-active" : "btn-status-inactive")">
+                                        @(s.IsActive ? "✅ Active" : "⏸ Inactive")
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="admin-actions">
+                                <a href="/Admin/EditSlide/@s.Id" class="btn-edit">✏ Edit</a>
+                                <form method="post" action="/Admin/DeleteSlide/@s.Id" style="display:inline"
+                                      onsubmit="return confirm('Delete slide @s.Title?')">
+                                    <button type="submit" class="btn-remove">🗑 Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <p style="margin-top:1rem;font-size:0.83rem;color:var(--text-3);">
+            💡 Tip: Lower Sort Order number = appears first. Toggle Active to show/hide without deleting.
+        </p>
+    }
+</section>

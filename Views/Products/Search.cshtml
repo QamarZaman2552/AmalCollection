@@ -1,0 +1,44 @@
+@model List<ShoppingApp.Models.Product>
+@{
+    ViewData["Title"] = $"Search: {ViewBag.Query}";
+    var categories = ViewBag.Categories as List<string>;
+    var brands = ViewBag.Brands as List<string>;
+}
+
+<section class="section">
+    <h2 class="section-title">
+        Search results for "<span class="gradient-text">@ViewBag.Query</span>"
+        <span class="badge">@Model.Count found</span>
+    </h2>
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <p>No products matched your search. Try different keywords.</p>
+            <a href="/" class="btn-primary">Back to Shop</a>
+        </div>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var p in Model)
+            {
+                <a href="/Products/Detail/@p.Id" class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                        @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">@p.Category</div>
+                        <h3 class="product-name">@p.Name</h3>
+                        <div class="product-brand">@p.Brand</div>
+                        <div class="product-pricing">
+                            <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                            @if (p.Discount > 0) { <span class="price-original">PKR @p.Price.ToString("N0")</span> }
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>

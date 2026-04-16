@@ -1,0 +1,179 @@
+@model List<ShoppingApp.Models.Order>
+@{
+    ViewData["Title"] = "Admin – Orders";
+}
+
+<style>
+    .order-detail-table {
+        width: 100%;
+        min-width: 280px;
+        border-collapse: collapse;
+        background-color: var(--bg-2);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+    .order-detail-table th {
+        background-color: var(--bg-3);
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: left;
+        color: var(--text-2);
+    }
+    .order-detail-table td {
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .order-detail-table tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">📦 Orders Management</h1>
+        <div class="admin-header-actions">
+            <a href="/Admin/Analytics"  class="btn-glass">📊 Analytics</a>
+            <a href="/Admin/HeroSlides" class="btn-glass">🖼️ Hero Slides</a>
+            <a href="/Admin/ChatLogs"   class="btn-glass">📜 Chat Logs</a>
+            <a href="/Admin/Products"   class="btn-glass">⚙️ Products</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <p>No orders placed yet.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Summary Stats -->
+        <div class="orders-stats-row">
+            <div class="ostat-card">
+                <span class="ostat-num">@Model.Count</span>
+                <span class="ostat-label">Total Orders</span>
+            </div>
+            <div class="ostat-card">
+                <span class="ostat-num">@Model.Count(o => o.Status == "pending")</span>
+                <span class="ostat-label">Pending</span>
+            </div>
+            <div class="ostat-card">
+                <span class="ostat-num">@Model.Count(o => o.Status == "confirmed")</span>
+                <span class="ostat-label">Confirmed</span>
+            </div>
+            <div class="ostat-card">
+                <span class="ostat-num">@Model.Count(o => o.Status == "delivered")</span>
+                <span class="ostat-label">Delivered</span>
+            </div>
+        </div>
+
+        <!-- Main Orders Table -->
+        <div class="admin-table-wrap">
+            <table class="admin-table orders-master-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date (PKT)</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Delivery Address</th>
+                        <th>Payment</th>
+                        <th>Items Ordered</th>
+                        <th>Total (PKR)</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr class="order-row-@order.Status">
+                            <!-- Order # -->
+                            <td><strong class="order-num">#@order.Id</strong></td>
+
+                            <!-- Date -->
+                            <td class="cell-date">
+                                @order.CreatedAt.AddHours(5).ToString("dd MMM yy")<br/>
+                                <span class="cell-sub">@order.CreatedAt.AddHours(5).ToString("hh:mm tt")</span>
+                            </td>
+
+                            <!-- Customer -->
+                            <td>
+                                <div class="cell-customer-name">@order.User?.FullName</div>
+                                <div class="cell-sub">@order.User?.Email</div>
+                            </td>
+
+                            <!-- Phone -->
+                            <td class="cell-sub">@(order.User?.Phone ?? "—")</td>
+
+                            <!-- Address -->
+                            <td class="cell-address">@order.DeliveryAddress</td>
+
+                            <!-- Payment -->
+                            <td>
+                                <span class="payment-badge">@order.PaymentMethod</span>
+                            </td>
+
+                            <!-- Items -->
+                            <td>
+                                <table class="order-detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Qty</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div style="display:flex; align-items:center; gap:6px;">
+                                                        <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" onerror="this.src='/images/placeholder.jpg'" style="width:24px; height:24px; object-fit:cover; border-radius:4px;" />
+                                                        <span style="font-size:0.85rem;">@item.Product?.Name</span>
+                                                    </div>
+                                                </td>
+                                                <td style="font-size:0.85rem; font-weight:bold;">×@item.Quantity</td>
+                                                <td style="font-size:0.8rem; color:var(--text-2);">@item.UnitPrice.ToString("N0")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+
+                            <!-- Total -->
+                            <td><strong class="cell-total">@order.TotalAmount.ToString("N0")</strong></td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                <span class="order-status status-@order.Status">@order.Status.ToUpper()</span>
+                            </td>
+
+                            <!-- Update Status -->
+                            <td>
+                                <form method="post" action="/Admin/UpdateStatus/@order.Id" class="status-update-form">
+                                    @{ var st2 = order.Status; }
+                                    <select name="status" class="aorder-status-select">
+                                        @if (st2 == "pending")   { <option value="pending"   selected>⏳ Pending</option>   } else { <option value="pending">⏳ Pending</option>   }
+                                        @if (st2 == "confirmed") { <option value="confirmed" selected>✅ Confirmed</option> } else { <option value="confirmed">✅ Confirmed</option> }
+                                        @if (st2 == "delivered") { <option value="delivered" selected>🚚 Delivered</option> } else { <option value="delivered">🚚 Delivered</option> }
+                                    </select>
+                                    <button type="submit" class="btn-save-status">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

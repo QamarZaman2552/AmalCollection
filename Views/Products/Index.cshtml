@@ -1,0 +1,182 @@
+@model List<ShoppingApp.Models.Product>
+@{
+    ViewData["Title"] = "Home – ShopAI";
+    var recommendations = ViewBag.Recommendations as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
+    var categories  = ViewBag.Categories as List<string> ?? new List<string>();
+    var brands      = ViewBag.Brands as List<string> ?? new List<string>();
+    var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
+    string selectedCat   = ViewBag.SelectedCategory ?? "";
+    string selectedBrand = ViewBag.SelectedBrand ?? "";
+
+    // Fallback static slides if no DB slides exist yet
+    if (!heroSlides.Any())
+    {
+        heroSlides = new List<ShoppingApp.Models.HeroSlide>
+        {
+            new() { Id=0, Tagline="SOUND THAT COMPLETES THE FIT", Title="MAGNITUDE",   CategoryLabel="HEADPHONES",  Hashtag="#SOUNDSGREAT", LinkUrl="/?category=Audio",       ImagePath="/images/hero1.jpg" },
+            new() { Id=0, Tagline="BUILT FOR THE RELENTLESS",     Title="GAMING PRO",  CategoryLabel="LAPTOPS",     Hashtag="#LEVELUP",     LinkUrl="/?category=Laptops",     ImagePath="/images/hero2.jpg" },
+            new() { Id=0, Tagline="CAPTURE EVERY MOMENT",         Title="200MP",       CategoryLabel="SMARTPHONES", Hashtag="#SHOOTBIG",    LinkUrl="/?category=Phones",      ImagePath="/images/hero3.jpg" },
+            new() { Id=0, Tagline="PRECISION AT YOUR FINGERTIPS", Title="RGB PRO",     CategoryLabel="ACCESSORIES", Hashtag="#GAMEHARDER",  LinkUrl="/?category=Accessories", ImagePath="/images/hero4.jpg" },
+        };
+    }
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO SLIDER — Full-Image Horizontal Banner
+     ═══════════════════════════════════════════════════════════ -->
+<div class="rn-slider" id="rnSlider">
+
+    @{ int slideIdx = 0; }
+    @foreach (var slide in heroSlides)
+    {
+        <div class="rn-slide @(slideIdx == 0 ? "active" : "")">
+            <!-- Background image layer -->
+            <div class="rn-img" style="background-image:url('@(string.IsNullOrEmpty(slide.ImagePath) ? "/images/placeholder.jpg" : slide.ImagePath)')">
+                <!-- Gradient overlay so text is always readable -->
+            </div>
+            <!-- Text panel (left side) -->
+            <div class="rn-panel">
+                <div class="rn-text-box">
+                    <p class="rn-tagline">@slide.Tagline</p>
+                    <h2 class="rn-name">@slide.Title</h2>
+                    <p class="rn-cat">@slide.CategoryLabel</p>
+                    @if (!string.IsNullOrEmpty(slide.Hashtag))
+                    {
+                        <p class="rn-tag">@slide.Hashtag</p>
+                    }
+                    @if (!string.IsNullOrEmpty(slide.LinkUrl))
+                    {
+                        <a href="@slide.LinkUrl" class="rn-cta">Shop Now</a>
+                    }
+                </div>
+            </div>
+        </div>
+        slideIdx++;
+    }
+
+    <!-- Prev / Next arrows -->
+    <button class="rn-arrow rn-prev" id="rnPrev" aria-label="Previous">&#8249;</button>
+    <button class="rn-arrow rn-next" id="rnNext" aria-label="Next">&#8250;</button>
+
+    <!-- Dot indicators -->
+    <div class="rn-dots" id="rnDots">
+        @for (int d = 0; d < heroSlides.Count; d++)
+        {
+            <span class="rn-dot @(d == 0 ? "active" : "")" data-goto="@d"></span>
+        }
+    </div>
+</div>
+
+<!-- Filters -->
+<section class="filter-bar" id="products">
+    <form method="get" action="/" class="filter-form">
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            @foreach (var cat in categories)
+            {
+                if (cat == selectedCat)
+                {
+                    <option value="@cat" selected>@cat</option>
+                }
+                else
+                {
+                    <option value="@cat">@cat</option>
+                }
+            }
+        </select>
+        <select name="brand" onchange="this.form.submit()">
+            <option value="">All Brands</option>
+            @foreach (var b in brands)
+            {
+                if (b == selectedBrand)
+                {
+                    <option value="@b" selected>@b</option>
+                }
+                else
+                {
+                    <option value="@b">@b</option>
+                }
+            }
+        </select>
+        @if (!string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedBrand))
+        {
+            <a href="/" class="btn-outline-sm">✕ Clear</a>
+        }
+    </form>
+</section>
+
+<!-- Products Grid -->
+<section class="section">
+    <h2 class="section-title">
+        @(string.IsNullOrEmpty(selectedCat) ? "All Products" : selectedCat)
+        <span class="badge">@Model.Count items</span>
+    </h2>
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <p>No products found in this category.</p>
+            <a href="/" class="btn-primary">See All Products</a>
+        </div>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var p in Model)
+            {
+                <a href="/Products/Detail/@p.Id" class="product-card">
+                    <div class="product-img-wrap">
+                        <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                             alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                        @if (p.Discount > 0)
+                        {
+                            <span class="badge-discount">-@p.Discount%</span>
+                        }
+                        @if (p.Stock == 0)
+                        {
+                            <span class="badge-oos">Out of Stock</span>
+                        }
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">@p.Category</div>
+                        <h3 class="product-name">@p.Name</h3>
+                        <div class="product-brand">@p.Brand</div>
+                        <div class="product-pricing">
+                            <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                            @if (p.Discount > 0)
+                            {
+                                <span class="price-original">PKR @p.Price.ToString("N0")</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<!-- AI Recommendations -->
+@if (recommendations.Any())
+{
+    <section class="section recs-section">
+        <h2 class="section-title">✨ Recommended For You</h2>
+        <div class="product-grid">
+            @foreach (var p in recommendations)
+            {
+                <a href="/Products/Detail/@p.Id" class="product-card rec-card">
+                    <div class="product-img-wrap">
+                        <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                             alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">@p.Category</div>
+                        <h3 class="product-name">@p.Name</h3>
+                        <div class="product-pricing">
+                            <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}

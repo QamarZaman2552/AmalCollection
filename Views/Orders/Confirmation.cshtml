@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<section class="section">
+    <div class="confirmation-box">
+        <div class="confirm-icon">🎉</div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Thank you for your purchase. Your order <strong>#@ViewBag.OrderId</strong> has been received and is being processed.</p>
+        <div class="confirm-steps">
+            <div class="step active">✅ Order Placed</div>
+            <div class="step">📦 Processing</div>
+            <div class="step">🚚 Shipping</div>
+            <div class="step">🏠 Delivered</div>
+        </div>
+        <div class="confirm-actions">
+            <a href="/Orders/History" class="btn-primary">View My Orders</a>
+            <a href="/" class="btn-glass">Continue Shopping</a>
+        </div>
+    </div>
+</section>

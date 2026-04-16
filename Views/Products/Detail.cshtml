@@ -1,0 +1,84 @@
+@model ShoppingApp.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    var related = ViewBag.Related as List<ShoppingApp.Models.Product>;
+    var userId = Context.Session.GetInt32("UserId");
+}
+
+<section class="product-detail-section">
+    <div class="product-detail-grid">
+        <!-- Image -->
+        <div class="product-detail-img">
+            <img src="@(Model.ImagePath ?? "/images/placeholder.jpg")" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" id="mainImage" />
+        </div>
+
+        <!-- Info -->
+        <div class="product-detail-info">
+            <div class="product-category">@Model.Category · @Model.Brand</div>
+            <h1 class="product-detail-name">@Model.Name</h1>
+            
+            <div class="product-detail-price">
+                <span class="price-final-lg">PKR @Model.FinalPrice.ToString("N0")</span>
+                @if (Model.Discount > 0)
+                {
+                    <span class="price-original-lg">PKR @Model.Price.ToString("N0")</span>
+                    <span class="discount-pill">@Model.Discount% OFF</span>
+                }
+            </div>
+
+            <div class="stock-status @(Model.Stock > 0 ? "in-stock" : "out-stock")">
+                @(Model.Stock > 0 ? $"✓ In Stock ({Model.Stock} available)" : "✗ Out of Stock")
+            </div>
+
+            <p class="product-desc">@Model.Description</p>
+
+            @if (Model.Stock > 0)
+            {
+                if (userId != null)
+                {
+                    <form method="post" action="/Cart/Add" class="add-cart-form">
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <div class="qty-row">
+                            <label>Qty:</label>
+                            <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="qty-input" />
+                        </div>
+                        <button type="submit" class="btn-primary btn-full">🛒 Add to Cart</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Auth/Login" class="btn-primary btn-full">Login to Add to Cart</a>
+                }
+            }
+            else
+            {
+                <button class="btn-primary btn-full" disabled>Out of Stock</button>
+            }
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (related != null && related.Any())
+    {
+        <div class="section">
+            <h2 class="section-title">Related Products</h2>
+            <div class="product-grid">
+                @foreach (var p in related)
+                {
+                    <a href="/Products/Detail/@p.Id" class="product-card">
+                        <div class="product-img-wrap">
+                            <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">@p.Name</h3>
+                            <div class="product-pricing">
+                                <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</section>

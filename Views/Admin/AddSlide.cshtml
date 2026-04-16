@@ -1,0 +1,102 @@
+@model ShoppingApp.Models.HeroSlide
+@{
+    ViewData["Title"] = "Admin – Add Hero Slide";
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">🖼️ Add Hero Slide</h1>
+        <a href="/Admin/HeroSlides" class="btn-glass">← Back to Slides</a>
+    </div>
+
+    <div class="form-card">
+        <form method="post" action="/Admin/AddSlide" enctype="multipart/form-data" class="admin-form">
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Tagline <small>(small text above title)</small></label>
+                    <input name="Tagline" placeholder="e.g. SOUND THAT COMPLETES THE FIT" required />
+                </div>
+                <div class="form-group">
+                    <label>Title <small>(big bold name)</small></label>
+                    <input name="Title" placeholder="e.g. MAGNITUDE" required />
+                </div>
+                <div class="form-group">
+                    <label>Category Label</label>
+                    <input name="CategoryLabel" placeholder="e.g. HEADPHONES" required />
+                </div>
+                <div class="form-group">
+                    <label>Hashtag <small>(optional)</small></label>
+                    <input name="Hashtag" placeholder="e.g. #SOUNDSGREAT" />
+                </div>
+                <div class="form-group">
+                    <label>Link URL <small>(Shop Now button)</small></label>
+                    <input name="LinkUrl" placeholder="e.g. /?category=Audio" />
+                </div>
+                <div class="form-group">
+                    <label>Sort Order <small>(0 = first)</small></label>
+                    <input name="SortOrder" type="number" value="0" min="0" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Hero Background Image <small>(recommended: 1440×500px, JPG/PNG/WebP)</small></label>
+                <div class="slide-upload-zone" id="uploadZone">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">Click to select or drag & drop image</div>
+                    <div class="upload-hint">1440×500px recommended · JPG / PNG / WebP</div>
+                    <input type="file" name="imageFile" id="imageFile" accept="image/*" style="display:none" />
+                </div>
+                <div id="imgPreviewWrap" style="display:none;margin-top:0.75rem;">
+                    <img id="imgPreview" style="max-height:160px;border-radius:8px;border:1px solid var(--border);width:100%;object-fit:cover;" />
+                    <p id="imgPreviewName" style="font-size:0.8rem;color:var(--text-3);margin-top:0.4rem;"></p>
+                </div>
+            </div>
+
+            <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+                <input type="checkbox" name="IsActive" id="isActive" value="true" checked style="width:18px;height:18px;accent-color:var(--accent);" />
+                <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage)</label>
+            </div>
+
+            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+                <button type="submit" class="btn-primary">💾 Save Slide</button>
+                <a href="/Admin/HeroSlides" class="btn-glass">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    const zone     = document.getElementById('uploadZone');
+    const input    = document.getElementById('imageFile');
+    const preview  = document.getElementById('imgPreview');
+    const preWrap  = document.getElementById('imgPreviewWrap');
+    const preName  = document.getElementById('imgPreviewName');
+
+    zone.addEventListener('click', () => input.click());
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent-2)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.style.borderColor = '';
+        if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+    });
+
+    input.addEventListener('change', () => { if (input.files[0]) loadFile(input.files[0]); });
+
+    function loadFile(file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            preWrap.style.display = 'block';
+            zone.querySelector('.upload-text').textContent = '✅ Image selected – click to change';
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
+}

@@ -1,0 +1,30 @@
+@model List<ShoppingApp.Models.ChatbotLog>
+@{
+    ViewData["Title"] = "Chatbot Logs";
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">📜 Chatbot Logs</h1>
+        <a href="/Admin/Products" class="btn-glass">← Back</a>
+    </div>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr><th>ID</th><th>User ID</th><th>Query</th><th>Response</th><th>Timestamp</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@log.Id</td>
+                        <td>@(log.UserId?.ToString() ?? "Guest")</td>
+                        <td>@log.Query</td>
+                        <td class="log-response">@log.Response</td>
+                        <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

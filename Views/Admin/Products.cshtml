@@ -1,0 +1,52 @@
+@model List<ShoppingApp.Models.Product>
+@{
+    ViewData["Title"] = "Admin – Products";
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">⚙️ Product Management</h1>
+        <div class="admin-header-actions">
+            <a href="/Admin/Analytics"  class="btn-glass">📊 Analytics</a>
+            <a href="/Admin/Orders"     class="btn-glass">📦 Orders</a>
+            <a href="/Admin/HeroSlides" class="btn-glass">🖼️ Hero Slides</a>
+            <a href="/Admin/ChatLogs"   class="btn-glass">📜 Chat Logs</a>
+            <a href="/Admin/Add"        class="btn-primary">+ Add Product</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    { <div class="alert alert-success">✅ @TempData["Success"]</div> }
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Image</th><th>Name</th><th>Category</th><th>Brand</th>
+                    <th>Price (PKR)</th><th>Discount</th><th>Stock</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td><img src="@(p.ImagePath ?? "/images/placeholder.jpg")" class="admin-thumb" onerror="this.src='/images/placeholder.jpg'" /></td>
+                        <td><strong>@p.Name</strong></td>
+                        <td>@p.Category</td>
+                        <td>@p.Brand</td>
+                        <td>@p.Price.ToString("N0")</td>
+                        <td>@p.Discount%</td>
+                        <td class="@(p.Stock < 5 ? "stock-low" : "")">@p.Stock</td>
+                        <td class="admin-actions">
+                            <a href="/Admin/Edit/@p.Id" class="btn-edit">✏ Edit</a>
+                            <form method="post" action="/Admin/Delete/@p.Id" style="display:inline"
+                                  onsubmit="return confirm('Delete @p.Name?')">
+                                <button type="submit" class="btn-remove">🗑 Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

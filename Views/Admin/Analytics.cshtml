@@ -1,0 +1,237 @@
+@{
+    ViewData["Title"] = "Admin – Analytics";
+
+    var monthlyLabels = (ViewBag.MonthlyLabels as List<string> ?? new List<string>());
+    var monthlySales  = (ViewBag.MonthlySales  as List<decimal> ?? new List<decimal>());
+    var monthlyOrders = (ViewBag.MonthlyOrders as List<int> ?? new List<int>());
+
+    var weeklyLabels  = (ViewBag.WeeklyLabels  as List<string> ?? new List<string>());
+    var weeklySales   = (ViewBag.WeeklySales   as List<decimal> ?? new List<decimal>());
+    var weeklyOrders  = (ViewBag.WeeklyOrders  as List<int> ?? new List<int>());
+
+    decimal totalRevenue    = ViewBag.TotalRevenue    ?? 0m;
+    int     totalOrders     = ViewBag.TotalOrders     ?? 0;
+    int     pendingOrders   = ViewBag.PendingOrders   ?? 0;
+    int     deliveredOrders = ViewBag.DeliveredOrders ?? 0;
+
+    string mlJson  = System.Text.Json.JsonSerializer.Serialize(monthlyLabels);
+    string msJson  = System.Text.Json.JsonSerializer.Serialize(monthlySales.Select(s => (double)s));
+    string moJson  = System.Text.Json.JsonSerializer.Serialize(monthlyOrders);
+
+    string wlJson  = System.Text.Json.JsonSerializer.Serialize(weeklyLabels);
+    string wsJson  = System.Text.Json.JsonSerializer.Serialize(weeklySales.Select(s => (double)s));
+    string woJson  = System.Text.Json.JsonSerializer.Serialize(weeklyOrders);
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">📊 Shop Analytics</h1>
+        <div class="admin-header-actions">
+            <a href="/Admin/Orders"   class="btn-glass">📦 Orders</a>
+            <a href="/Admin/ChatLogs" class="btn-glass">📜 Chat Logs</a>
+            <a href="/Admin/Products" class="btn-glass">⚙️ Products</a>
+        </div>
+    </div>
+
+    <!-- ── Summary Cards ─────────────────────────────────────── -->
+    <div class="analytics-stats">
+        <div class="analytics-stat-card">
+            <div class="asc-icon">💰</div>
+            <div class="asc-num">PKR @totalRevenue.ToString("N0")</div>
+            <div class="asc-label">Total Revenue</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="asc-icon">🛒</div>
+            <div class="asc-num">@totalOrders</div>
+            <div class="asc-label">Total Orders</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="asc-icon">⏳</div>
+            <div class="asc-num">@pendingOrders</div>
+            <div class="asc-label">Pending Orders</div>
+        </div>
+        <div class="analytics-stat-card">
+            <div class="asc-icon">🚚</div>
+            <div class="asc-num">@deliveredOrders</div>
+            <div class="asc-label">Delivered Orders</div>
+        </div>
+    </div>
+
+    <!-- ── Monthly Sales Chart ────────────────────────────────── -->
+    <div class="analytics-chart-card">
+        <h2 class="analytics-chart-title">📅 Monthly Sales (Last 12 Months)</h2>
+        <div class="analytics-chart-wrap">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- ── Monthly Orders Chart ───────────────────────────────── -->
+    <div class="analytics-chart-card">
+        <h2 class="analytics-chart-title">📦 Monthly Order Count (Last 12 Months)</h2>
+        <div class="analytics-chart-wrap">
+            <canvas id="monthlyOrdersChart"></canvas>
+        </div>
+    </div>
+
+    <!-- ── Weekly Sales Chart ─────────────────────────────────── -->
+    <div class="analytics-chart-card">
+        <h2 class="analytics-chart-title">🗓️ Weekly Sales (Last 8 Weeks)</h2>
+        <div class="analytics-chart-wrap">
+            <canvas id="weeklyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- ── Weekly Orders Chart ────────────────────────────────── -->
+    <div class="analytics-chart-card">
+        <h2 class="analytics-chart-title">📊 Weekly Order Count (Last 8 Weeks)</h2>
+        <div class="analytics-chart-wrap">
+            <canvas id="weeklyOrdersChart"></canvas>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(17,24,39,0.95)',
+                titleColor: '#f1f5f9',
+                bodyColor: '#94a3b8',
+                borderColor: 'rgba(255,255,255,0.08)',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#94a3b8', font: { size: 11 } },
+                grid:  { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: {
+                ticks: { color: '#94a3b8', font: { size: 11 } },
+                grid:  { color: 'rgba(255,255,255,0.05)' },
+                beginAtZero: true
+            }
+        }
+    };
+
+    function makeGradient(ctx, color1, color2) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+    }
+
+    // Monthly Revenue
+    (function() {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(mlJson),
+                datasets: [{
+                    label: 'Revenue (PKR)',
+                    data: @Html.Raw(msJson),
+                    backgroundColor: makeGradient(ctx, 'rgba(124,58,237,0.85)', 'rgba(99,102,241,0.3)'),
+                    borderColor: 'rgba(168,85,247,1)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                plugins: {
+                    ...chartDefaults.plugins,
+                    tooltip: {
+                        ...chartDefaults.plugins.tooltip,
+                        callbacks: {
+                            label: ctx => 'PKR ' + ctx.parsed.y.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+    })();
+
+    // Monthly Orders
+    (function() {
+        const ctx = document.getElementById('monthlyOrdersChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(mlJson),
+                datasets: [{
+                    label: 'Orders',
+                    data: @Html.Raw(moJson),
+                    backgroundColor: makeGradient(ctx, 'rgba(34,197,94,0.85)', 'rgba(34,197,94,0.2)'),
+                    borderColor: 'rgba(34,197,94,1)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: chartDefaults
+        });
+    })();
+
+    // Weekly Revenue
+    (function() {
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(wlJson),
+                datasets: [{
+                    label: 'Revenue (PKR)',
+                    data: @Html.Raw(wsJson),
+                    backgroundColor: makeGradient(ctx, 'rgba(249,115,22,0.85)', 'rgba(249,115,22,0.2)'),
+                    borderColor: 'rgba(249,115,22,1)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                ...chartDefaults,
+                plugins: {
+                    ...chartDefaults.plugins,
+                    tooltip: {
+                        ...chartDefaults.plugins.tooltip,
+                        callbacks: {
+                            label: ctx => 'PKR ' + ctx.parsed.y.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+    })();
+
+    // Weekly Orders
+    (function() {
+        const ctx = document.getElementById('weeklyOrdersChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(wlJson),
+                datasets: [{
+                    label: 'Orders',
+                    data: @Html.Raw(woJson),
+                    backgroundColor: makeGradient(ctx, 'rgba(99,102,241,0.85)', 'rgba(99,102,241,0.2)'),
+                    borderColor: 'rgba(99,102,241,1)',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: chartDefaults
+        });
+    })();
+</script>
+}

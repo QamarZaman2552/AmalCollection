@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ShopAI – Pakistan's premium AI-powered shopping destination with smart chatbot assistance." />
+    <title>@ViewData["Title"] – ShopAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <!-- ─── Navigation ─────────────────────────────────────── -->
+    <header class="navbar">
+        <a href="/" class="brand">
+            <span class="brand-icon">🛍️</span>
+            <span>ShopAI</span>
+        </a>
+
+        <!-- Search Bar -->
+        <form class="nav-search" action="/Products/Search" method="get">
+            <input type="text" name="q" placeholder="Search products…" value="@ViewBag.Query" autocomplete="off" />
+            <button type="submit">🔍</button>
+        </form>
+
+        <!-- Nav Links -->
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            @if (Context.Session.GetString("UserRole") == "admin")
+            {
+                <a href="/Admin/Products" class="nav-admin">⚙ Admin</a>
+            }
+            @if (Context.Session.GetInt32("UserId") != null)
+            {
+                <a href="/Orders/History">My Orders</a>
+                <a href="/Cart" class="cart-link">
+                    🛒 Cart <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a href="/Auth/Logout" class="btn-outline-sm">Logout</a>
+            }
+            else
+            {
+                <a href="/Auth/Login" class="btn-outline-sm">Login</a>
+                <a href="/Auth/Register" class="btn-primary-sm">Register</a>
+            }
+        </nav>
+    </header>
+
+    <!-- ─── Toast Notifications ──────────────────────────────── -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="toast toast-success" id="toast">✅ @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="toast toast-error" id="toast">❌ @TempData["Error"]</div>
+    }
+
+    <!-- ─── Main Content ─────────────────────────────────────── -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- ─── Footer ──────────────────────────────────────────── -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>© 2024 <strong>ShopAI</strong> — CS-UEM-BS-F22E8 · University of Education, Lahore – Multan Campus</p>
+            <div class="footer-links">
+                <a href="/Products/Search?q=">All Products</a>
+                <span>·</span>
+                <a href="/Auth/Register">Register</a>
+                <span>·</span>
+                <a href="/Auth/Login">Login</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ─── Chatbot Widget ────────────────────────────────────── -->
+    <div class="chatbot-bubble" id="chatBubble" title="Chat with ShopAI">
+        <span class="chatbot-icon">💬</span>
+        <span class="chatbot-ping"></span>
+    </div>
+
+    <div class="chatbot-window" id="chatWindow">
+        <div class="chatbot-header">
+            <div class="chatbot-avatar">🤖</div>
+            <div>
+                <div class="chatbot-name">ShopAI Assistant</div>
+                <div class="chatbot-status">● Online</div>
+            </div>
+            <button class="chatbot-close" id="chatClose">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatMessages">
+            <div class="chat-msg bot">
+                <div class="chat-bubble">👋 Hi! I'm your ShopAI assistant. Ask me about products, prices, shipping, or anything else!</div>
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatInput" placeholder="Type your message…" maxlength="300" />
+            <button id="chatSend">➤</button>
+        </div>
+    </div>
+
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

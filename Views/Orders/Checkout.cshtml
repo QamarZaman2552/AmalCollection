@@ -1,0 +1,54 @@
+@model List<ShoppingApp.Models.CartItem>
+@{
+    ViewData["Title"] = "Checkout";
+    decimal total = (decimal)(ViewBag.Total ?? 0);
+}
+
+<section class="section">
+    <h1 class="section-title">✅ Checkout</h1>
+    <div class="checkout-layout">
+        <div class="checkout-form-wrap">
+            <form method="post" action="/Orders/Checkout" class="checkout-form">
+                <h2>Delivery Details</h2>
+                <div class="form-group">
+                    <label for="deliveryAddress">Delivery Address *</label>
+                    <textarea id="deliveryAddress" name="deliveryAddress" placeholder="House #, Street, City, Province" required rows="3"></textarea>
+                </div>
+
+                <h2>Payment Method</h2>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
+                        <span class="payment-label">💵 Cash on Delivery</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
+                        <span class="payment-label">💳 Credit / Debit Card</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Bank Transfer" />
+                        <span class="payment-label">🏦 Bank Transfer</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary btn-full">Place Order PKR @total.ToString("N0") →</button>
+            </form>
+        </div>
+
+        <div class="checkout-summary">
+            <h2>Order Items</h2>
+            @foreach (var item in Model)
+            {
+                <div class="checkout-item">
+                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" />
+                    <div>
+                        <div class="checkout-item-name">@item.Product?.Name</div>
+                        <div class="checkout-item-qty">x@item.Quantity</div>
+                    </div>
+                    <div class="checkout-item-price">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+                </div>
+            }
+            <div class="summary-total"><span>Total</span><span>PKR @total.ToString("N0")</span></div>
+        </div>
+    </div>
+</section>

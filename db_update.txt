@@ -1,0 +1,177 @@
+﻿Build started...
+Build succeeded.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      PRAGMA journal_mode = 'wal';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "__EFMigrationsHistory" (
+          "MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
+          "ProductVersion" TEXT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM "__EFMigrationsHistory"
+      ORDER BY "MigrationId";
+info: Microsoft.EntityFrameworkCore.Migrations[20402]
+      Applying migration '20260309100546_InitialCreate'.
+Applying migration '20260309100546_InitialCreate'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "Products" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_Products" PRIMARY KEY AUTOINCREMENT,
+          "Name" TEXT NOT NULL,
+          "Description" TEXT NULL,
+          "Price" TEXT NOT NULL,
+          "Discount" TEXT NOT NULL,
+          "Stock" INTEGER NOT NULL,
+          "Category" TEXT NULL,
+          "Brand" TEXT NULL,
+          "ImagePath" TEXT NULL,
+          "CreatedAt" TEXT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "Users" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+          "FullName" TEXT NOT NULL,
+          "Email" TEXT NOT NULL,
+          "PasswordHash" TEXT NOT NULL,
+          "Phone" TEXT NULL,
+          "Role" TEXT NOT NULL,
+          "IsLocked" INTEGER NOT NULL,
+          "FailedAttempts" INTEGER NOT NULL,
+          "CreatedAt" TEXT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "BrowseHistories" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_BrowseHistories" PRIMARY KEY AUTOINCREMENT,
+          "UserId" INTEGER NOT NULL,
+          "ProductId" INTEGER NOT NULL,
+          "ViewedAt" TEXT NOT NULL,
+          CONSTRAINT "FK_BrowseHistories_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE CASCADE,
+          CONSTRAINT "FK_BrowseHistories_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "CartItems" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_CartItems" PRIMARY KEY AUTOINCREMENT,
+          "UserId" INTEGER NOT NULL,
+          "ProductId" INTEGER NOT NULL,
+          "Quantity" INTEGER NOT NULL,
+          CONSTRAINT "FK_CartItems_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE CASCADE,
+          CONSTRAINT "FK_CartItems_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "ChatbotLogs" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_ChatbotLogs" PRIMARY KEY AUTOINCREMENT,
+          "UserId" INTEGER NULL,
+          "Query" TEXT NOT NULL,
+          "Response" TEXT NULL,
+          "Timestamp" TEXT NOT NULL,
+          CONSTRAINT "FK_ChatbotLogs_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id")
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "Orders" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_Orders" PRIMARY KEY AUTOINCREMENT,
+          "UserId" INTEGER NOT NULL,
+          "TotalAmount" TEXT NOT NULL,
+          "DeliveryAddress" TEXT NULL,
+          "PaymentMethod" TEXT NULL,
+          "Status" TEXT NOT NULL,
+          "CreatedAt" TEXT NOT NULL,
+          CONSTRAINT "FK_Orders_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "OrderItems" (
+          "Id" INTEGER NOT NULL CONSTRAINT "PK_OrderItems" PRIMARY KEY AUTOINCREMENT,
+          "OrderId" INTEGER NOT NULL,
+          "ProductId" INTEGER NOT NULL,
+          "Quantity" INTEGER NOT NULL,
+          "UnitPrice" TEXT NOT NULL,
+          CONSTRAINT "FK_OrderItems_Orders_OrderId" FOREIGN KEY ("OrderId") REFERENCES "Orders" ("Id") ON DELETE CASCADE,
+          CONSTRAINT "FK_OrderItems_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (1, 'Asus', 'Laptops', '2024-01-01 00:00:00', 'High-performance gaming laptop with RTX 4070, 16GB RAM, 512GB SSD.', '10.0', '/images/laptop1.jpg', 'Gaming Laptop Pro', '189999.0', 15);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (2, 'Dell', 'Laptops', '2024-01-01 00:00:00', 'Lightweight business laptop, Intel Core i7, 16GB RAM, 1TB SSD.', '5.0', '/images/laptop2.jpg', 'UltraBook Slim 14', '149999.0', 20);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (3, 'Sony', 'Audio', '2024-01-01 00:00:00', 'Premium sound, 30hr battery, ANC technology.', '15.0', '/images/headphones1.jpg', 'Wireless Noise-Cancelling Headphones', '29999.0', 50);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (4, 'Logitech', 'Accessories', '2024-01-01 00:00:00', 'RGB backlit, Cherry MX switches, USB-C.', '0.0', '/images/keyboard1.jpg', 'Mechanical Gaming Keyboard', '12999.0', 35);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (5, 'Samsung', 'Monitors', '2024-01-01 00:00:00', '144Hz refresh rate, 1ms response, HDR400.', '8.0', '/images/monitor1.jpg', '4K Curved Monitor 27"', '74999.0', 10);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (6, 'Razer', 'Accessories', '2024-01-01 00:00:00', '25,000 DPI, 70hr battery, ultra-lightweight.', '0.0', '/images/mouse1.jpg', 'Wireless Gaming Mouse', '9999.0', 60);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (7, 'Samsung', 'Phones', '2024-01-01 00:00:00', '6.7" AMOLED, 200MP camera, 5000mAh, Snapdragon 8 Gen 3.', '5.0', '/images/phone1.jpg', 'Smartphone X15 Pro', '109999.0', 25);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (8, 'Apple', 'Audio', '2024-01-01 00:00:00', 'ANC, 36hr total battery, IPX5 waterproof.', '20.0', '/images/earbuds1.jpg', 'True Wireless Earbuds', '14999.0', 80);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (9, 'Anker', 'Accessories', '2024-01-01 00:00:00', 'HDMI 4K, 100W PD, SD/MicroSD, 3x USB-A.', '0.0', '/images/hub1.jpg', 'USB-C Hub 7-in-1', '4999.0', 100);
+      SELECT changes();
+      
+      INSERT INTO "Products" ("Id", "Brand", "Category", "CreatedAt", "Description", "Discount", "ImagePath", "Name", "Price", "Stock")
+      VALUES (10, 'Samsung', 'Storage', '2024-01-01 00:00:00', 'Read 1050MB/s, USB 3.2 Gen 2, shock-proof.', '10.0', '/images/ssd1.jpg', 'Portable SSD 1TB', '19999.0', 40);
+      SELECT changes();
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "Users" ("Id", "CreatedAt", "Email", "FailedAttempts", "FullName", "IsLocked", "PasswordHash", "Phone", "Role")
+      VALUES (1, '2024-01-01 00:00:00', 'admin@shop.com', 0, 'Admin', 0, '$2a$11$p1mn.hj1sVTPS16MgsO1vu5HtzCxWVLKUWHN/E/9f02gy9veyvhpu', '0300-0000000', 'admin');
+      SELECT changes();
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_BrowseHistories_ProductId" ON "BrowseHistories" ("ProductId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_BrowseHistories_UserId" ON "BrowseHistories" ("UserId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_CartItems_ProductId" ON "CartItems" ("ProductId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_CartItems_UserId" ON "CartItems" ("UserId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_ChatbotLogs_UserId" ON "ChatbotLogs" ("UserId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_OrderItems_OrderId" ON "OrderItems" ("OrderId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_OrderItems_ProductId" ON "OrderItems" ("ProductId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX "IX_Orders_UserId" ON "Orders" ("UserId");
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+      VALUES ('20260309100546_InitialCreate', '8.0.0');
+Done.
