@@ -29,6 +29,7 @@ namespace ShoppingApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Add(Product product, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -59,6 +60,7 @@ namespace ShoppingApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Product updated, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -89,6 +91,7 @@ namespace ShoppingApp.Controllers
 
         // ─── Delete Product ───────────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -123,6 +126,7 @@ namespace ShoppingApp.Controllers
 
         // ─── Update Order Status ──────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateStatus(int id, string status)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -217,10 +221,12 @@ namespace ShoppingApp.Controllers
         public IActionResult AddSlide()
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            ViewBag.Products = _db.Products.OrderBy(p => p.Name).ToList();
             return View(new HeroSlide());
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult AddSlide(HeroSlide slide, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -232,6 +238,14 @@ namespace ShoppingApp.Controllers
                 using var stream = System.IO.File.Create(path);
                 imageFile.CopyTo(stream);
                 slide.ImagePath = "/images/" + fileName;
+            }
+
+            // If a product is linked, auto-fill price from that product
+            if (slide.ProductId.HasValue && !slide.DisplayPrice.HasValue)
+            {
+                var prod = _db.Products.FirstOrDefault(p => p.Id == slide.ProductId.Value);
+                if (prod != null)
+                    slide.DisplayPrice = prod.Price * (1 - prod.Discount / 100m);
             }
 
             _db.HeroSlides.Add(slide);
@@ -247,10 +261,12 @@ namespace ShoppingApp.Controllers
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var slide = _db.HeroSlides.FirstOrDefault(s => s.Id == id);
             if (slide == null) return NotFound();
+            ViewBag.Products = _db.Products.OrderBy(p => p.Name).ToList();
             return View(slide);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EditSlide(HeroSlide updated, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -264,6 +280,8 @@ namespace ShoppingApp.Controllers
             slide.LinkUrl       = updated.LinkUrl;
             slide.SortOrder     = updated.SortOrder;
             slide.IsActive      = updated.IsActive;
+            slide.ProductId     = updated.ProductId;
+            slide.DisplayPrice  = updated.DisplayPrice;
 
             if (imageFile != null && imageFile.Length > 0)
             {
@@ -281,6 +299,7 @@ namespace ShoppingApp.Controllers
 
         // ─── Delete Hero Slide ────────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DeleteSlide(int id)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -292,6 +311,7 @@ namespace ShoppingApp.Controllers
 
         // ─── Toggle Active ────────────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ToggleSlide(int id)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
@@ -302,6 +322,44 @@ namespace ShoppingApp.Controllers
                 _db.SaveChanges();
             }
             return RedirectToAction("HeroSlides");
+        }
+
+        // ─── Contact Messages ─────────────────────────────────────
+        public IActionResult Messages()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var messages = _db.ContactMessages.OrderByDescending(m => m.CreatedAt).ToList();
+            return View(messages);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteMessage(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var message = _db.ContactMessages.FirstOrDefault(m => m.Id == id);
+            if (message != null)
+            {
+                _db.ContactMessages.Remove(message);
+                _db.SaveChanges();
+                TempData["Success"] = "Message deleted successfully!";
+            }
+            return RedirectToAction("Messages");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkMessageRead(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var message = _db.ContactMessages.FirstOrDefault(m => m.Id == id);
+            if (message != null)
+            {
+                message.IsRead = true;
+                _db.SaveChanges();
+                TempData["Success"] = "Message marked as read!";
+            }
+            return RedirectToAction("Messages");
         }
     }
 }

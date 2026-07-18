@@ -18,28 +18,66 @@
     {
         @foreach (var order in Model)
         {
-            <div class="order-card">
-                <div class="order-header">
+            int step = order.Status switch { "confirmed" => 1, "shipped" => 2, "delivered" => 3, _ => 0 };
+            <div class="order-track-card">
+
+                <!-- Header -->
+                <div class="otc-header">
                     <div>
-                        <span class="order-id">Order #@order.Id</span>
-                        <span class="order-date">@order.CreatedAt.AddHours(5).ToString("dd MMM yyyy, hh:mm tt") (PKT)</span>
+                        <span class="otc-id">Order #@order.Id</span>
+                        <span class="otc-date">@order.CreatedAt.AddHours(5).ToString("dd MMM yyyy, hh:mm tt") (PKT)</span>
                     </div>
                     <span class="order-status status-@order.Status">@order.Status.ToUpper()</span>
                 </div>
-                <div class="order-items-list">
+
+                <!-- Tracking Timeline -->
+                <div class="otc-timeline">
+                    <div class="otc-step @(step >= 0 ? "done" : "")">
+                        <div class="otc-step-dot">✓</div>
+                        <div class="otc-step-label">Order Placed</div>
+                    </div>
+                    <div class="otc-line @(step >= 1 ? "done" : "")"></div>
+                    <div class="otc-step @(step >= 1 ? "done" : "")">
+                        <div class="otc-step-dot">@(step >= 1 ? "✓" : "2")</div>
+                        <div class="otc-step-label">Confirmed</div>
+                    </div>
+                    <div class="otc-line @(step >= 2 ? "done" : "")"></div>
+                    <div class="otc-step @(step >= 2 ? "done" : "")">
+                        <div class="otc-step-dot">@(step >= 2 ? "✓" : "🚚")</div>
+                        <div class="otc-step-label">Shipped</div>
+                    </div>
+                    <div class="otc-line @(step >= 3 ? "done" : "")"></div>
+                    <div class="otc-step @(step >= 3 ? "done" : "")">
+                        <div class="otc-step-dot">@(step >= 3 ? "✓" : "🏠")</div>
+                        <div class="otc-step-label">Delivered</div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="otc-items">
                     @foreach (var item in order.OrderItems)
                     {
-                        <div class="order-item-row">
-                            <span>@item.Product?.Name</span>
-                            <span>PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</span>
+                        <div class="otc-item">
+                            <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
+                                 alt="@item.Product?.Name"
+                                 onerror="this.src='/images/placeholder.jpg'" />
+                            <div class="otc-item-info">
+                                <div class="otc-item-name">@item.Product?.Name</div>
+                                <div class="otc-item-qty">Qty: @item.Quantity</div>
+                            </div>
+                            <div class="otc-item-price">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</div>
+                            <a href="/Products/Detail/@item.ProductId" class="btn-glass" style="font-size:0.8rem;padding:0.3rem 0.8rem;">Review</a>
                         </div>
                     }
                 </div>
-                <div class="order-footer">
+
+                <!-- Footer -->
+                <div class="otc-footer">
                     <span>📍 @order.DeliveryAddress</span>
                     <span>💳 @order.PaymentMethod</span>
-                    <span class="order-total">Total: PKR @order.TotalAmount.ToString("N0")</span>
+                    <span class="otc-total">Total: PKR @order.TotalAmount.ToString("N0")</span>
                 </div>
+
             </div>
         }
     }

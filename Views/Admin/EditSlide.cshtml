@@ -1,6 +1,8 @@
 @model ShoppingApp.Models.HeroSlide
+@using ShoppingApp.Models
 @{
     ViewData["Title"] = "Admin – Edit Hero Slide";
+    var products = ViewBag.Products as List<Product> ?? new List<Product>();
 }
 
 <section class="section">
@@ -11,6 +13,7 @@
 
     <div class="form-card">
         <form method="post" action="/Admin/EditSlide" enctype="multipart/form-data" class="admin-form">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="Id" value="@Model.Id" />
 
             <div class="form-grid-2">
@@ -37,6 +40,28 @@
                 <div class="form-group">
                     <label>Sort Order <small>(0 = first)</small></label>
                     <input name="SortOrder" type="number" value="@Model.SortOrder" min="0" />
+                </div>
+                <div class="form-group">
+                    <label>🔗 Linked Product <small>(Shop Now button adds this to cart)</small></label>
+                    <select name="ProductId" id="productSelect" onchange="autoFillPrice(this)">
+                        <option value="">— No product linked (use Link URL instead) —</option>
+                        @foreach (var p in products)
+                        {
+                            if (p.Id == Model.ProductId)
+                            {
+                                <option value="@p.Id" data-price="@p.FinalPrice" selected>@p.Name (@p.Category) — PKR @p.FinalPrice.ToString("N0")</option>
+                            }
+                            else
+                            {
+                                <option value="@p.Id" data-price="@p.FinalPrice">@p.Name (@p.Category) — PKR @p.FinalPrice.ToString("N0")</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💰 Display Price on Slide <small>(optional, leave 0 to hide)</small></label>
+                    <input name="DisplayPrice" id="displayPrice" type="number" step="0.01" min="0"
+                           value="@(Model.DisplayPrice.HasValue ? Model.DisplayPrice.Value.ToString("F2") : "")" placeholder="e.g. 29999" />
                 </div>
             </div>
 
@@ -79,6 +104,16 @@
 
 @section Scripts {
 <script>
+    // ── Auto-fill price when a product is selected ────────
+    function autoFillPrice(sel) {
+        const opt = sel.options[sel.selectedIndex];
+        const price = opt ? opt.getAttribute('data-price') : '';
+        const priceInput = document.getElementById('displayPrice');
+        if (price && priceInput) {
+            priceInput.value = parseFloat(price).toFixed(2);
+        }
+    }
+
     const zone    = document.getElementById('uploadZone');
     const input   = document.getElementById('imageFile');
     const preview = document.getElementById('imgPreview');

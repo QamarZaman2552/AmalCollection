@@ -23,6 +23,12 @@ namespace ShoppingApp.Models
         // Where "Shop Now" button links, e.g. "/?category=Audio"
         public string? LinkUrl { get; set; }
 
+        // Linked product ID — when set, "Shop Now" adds this product to cart
+        public int? ProductId { get; set; }
+
+        // Price to display on the hero slide (e.g. PKR 29,999)
+        public decimal? DisplayPrice { get; set; }
+
         // Uploaded hero background image
         public string? ImagePath { get; set; }
 

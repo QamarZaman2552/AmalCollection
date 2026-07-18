@@ -1,3 +1,27 @@
+// ─── Mobile Hamburger Menu ──────────────────────────────
+(function () {
+  const btn  = document.getElementById('hamburgerBtn');
+  const menu = document.getElementById('mobileMenu');
+  if (!btn || !menu) return;
+
+  function openMenu()  { btn.classList.add('open'); menu.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  function closeMenu() { btn.classList.remove('open'); menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+  function toggleMenu() { btn.classList.contains('open') ? closeMenu() : openMenu(); }
+
+  btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+
+  // Close when any menu link is clicked
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
+  });
+
+  // Close on resize back to desktop
+  window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
+})();
+
 // ─── Cart Badge ────────────────────────────────────────
 async function updateCartBadge() {
   try {
@@ -8,6 +32,21 @@ async function updateCartBadge() {
   } catch {}
 }
 updateCartBadge();
+
+// ─── Wishlist Badge ─────────────────────────────────────
+async function updateWishlistBadge() {
+  try {
+    const res = await fetch('/Wishlist/Count');
+    const count = await res.json();
+    const badge = document.getElementById('wishlistBadge');
+    if (badge) {
+      badge.textContent = count > 0 ? count : '0';
+      badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+  } catch {}
+}
+updateWishlistBadge();
+
 
 // ─── Auto-dismiss Toast ─────────────────────────────────
 const toast = document.getElementById('toast');
@@ -245,7 +284,78 @@ async function sendMessage() {
   });
 
   start();
+})();// ─── Scroll Reveal ────────────────────────────────────────
+(function () {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => {
+      if (el.isIntersecting) {
+        el.target.classList.add('visible');
+        observer.unobserve(el.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  // Auto-apply .reveal to common elements
+  document.querySelectorAll('.product-card, .section-title, .cart-item, .review-card, .order-card, .analytics-stat-card, .faq-item, .msg-card').forEach((el, i) => {
+    el.classList.add('reveal');
+    if (i % 4 === 1) el.classList.add('reveal-delay-1');
+    if (i % 4 === 2) el.classList.add('reveal-delay-2');
+    if (i % 4 === 3) el.classList.add('reveal-delay-3');
+    observer.observe(el);
+  });
 })();
 
+// ─── Card Mouse-Glow Tracker ──────────────────────────────
+document.addEventListener('mousemove', (e) => {
+  document.querySelectorAll('.product-card').forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
+    const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
+    card.style.setProperty('--mx', x);
+    card.style.setProperty('--my', y);
+  });
+});
 
+// ─── Button Ripple Effect ─────────────────────────────────
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-primary, .btn-glass');
+  if (!btn) return;
+  const ripple = document.createElement('span');
+  const rect   = btn.getBoundingClientRect();
+  const size   = Math.max(rect.width, rect.height) * 2;
+  ripple.style.cssText = `
+    position:absolute; border-radius:50%;
+    width:${size}px; height:${size}px;
+    left:${e.clientX - rect.left - size/2}px;
+    top:${e.clientY - rect.top - size/2}px;
+    background:rgba(255,255,255,0.18);
+    transform:scale(0); animation:rippleAnim 0.55s ease forwards;
+    pointer-events:none; z-index:10;
+  `;
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+});
+
+// Inject ripple keyframe once
+if (!document.getElementById('rippleStyle')) {
+  const s = document.createElement('style');
+  s.id = 'rippleStyle';
+  s.textContent = '@keyframes rippleAnim { to { transform:scale(1); opacity:0; } }';
+  document.head.appendChild(s);
+}
+
+// ─── Navbar scroll shadow ─────────────────────────────────
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('.navbar');
+  if (!nav) return;
+  if (window.scrollY > 10) {
+    nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.35)';
+    nav.style.background = 'rgba(10,13,20,0.96)';
+  } else {
+    nav.style.boxShadow = '';
+    nav.style.background = 'rgba(10,13,20,0.85)';
+  }
+}, { passive: true });
 

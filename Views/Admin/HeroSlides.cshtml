@@ -67,6 +67,7 @@
                             <td style="text-align:center;">@s.SortOrder</td>
                             <td>
                                 <form method="post" action="/Admin/ToggleSlide/@s.Id" style="display:inline">
+                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="@(s.IsActive ? "btn-status-active" : "btn-status-inactive")">
                                         @(s.IsActive ? "✅ Active" : "⏸ Inactive")
                                     </button>
@@ -76,6 +77,7 @@
                                 <a href="/Admin/EditSlide/@s.Id" class="btn-edit">✏ Edit</a>
                                 <form method="post" action="/Admin/DeleteSlide/@s.Id" style="display:inline"
                                       onsubmit="return confirm('Delete slide @s.Title?')">
+                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="btn-remove">🗑 Delete</button>
                                 </form>
                             </td>

@@ -41,6 +41,7 @@
                             <a href="/Admin/Edit/@p.Id" class="btn-edit">✏ Edit</a>
                             <form method="post" action="/Admin/Delete/@p.Id" style="display:inline"
                                   onsubmit="return confirm('Delete @p.Name?')">
+                                @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-remove">🗑 Delete</button>
                             </form>
                         </td>

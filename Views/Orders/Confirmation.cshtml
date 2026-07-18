@@ -5,8 +5,20 @@
 <section class="section">
     <div class="confirmation-box">
         <div class="confirm-icon">🎉</div>
-        <h1>Order Placed Successfully!</h1>
-        <p>Thank you for your purchase. Your order <strong>#@ViewBag.OrderId</strong> has been received and is being processed.</p>
+        @if (ViewBag.OrderId == null)
+        {
+            <h1>Order status unknown</h1>
+            <p>We could not confirm your order. Please check <a href="/Orders/History">My Orders</a> or contact support.</p>
+        }
+        else
+        {
+            <h1>Order Placed Successfully!</h1>
+            <p>Thank you for your purchase. Your order <strong>#@ViewBag.OrderId</strong> has been received and is being processed.</p>
+        }
+        @if (ViewBag.NewBalance != null)
+        {
+            <p style="color:var(--text-2);margin-top:0.5rem;">Remaining account balance: <strong>PKR @Convert.ToDecimal(ViewBag.NewBalance).ToString("N0")</strong></p>
+        }
         <div class="confirm-steps">
             <div class="step active">✅ Order Placed</div>
             <div class="step">📦 Processing</div>

@@ -7,13 +7,14 @@
     var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
     string selectedCat   = ViewBag.SelectedCategory ?? "";
     string selectedBrand = ViewBag.SelectedBrand ?? "";
+    string selectedSort  = ViewBag.SelectedSort ?? "";
 
     // Fallback static slides if no DB slides exist yet
     if (!heroSlides.Any())
     {
         heroSlides = new List<ShoppingApp.Models.HeroSlide>
         {
-            new() { Id=0, Tagline="SOUND THAT COMPLETES THE FIT", Title="MAGNITUDE",   CategoryLabel="HEADPHONES",  Hashtag="#SOUNDSGREAT", LinkUrl="/?category=Audio",       ImagePath="/images/hero1.jpg" },
+            new() { Id=0, Tagline="SOUND THAT COMPLETES THE FIT", Title="MAGNITUDE",   CategoryLabel="HEADPHONES",  Hashtag="#SOUNDSGREAT", LinkUrl="/Cart/Add?productId=1&quantity=1", ImagePath="/images/hero1.jpg" },
             new() { Id=0, Tagline="BUILT FOR THE RELENTLESS",     Title="GAMING PRO",  CategoryLabel="LAPTOPS",     Hashtag="#LEVELUP",     LinkUrl="/?category=Laptops",     ImagePath="/images/hero2.jpg" },
             new() { Id=0, Tagline="CAPTURE EVERY MOMENT",         Title="200MP",       CategoryLabel="SMARTPHONES", Hashtag="#SHOOTBIG",    LinkUrl="/?category=Phones",      ImagePath="/images/hero3.jpg" },
             new() { Id=0, Tagline="PRECISION AT YOUR FINGERTIPS", Title="RGB PRO",     CategoryLabel="ACCESSORIES", Hashtag="#GAMEHARDER",  LinkUrl="/?category=Accessories", ImagePath="/images/hero4.jpg" },
@@ -44,9 +45,20 @@
                     {
                         <p class="rn-tag">@slide.Hashtag</p>
                     }
-                    @if (!string.IsNullOrEmpty(slide.LinkUrl))
+                    @if (slide.DisplayPrice.HasValue && slide.DisplayPrice > 0)
                     {
-                        <a href="@slide.LinkUrl" class="rn-cta">Shop Now</a>
+                        <p class="rn-price">PKR @slide.DisplayPrice.Value.ToString("N0")</p>
+                    }
+                    @{
+                        // If a ProductId is linked → add directly to cart
+                        // Otherwise fall back to LinkUrl
+                        string shopHref = slide.ProductId.HasValue
+                            ? $"/Cart/Add?productId={slide.ProductId.Value}&quantity=1"
+                            : (slide.LinkUrl ?? "/");
+                    }
+                    @if (slide.ProductId.HasValue || !string.IsNullOrEmpty(slide.LinkUrl))
+                    {
+                        <a href="@shopHref" class="rn-cta">Shop Now</a>
                     }
                 </div>
             </div>
@@ -98,7 +110,33 @@
                 }
             }
         </select>
-        @if (!string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedBrand))
+        <select name="sort" onchange="this.form.submit()">
+            @if (selectedSort == "")
+            {
+                <option value="" selected>Sort: Newest</option>
+            }
+            else
+            {
+                <option value="">Sort: Newest</option>
+            }
+            @if (selectedSort == "price_asc")
+            {
+                <option value="price_asc" selected>📈 Price: Low to High</option>
+            }
+            else
+            {
+                <option value="price_asc">📈 Price: Low to High</option>
+            }
+            @if (selectedSort == "price_desc")
+            {
+                <option value="price_desc" selected>📉 Price: High to Low</option>
+            }
+            else
+            {
+                <option value="price_desc">📉 Price: High to Low</option>
+            }
+        </select>
+        @if (!string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedBrand) || !string.IsNullOrEmpty(selectedSort))
         {
             <a href="/" class="btn-outline-sm">✕ Clear</a>
         }

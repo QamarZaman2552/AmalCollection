@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<div class="container py-5">
+
+    <!-- ── Hero ── -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="about-hero text-center p-5">
+                @* <div class="about-hero-badge">🛍️ Premium AI Shopping</div> *@
+                <h1 class="display-4 mb-3">Welcome to <span class="about-gradient-text">ShopAI</span></h1>
+                <p class="lead mx-auto" style="max-width: 680px; color: var(--text-2);">
+                    Combining the power of artificial intelligence with an unparalleled e‑commerce experience — bringing you tomorrow's shopping, today.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Why We Stand Out ── -->
+    <div class="row mb-5 text-center">
+        <div class="col-12 mb-4">
+            <h2 class="display-6 fw-bold">Why We <span class="about-gradient-text">Stand Out</span></h2>
+            <p style="color: var(--text-3);">Three pillars that make ShopAI different from the rest.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 essential-card py-4 px-3">
+                <div class="card-body">
+                    <div class="essential-icon mb-3">🤖</div>
+                    <h3 class="h4 fw-bold">AI-Powered Assistance</h3>
+                    <p style="color: var(--text-2); font-size: 0.9rem; line-height: 1.7;">Our smart chatbot is available 24/7 to help you find the perfect product, tailored to your exact needs and budget.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 essential-card py-4 px-3">
+                <div class="card-body">
+                    <div class="essential-icon mb-3">⚡</div>
+                    <h3 class="h4 fw-bold">Lightning Fast Delivery</h3>
+                    <p style="color: var(--text-2); font-size: 0.9rem; line-height: 1.7;">Experience ultra-fast, reliable shipping across all regions — ensuring your purchases reach your doorstep in record time.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 essential-card py-4 px-3">
+                <div class="card-body">
+                    <div class="essential-icon mb-3">🔒</div>
+                    <h3 class="h4 fw-bold">Bank-Grade Security</h3>
+                    <p style="color: var(--text-2); font-size: 0.9rem; line-height: 1.7;">Your privacy and payment data are protected with state-of-the-art encryption protocols. Shop with absolute peace of mind.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FAQ Section ── -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h2 class="display-6 fw-bold">Frequently Asked <span class="about-gradient-text">Questions</span></h2>
+                <p style="color: var(--text-3);">Everything you need to know about ShopAI.</p>
+            </div>
+            <div class="faq-list" id="faqList">
+
+                <div class="faq-item active" id="faq-1">
+                    <button class="faq-question" onclick="toggleFaq('faq-1')">
+                        <span class="faq-icon">💳</span>
+                        <span>What payment methods do you accept?</span>
+                        <span class="faq-chevron">›</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and direct bank transfers. All transactions are securely encrypted with 256-bit SSL.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" id="faq-2">
+                    <button class="faq-question" onclick="toggleFaq('faq-2')">
+                        <span class="faq-icon">🤖</span>
+                        <span>How does the AI Assistant work?</span>
+                        <span class="faq-chevron">›</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Our ShopAI assistant uses advanced natural language processing. Simply type what you're looking for and it will instantly recommend the best-matched products from our catalog.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" id="faq-3">
+                    <button class="faq-question" onclick="toggleFaq('faq-3')">
+                        <span class="faq-icon">🔄</span>
+                        <span>What is your return policy?</span>
+                        <span class="faq-chevron">›</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We offer a hassle-free 30-day return policy. If you are not satisfied with your purchase, return it in original packaging for a full refund or exchange — no questions asked.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" id="faq-4">
+                    <button class="faq-question" onclick="toggleFaq('faq-4')">
+                        <span class="faq-icon">🌍</span>
+                        <span>Do you ship internationally?</span>
+                        <span class="faq-chevron">›</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Currently we operate primarily within Pakistan with premium nationwide delivery. International shipping for selected products will be introduced soon — stay tuned!</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" id="faq-5">
+                    <button class="faq-question" onclick="toggleFaq('faq-5')">
+                        <span class="faq-icon">📦</span>
+                        <span>How do I track my order?</span>
+                        <span class="faq-chevron">›</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Once logged in, visit <strong>My Orders</strong> from the navigation bar. You'll see the real-time status of every order — from processing to delivered.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+function toggleFaq(id) {
+    const item = document.getElementById(id);
+    const isActive = item.classList.contains('active');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+    if (!isActive) item.classList.add('active');
+}
+</script>
+}

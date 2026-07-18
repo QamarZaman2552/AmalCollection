@@ -1,0 +1,132 @@
+@model ShoppingApp.Models.User
+@{
+    ViewData["Title"] = "My Profile";
+    int    totalOrders   = ViewBag.TotalOrders   ?? 0;
+    decimal totalSpent   = ViewBag.TotalSpent    ?? 0m;
+    int    wishlistCount = ViewBag.WishlistCount ?? 0;
+    int    reviewCount   = ViewBag.ReviewCount   ?? 0;
+    string initials      = string.Join("", Model.FullName.Split(' ').Take(2).Select(w => w[0])).ToUpper();
+}
+
+<section class="section profile-section">
+
+    <!-- ── Profile Header ── -->
+    <div class="profile-hero">
+        <div class="profile-avatar-big">@initials</div>
+        <div class="profile-hero-info">
+            <h1 class="profile-name">@Model.FullName</h1>
+            <div class="profile-email">✉️ @Model.Email</div>
+            @if (!string.IsNullOrEmpty(Model.Phone))
+            {
+                <div class="profile-phone">📱 @Model.Phone</div>
+            }
+            <div class="profile-since">🗓️ Member since @Model.CreatedAt.ToString("dd MMMM yyyy")</div>
+        </div>
+    </div>
+
+    <!-- ── Stats ── -->
+    @if (Context.Session.GetString("UserRole") != "admin")
+    {
+        <div class="profile-stats">
+            <div class="pstat-card">
+                <div class="pstat-icon">📦</div>
+                <div class="pstat-num">@totalOrders</div>
+                <div class="pstat-label">Total Orders</div>
+            </div>
+            <div class="pstat-card">
+                <div class="pstat-icon">💳</div>
+                <div class="pstat-num">PKR @Model.Balance.ToString("N0")</div>
+                <div class="pstat-label">Account Balance</div>
+            </div>
+            <div class="pstat-card">
+                <div class="pstat-icon">💰</div>
+                <div class="pstat-num">PKR @totalSpent.ToString("N0")</div>
+                <div class="pstat-label">Total Spent</div>
+            </div>
+            <div class="pstat-card">
+                <div class="pstat-icon">❤️</div>
+                <div class="pstat-num">@wishlistCount</div>
+                <div class="pstat-label">Wishlist Items</div>
+            </div>
+            <div class="pstat-card">
+                <div class="pstat-icon">⭐</div>
+                <div class="pstat-num">@reviewCount</div>
+                <div class="pstat-label">Reviews Written</div>
+            </div>
+        </div>
+    }
+
+    <!-- ── Quick Links ── -->
+    <div class="profile-quick-links">
+        @if (Context.Session.GetString("UserRole") != "admin")
+        {
+            <a href="/Orders/History" class="pquick-link">📋 My Orders</a>
+            <a href="/Wishlist"       class="pquick-link">❤️ Wishlist</a>
+            <a href="/Cart"           class="pquick-link">🛒 Cart</a>
+        }
+        <a href="/Auth/Logout"    class="pquick-link pquick-danger">🚪 Logout</a>
+    </div>
+
+    <!-- ── Edit Profile ── -->
+    <div class="profile-forms-grid">
+
+        @if (Context.Session.GetString("UserRole") != "admin")
+        {
+            <div class="profile-form-card" id="topup-balance">
+                <h2 class="profile-form-title">💳 Top Up Balance</h2>
+                <p style="color:var(--text-2);font-size:0.88rem;margin-bottom:1rem;">
+                    Current balance: <strong>PKR @Model.Balance.ToString("N0")</strong>
+                </p>
+                <form method="post" action="/Profile/TopUp" class="auth-form">
+                    @Html.AntiForgeryToken()
+                    @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string))
+                    {
+                        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                    }
+                    <div class="form-group">
+                        <label>Amount to add (PKR)</label>
+                        <input type="number" name="amount" min="1" step="1" placeholder="e.g. 50000" required />
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
+                        <form method="post" action="/Profile/TopUp" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="amount" value="25000" />@if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string)){<input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />}<button type="submit" class="btn-glass">+ 25,000</button></form>
+                        <form method="post" action="/Profile/TopUp" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="amount" value="50000" />@if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string)){<input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />}<button type="submit" class="btn-glass">+ 50,000</button></form>
+                        <form method="post" action="/Profile/TopUp" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="amount" value="100000" />@if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string)){<input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />}<button type="submit" class="btn-glass">+ 100,000</button></form>
+                        <form method="post" action="/Profile/TopUp" style="display:inline;">@Html.AntiForgeryToken()<input type="hidden" name="amount" value="200000" />@if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string)){<input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />}<button type="submit" class="btn-glass">+ 200,000</button></form>
+                    </div>
+                    <button type="submit" class="btn-primary">Add to Balance</button>
+                </form>
+                <p style="font-size:0.75rem;color:var(--text-3);margin-top:0.75rem;">Demo wallet — no real payment required.</p>
+            </div>
+        }
+
+        <!-- Edit Profile -->
+        <div class="profile-form-card">
+            <h2 class="profile-form-title">✏️ Edit Profile</h2>
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">✅ @TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-error">⚠️ @TempData["Error"]</div>
+            }
+            <form method="post" action="/Profile/Update" class="auth-form">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" value="@Model.FullName" required />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="@Model.Email" required />
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" value="@Model.Phone" placeholder="03XX-XXXXXXX" />
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+
+    </div>
+</section>

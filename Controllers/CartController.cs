@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
 using ShoppingApp.Models;
+using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
 {
@@ -16,60 +17,97 @@ namespace ShoppingApp.Controllers
         // ─── View Cart ───────────────────────────────────────────
         public IActionResult Index()
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
+            if (UserId == null) return RedirectToAction("Login", "Auth", new { returnUrl = Request.Path + Request.QueryString });
+            if (HttpContext.Session.GetString("UserRole") == "admin")
+            {
+                TempData["Error"] = "Admins cannot purchase products.";
+                return RedirectToAction("Index", "Home");
+            }
 
+            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
             var items = _db.CartItems
                 .Include(c => c.Product)
                 .Where(c => c.UserId == UserId)
                 .ToList();
+
+            var cartTotal = CheckoutService.ComputeCartTotal(items);
+            ViewBag.Balance = user?.Balance ?? 0m;
+            ViewBag.CartTotal = cartTotal;
+            ViewBag.CanAfford = user != null && user.Balance >= cartTotal && cartTotal > 0;
+
             return View(items);
         }
 
         // ─── Add to Cart ─────────────────────────────────────────
-        [HttpPost]
+        [HttpGet, HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Add(int productId, int quantity = 1)
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
+            if (UserId == null) return RedirectToAction("Login", "Auth", new { returnUrl = Url.Action("Add", "Cart", new { productId, quantity }) });
+            if (HttpContext.Session.GetString("UserRole") == "admin")
+            {
+                TempData["Error"] = "Admins cannot purchase products.";
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
 
             var product = _db.Products.FirstOrDefault(p => p.Id == productId);
             if (product == null) return NotFound();
 
-            if (product.Stock < quantity)
+            if (quantity <= 0)
             {
-                TempData["Error"] = "Not enough stock available.";
+                TempData["Error"] = "Quantity must be at least 1.";
                 return RedirectToAction("Detail", "Products", new { id = productId });
             }
 
+            // Formal rule: requested_quantity ≤ stock
             var existing = _db.CartItems.FirstOrDefault(c => c.UserId == UserId && c.ProductId == productId);
+            var newQty = (existing?.Quantity ?? 0) + quantity;
+            if (newQty > product.Stock)
+            {
+                TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
+
             if (existing != null)
-                existing.Quantity += quantity;
+                existing.Quantity = newQty;
             else
                 _db.CartItems.Add(new CartItem { UserId = UserId.Value, ProductId = productId, Quantity = quantity });
 
             _db.SaveChanges();
             TempData["Success"] = $"{product.Name} added to cart!";
-            return RedirectToAction("Detail", "Products", new { id = productId });
+            return RedirectToAction("Index");
         }
 
         // ─── Update Quantity ─────────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateQuantity(int cartItemId, int quantity)
         {
             if (UserId == null) return Unauthorized();
-            var item = _db.CartItems.FirstOrDefault(c => c.Id == cartItemId && c.UserId == UserId);
+            var item = _db.CartItems.Include(c => c.Product).FirstOrDefault(c => c.Id == cartItemId && c.UserId == UserId);
             if (item == null) return NotFound();
 
             if (quantity <= 0)
+            {
                 _db.CartItems.Remove(item);
-            else
-                item.Quantity = quantity;
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
 
+            if (item.Product != null && quantity > item.Product.Stock)
+            {
+                TempData["Error"] = $"Not enough stock for \"{item.Product.Name}\". Maximum: {item.Product.Stock}.";
+                return RedirectToAction("Index");
+            }
+
+            item.Quantity = quantity;
             _db.SaveChanges();
             return RedirectToAction("Index");
         }
 
         // ─── Remove from Cart ────────────────────────────────────
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Remove(int cartItemId)
         {
             if (UserId == null) return Unauthorized();

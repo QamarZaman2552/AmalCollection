@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="contact-wrapper d-flex align-items-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card contact-card shadow-lg border-0">
+                    <div class="row g-0">
+                        
+                        <!-- Contact Information (Left) -->
+                        <div class="col-md-5 contact-info p-5 d-flex flex-column justify-content-between">
+                            <div>
+                                <h2 class="fw-bold mb-3">Get in Touch</h2>
+                                <p class="text-white-50 mb-5">Have questions about a product, your order, or just want to say hi? We'd love to hear from you. Drop us a message here or reach out via our direct channels.</p>
+                                
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="icon-circle me-3">📧</div>
+                                    <div>
+                                        <div class="small text-white-50 text-uppercase fw-semibold" style="letter-spacing: 1px;">Email Us</div>
+                                        <a href="mailto:support@shopai.pk" class="text-white text-decoration-none fw-medium">qamar@shopai.pk</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="icon-circle me-3">📞</div>
+                                    <div>
+                                        <div class="small text-white-50 text-uppercase fw-semibold" style="letter-spacing: 1px;">Call Us</div>
+                                        <span class="fw-medium">03216068091</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="icon-circle me-3">📍</div>
+                                    <div>
+                                        <div class="small text-white-50 text-uppercase fw-semibold" style="letter-spacing: 1px;">Location</div>
+                                        <span class="fw-medium">University of Education, Lahore – Multan Campus</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Social Icons -->
+                            <div class="social-links d-flex gap-3 mt-4 mt-md-0">
+                                <a href="#" aria-label="Facebook">FB</a>
+                                <a href="#" aria-label="Twitter">TW</a>
+                                <a href="#" aria-label="Instagram">IG</a>
+                                <a href="#" aria-label="LinkedIn">IN</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Form (Right) -->
+                        <div class="col-md-7 p-5">
+                            <h3 class="fw-bold mb-4">Send a Message</h3>
+                            
+                            @if(TempData["Success"] != null)
+                            {
+                                <div class="alert alert-success fw-bold p-3 mb-4 rounded-3 shadow-sm border-0 bg-success text-white">
+                                    ✨ @TempData["Success"]
+                                </div>
+                            }
+
+                            <form action="/Contact/Submit" method="POST">
+                                @Html.AntiForgeryToken()
+                                <div class="mb-4">
+                                    <label for="name" class="form-label fw-semibold" style="color: var(--text-2);">Full Name</label>
+                                    <input type="text" id="name" name="Name" class="form-control form-control-lg rounded-3" placeholder="Qamar Zaman" required />
+                                </div>
+                                <div class="mb-4">
+                                    <label for="email" class="form-label fw-semibold" style="color: var(--text-2);">Email Address</label>
+                                    <input type="email" id="email" name="Email" class="form-control form-control-lg rounded-3" placeholder="qamar@example.com" required />
+                                </div>
+                                <div class="mb-4">
+                                    <label for="message" class="form-label fw-semibold" style="color: var(--text-2);">Your Message</label>
+                                    <textarea id="message" name="Message" class="form-control form-control-lg rounded-3" placeholder="How can we help you today?" rows="5" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-gradient btn-lg w-100 rounded-3 fw-bold mt-2">Send Message ✨</button>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

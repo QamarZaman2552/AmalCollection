@@ -142,7 +142,7 @@
                                                         <span style="font-size:0.85rem;">@item.Product?.Name</span>
                                                     </div>
                                                 </td>
-                                                <td style="font-size:0.85rem; font-weight:bold;">×@item.Quantity</td>
+                                                <td style="font-size:0.85rem; font-weight:bold;">×@(item.Quantity)</td>
                                                 <td style="font-size:0.8rem; color:var(--text-2);">@item.UnitPrice.ToString("N0")</td>
                                             </tr>
                                         }
@@ -161,6 +161,7 @@
                             <!-- Update Status -->
                             <td>
                                 <form method="post" action="/Admin/UpdateStatus/@order.Id" class="status-update-form">
+                                    @Html.AntiForgeryToken()
                                     @{ var st2 = order.Status; }
                                     <select name="status" class="aorder-status-select">
                                         @if (st2 == "pending")   { <option value="pending"   selected>⏳ Pending</option>   } else { <option value="pending">⏳ Pending</option>   }

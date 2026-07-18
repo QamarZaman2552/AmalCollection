@@ -7,6 +7,7 @@
     <h1 class="section-title">✏ Edit Product</h1>
     <div class="form-card">
         <form method="post" action="/Admin/Edit/@Model.Id" enctype="multipart/form-data" class="admin-form">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="Id" value="@Model.Id" />
             <div class="form-grid-2">
                 <div class="form-group">

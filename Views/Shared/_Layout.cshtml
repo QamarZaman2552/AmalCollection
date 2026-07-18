@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+@using ShoppingApp.Data
+@inject AppDbContext _db
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,9 +9,12 @@
     <title>@ViewData["Title"] – ShopAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="@ViewData["BodyClass"]">
     <!-- ─── Navigation ─────────────────────────────────────── -->
     <header class="navbar">
         <a href="/" class="brand">
@@ -26,16 +31,33 @@
         <!-- Nav Links -->
         <nav class="nav-links">
             <a href="/">Home</a>
+            <a href="/About">About</a>
+            <a href="/Contact">Contact us</a>
             @if (Context.Session.GetString("UserRole") == "admin")
             {
+                var unreadMsgs = _db.ContactMessages.Count(m => !m.IsRead);
                 <a href="/Admin/Products" class="nav-admin">⚙ Admin</a>
+                <a href="/Admin/Messages" class="nav-admin">
+                    ✉ Messages
+                    @if (unreadMsgs > 0)
+                    {
+                        <span style="background-color: #ff4757; color: white; border-radius: 12px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px;">@unreadMsgs</span>
+                    }
+                </a>
             }
             @if (Context.Session.GetInt32("UserId") != null)
             {
-                <a href="/Orders/History">My Orders</a>
-                <a href="/Cart" class="cart-link">
-                    🛒 Cart <span class="cart-badge" id="cartBadge">0</span>
-                </a>
+                if (Context.Session.GetString("UserRole") != "admin")
+                {
+                    <a href="/Orders/History">My Orders</a>
+                    <a href="/Wishlist" class="wishlist-nav-link">
+                        ❤️ Wishlist <span class="wishlist-badge" id="wishlistBadge">0</span>
+                    </a>
+                    <a href="/Cart" class="cart-link">
+                        🛒 Cart <span class="cart-badge" id="cartBadge">0</span>
+                    </a>
+                }
+                <a href="/Profile" class="nav-profile-link">👤 @Context.Session.GetString("UserName")</a>
                 <a href="/Auth/Logout" class="btn-outline-sm">Logout</a>
             }
             else
@@ -44,7 +66,53 @@
                 <a href="/Auth/Register" class="btn-primary-sm">Register</a>
             }
         </nav>
+
+        <!-- Hamburger (mobile) -->
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
     </header>
+
+    <!-- ─── Mobile Menu ──────────────────────────────────── -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Mobile Search -->
+        <form class="mobile-search" action="/Products/Search" method="get">
+            <input type="text" name="q" placeholder="Search products…" autocomplete="off" />
+            <button type="submit">🔍</button>
+        </form>
+        <a href="/">🏠 Home</a>
+        <a href="/About">ℹ️ About</a>
+        <a href="/Contact">✉️ Contact</a>
+        @if (Context.Session.GetString("UserRole") == "admin")
+        {
+            var unreadMsgs = _db.ContactMessages.Count(m => !m.IsRead);
+            <a href="/Admin/Products" style="color:var(--accent-2)">⚙️ Admin Panel</a>
+            <a href="/Admin/Messages" style="color:var(--accent-2)">
+                ✉️ Messages
+                @if (unreadMsgs > 0)
+                {
+                    <span style="background-color: #ff4757; color: white; border-radius: 12px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px;">@unreadMsgs</span>
+                }
+            </a>
+            <a href="/Admin/Analytics" style="color:var(--accent-2)">📊 Analytics</a>
+        }
+        @if (Context.Session.GetInt32("UserId") != null)
+        {
+            if (Context.Session.GetString("UserRole") != "admin")
+            {
+                <a href="/Orders/History">📋 My Orders</a>
+                <a href="/Wishlist">❤️ Wishlist</a>
+                <a href="/Cart">🛒 Cart</a>
+            }
+            <a href="/Profile">👤 @Context.Session.GetString("UserName")</a>
+            <a href="/Auth/Logout" style="color:var(--red)">🚪 Logout</a>
+        }
+        else
+        {
+            <a href="/Auth/Login">🔑 Login</a>
+            <a href="/Auth/Register" style="color:var(--accent-2)">✨ Register</a>
+        }
+    </div>
 
     <!-- ─── Toast Notifications ──────────────────────────────── -->
     @if (TempData["Success"] != null)
@@ -64,9 +132,13 @@
     <!-- ─── Footer ──────────────────────────────────────────── -->
     <footer class="footer">
         <div class="footer-inner">
-            <p>© 2024 <strong>ShopAI</strong> — CS-UEM-BS-F22E8 · University of Education, Lahore – Multan Campus</p>
+            <p>© 2026 <strong>ShopAI</strong> — CS-UEM-BS-F22E8 · University of Education, Lahore – Multan Campus</p>
             <div class="footer-links">
                 <a href="/Products/Search?q=">All Products</a>
+                <span>·</span>
+                <a href="/About">About</a>
+                <span>·</span>
+                <a href="/Contact">Contact</a>
                 <span>·</span>
                 <a href="/Auth/Register">Register</a>
                 <span>·</span>
@@ -101,7 +173,8 @@
         </div>
     </div>
 
-    <script src="~/js/site.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

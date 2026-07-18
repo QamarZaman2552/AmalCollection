@@ -14,6 +14,8 @@
         }
 
         <form method="post" action="/Auth/Register" class="auth-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
             <div class="form-group">
                 <label for="fullName">Full Name *</label>
                 <input type="text" id="fullName" name="fullName" placeholder="Muhammad Ali" required />
@@ -37,6 +39,6 @@
             <button type="submit" class="btn-primary btn-full">Create Account →</button>
         </form>
 
-        <p class="auth-switch">Already have an account? <a href="/Auth/Login">Sign in</a></p>
+        <p class="auth-switch">Already have an account? <a href="/Auth/Login?returnUrl=@System.Net.WebUtility.UrlEncode(ViewBag.ReturnUrl as string)">Sign in</a></p>
     </div>
 </div>

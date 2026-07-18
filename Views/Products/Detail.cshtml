@@ -1,22 +1,54 @@
 @model ShoppingApp.Models.Product
+@using ShoppingApp.Models
 @{
     ViewData["Title"] = Model.Name;
-    var related = ViewBag.Related as List<ShoppingApp.Models.Product>;
-    var userId = Context.Session.GetInt32("UserId");
+    var related        = ViewBag.Related as List<ShoppingApp.Models.Product>;
+    var reviews        = ViewBag.Reviews as List<Review> ?? new List<Review>();
+    var userId         = Context.Session.GetInt32("UserId");
+    var reviewCount    = (int)(ViewBag.ReviewCount ?? 0);
+    var avgRating      = (double)(ViewBag.AverageRating ?? 0.0);
+    bool userReviewed  = (bool)(ViewBag.UserReviewed ?? false);
+    bool hasPurchased  = (bool)(ViewBag.HasPurchased ?? false);
 }
 
 <section class="product-detail-section">
+
+    <!-- ── Product Info Grid ── -->
     <div class="product-detail-grid">
+
         <!-- Image -->
         <div class="product-detail-img">
-            <img src="@(Model.ImagePath ?? "/images/placeholder.jpg")" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" id="mainImage" />
+            <img src="@(Model.ImagePath ?? "/images/placeholder.jpg")"
+                 alt="@Model.Name"
+                 onerror="this.src='/images/placeholder.jpg'"
+                 id="mainImage" />
         </div>
 
-        <!-- Info -->
+        <!-- Info Panel -->
         <div class="product-detail-info">
             <div class="product-category">@Model.Category · @Model.Brand</div>
             <h1 class="product-detail-name">@Model.Name</h1>
-            
+
+            <!-- Star summary -->
+            <div class="pd-rating-summary">
+                <div class="pd-stars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= Math.Round(avgRating))
+                        {
+                            <span class="pd-star filled">★</span>
+                        }
+                        else
+                        {
+                            <span class="pd-star">★</span>
+                        }
+                    }
+                </div>
+                <span class="pd-rating-val">@avgRating.ToString("0.0")</span>
+                <span class="pd-rating-count">(@reviewCount @(reviewCount == 1 ? "review" : "reviews"))</span>
+            </div>
+
+            <!-- Price -->
             <div class="product-detail-price">
                 <span class="price-final-lg">PKR @Model.FinalPrice.ToString("N0")</span>
                 @if (Model.Discount > 0)
@@ -26,29 +58,46 @@
                 }
             </div>
 
+            <!-- Stock Status -->
             <div class="stock-status @(Model.Stock > 0 ? "in-stock" : "out-stock")">
                 @(Model.Stock > 0 ? $"✓ In Stock ({Model.Stock} available)" : "✗ Out of Stock")
             </div>
 
-            <p class="product-desc">@Model.Description</p>
-
-            @if (Model.Stock > 0)
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(Model.Description))
             {
-                if (userId != null)
-                {
-                    <form method="post" action="/Cart/Add" class="add-cart-form">
-                        <input type="hidden" name="productId" value="@Model.Id" />
-                        <div class="qty-row">
-                            <label>Qty:</label>
-                            <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="qty-input" />
-                        </div>
-                        <button type="submit" class="btn-primary btn-full">🛒 Add to Cart</button>
-                    </form>
-                }
-                else
-                {
-                    <a href="/Auth/Login" class="btn-primary btn-full">Login to Add to Cart</a>
-                }
+                <div class="pd-desc-box">
+                    <div class="pd-desc-label">📋 Description</div>
+                    <p class="product-desc">@Model.Description</p>
+                </div>
+            }
+
+            <!-- Add to Cart + Wishlist -->
+            @if (Context.Session.GetString("UserRole") == "admin")
+            {
+                <div class="not-buyer-notice" style="margin-bottom:1rem;">
+                    🔒 Admins cannot purchase products or add them to cart.
+                </div>
+            }
+            else if (Model.Stock > 0)
+            {
+                <form method="post" action="/Cart/Add" class="add-cart-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div class="qty-row">
+                        <label>Qty:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="qty-input" />
+                    </div>
+                    <div class="cart-wish-row">
+                        <button type="submit" class="btn-primary" style="flex:1;">🛒 Add to Cart</button>
+                        <button type="button" class="btn-wishlist" onclick="this.closest('form').before(this); document.getElementById('wishForm@(Model.Id)').submit();" title="Save to Wishlist">❤️</button>
+                    </div>
+                </form>
+                <form id="wishForm@(Model.Id)" method="post" action="/Wishlist/Toggle" style="display:none;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="/Products/Detail/@Model.Id" />
+                </form>
             }
             else
             {
@@ -57,11 +106,133 @@
         </div>
     </div>
 
-    <!-- Related Products -->
+    <!-- ── Reviews Section ── -->
+    <div class="reviews-section">
+
+        <!-- Header -->
+        <div class="reviews-header">
+            <div>
+                <h2 class="reviews-title">⭐ Customer Reviews</h2>
+                <p style="color:var(--text-3); font-size:0.85rem; margin:0;">
+                    @reviewCount @(reviewCount == 1 ? "review" : "reviews") · Average rating @avgRating.ToString("0.0") / 5.0
+                </p>
+            </div>
+            @if (reviewCount > 0)
+            {
+                <!-- Rating bar breakdown -->
+                <div class="rating-breakdown">
+                    @for (int star = 5; star >= 1; star--)
+                    {
+                        int count = reviews.Count(r => r.Rating == star);
+                        double pct = reviewCount > 0 ? (double)count / reviewCount * 100 : 0;
+                        <div class="rb-row">
+                            <span class="rb-label">@star ★</span>
+                            <div class="rb-bar-wrap">
+                                <div class="rb-bar-fill" style="width:@pct.ToString("0")%"></div>
+                            </div>
+                            <span class="rb-count">@count</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Write a Review -->
+        @if (userId != null && hasPurchased && !userReviewed)
+        {
+            <div class="write-review-box">
+                <h3 class="write-review-title">✍️ Write a Review <span class="verified-buyer-tag">✅ Verified Buyer</span></h3>
+                <form method="post" action="/Products/SubmitReview" id="reviewForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+
+                    <!-- Star Picker -->
+                    <div class="star-picker" id="starPicker">
+                        <span class="sp-label">Your Rating:</span>
+                        <div class="sp-stars" id="spStars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)">★</button>
+                            }
+                        </div>
+                        <span class="sp-hint" id="spHint">Click a star</span>
+                        <input type="hidden" name="rating" id="ratingInput" value="0" required />
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="form-group">
+                        <label for="comment">Your Review (optional)</label>
+                        <textarea id="comment" name="comment" placeholder="Share your experience with this product…" rows="4"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submitReview" style="min-width:160px;">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+        }
+        else if (userId != null && hasPurchased && userReviewed)
+        {
+            <div class="reviewed-notice">
+                ✅ You have already reviewed this product. Thank you!
+            </div>
+        }
+        else if (userId != null && !hasPurchased)
+        {
+            <div class="not-buyer-notice">
+                🔒 Only verified buyers can leave a review. <a href="/">Buy this product</a> to share your experience.
+            </div>
+        }
+        else
+        {
+            <div class="login-to-review">
+                <a href="/Auth/Login?returnUrl=/Products/Detail/@Model.Id" class="btn-glass">Login to Write a Review</a>
+            </div>
+        }
+
+        <!-- Review Cards -->
+        @if (reviews.Any())
+        {
+            <div class="review-list">
+                @foreach (var r in reviews)
+                {
+                    <div class="review-card">
+                        <div class="review-card-header">
+                            <div class="review-avatar">@(r.User?.FullName?[0].ToString().ToUpper() ?? "U")</div>
+                            <div>
+                                <div class="review-author">@(r.User?.FullName ?? "User")</div>
+                                <div class="review-date">@r.CreatedAt.ToString("MMM dd, yyyy")</div>
+                            </div>
+                            <div class="review-stars ms-auto">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="@(i <= r.Rating ? "rs-star filled" : "rs-star")">★</span>
+                                }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(r.Comment))
+                        {
+                            <p class="review-comment">@r.Comment</p>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-reviews">
+                <div style="font-size:2.5rem; margin-bottom:0.75rem;">💬</div>
+                <p>No reviews yet. Be the first to share your experience!</p>
+            </div>
+        }
+
+    </div>
+
+    <!-- ── Related Products ── -->
     @if (related != null && related.Any())
     {
         <div class="section">
-            <h2 class="section-title">Related Products</h2>
+            <h2 class="section-title">🔗 Related Products</h2>
             <div class="product-grid">
                 @foreach (var p in related)
                 {
@@ -81,4 +252,46 @@
             </div>
         </div>
     }
+
 </section>
+
+@section Scripts {
+<script>
+const ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
+
+function setRating(val) {
+    document.getElementById('ratingInput').value = val;
+    document.getElementById('spHint').textContent = ratingLabels[val];
+
+    const stars = document.querySelectorAll('.sp-star');
+    stars.forEach((s, idx) => {
+        s.classList.toggle('active', idx < val);
+    });
+}
+
+// Hover effects
+document.querySelectorAll('.sp-star').forEach((star, idx) => {
+    star.addEventListener('mouseenter', () => {
+        document.querySelectorAll('.sp-star').forEach((s, i) => {
+            s.classList.toggle('hover', i <= idx);
+        });
+        document.getElementById('spHint').textContent = ratingLabels[idx + 1];
+    });
+    star.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.sp-star').forEach(s => s.classList.remove('hover'));
+        const current = parseInt(document.getElementById('ratingInput').value);
+        document.getElementById('spHint').textContent = current > 0 ? ratingLabels[current] : 'Click a star';
+    });
+});
+
+// Validate rating before submit
+document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
+    const rating = parseInt(document.getElementById('ratingInput').value);
+    if (!rating || rating < 1) {
+        e.preventDefault();
+        document.getElementById('spHint').textContent = '⚠ Please select a rating!';
+        document.getElementById('spHint').style.color = 'var(--red)';
+    }
+});
+</script>
+}

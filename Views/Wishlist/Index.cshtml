@@ -1,0 +1,75 @@
+@model List<ShoppingApp.Models.WishlistItem>
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<section class="section">
+    <div class="wishlist-header">
+        <h1 class="section-title">❤️ My Wishlist <span class="badge">@Model.Count items</span></h1>
+        <a href="/" class="btn-glass">← Continue Shopping</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">💝</div>
+            <p>Your wishlist is empty! Explore products and save your favourites.</p>
+            <a href="/" class="btn-primary">Discover Products</a>
+        </div>
+    }
+    else
+    {
+        <div class="wishlist-grid">
+            @foreach (var item in Model)
+            {
+                var p = item.Product!;
+                <div class="wishlist-card">
+                    <a href="/Products/Detail/@p.Id" class="wishlist-img-wrap">
+                        <img src="@(p.ImagePath ?? "/images/placeholder.jpg")"
+                             alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                        @if (p.Discount > 0)
+                        {
+                            <span class="badge-discount">-@p.Discount%</span>
+                        }
+                        @if (p.Stock == 0)
+                        {
+                            <span class="badge-oos">Out of Stock</span>
+                        }
+                    </a>
+                    <div class="wishlist-info">
+                        <div class="product-category">@p.Category</div>
+                        <a href="/Products/Detail/@p.Id" class="wishlist-name">@p.Name</a>
+                        <div class="product-brand">@p.Brand</div>
+                        <div class="wishlist-price">
+                            <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                            @if (p.Discount > 0)
+                            {
+                                <span class="price-original">PKR @p.Price.ToString("N0")</span>
+                            }
+                        </div>
+                        <div class="wishlist-actions">
+                            @if (p.Stock > 0)
+                            {
+                                <form method="post" action="/Wishlist/MoveToCart" style="flex:1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <button type="submit" class="btn-primary btn-full">🛒 Move to Cart</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="btn-primary btn-full" disabled style="flex:1;">Out of Stock</button>
+                            }
+                            <form method="post" action="/Wishlist/Remove">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@p.Id" />
+                                <button type="submit" class="btn-remove wishlist-remove" title="Remove">✕</button>
+                            </form>
+                        </div>
+                        <div class="wishlist-added">Added @item.AddedAt.AddHours(5).ToString("dd MMM yyyy")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>

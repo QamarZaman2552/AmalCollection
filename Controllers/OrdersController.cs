@@ -1,14 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
-using ShoppingApp.Models;
+using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
 {
     public class OrdersController : Controller
     {
         private readonly AppDbContext _db;
-        public OrdersController(AppDbContext db) { _db = db; }
+        private readonly CheckoutService _checkout;
+
+        public OrdersController(AppDbContext db, CheckoutService checkout)
+        {
+            _db = db;
+            _checkout = checkout;
+        }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
 
@@ -17,62 +23,85 @@ namespace ShoppingApp.Controllers
         public IActionResult Checkout()
         {
             if (UserId == null) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+            if (user == null) return RedirectToAction("Login", "Auth");
+
             var items = _db.CartItems.Include(c => c.Product).Where(c => c.UserId == UserId).ToList();
             if (!items.Any()) return RedirectToAction("Index", "Cart");
-            ViewBag.Total = items.Sum(i => i.Product!.FinalPrice * i.Quantity);
+
+            var cartTotal = CheckoutService.ComputeCartTotal(items);
+            ViewBag.Total = cartTotal;
+            ViewBag.Balance = user.Balance;
+            ViewBag.CanAfford = user.Balance >= cartTotal;
+            ViewBag.Email = user.Email;
+            ViewBag.Phone = user.Phone ?? "";
+
+            var nameParts = (user.FullName ?? "").Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            ViewBag.FirstName = nameParts.Length > 0 ? nameParts[0] : "";
+            ViewBag.LastName = nameParts.Length > 1 ? nameParts[1] : "";
+
             return View(items);
         }
 
         // ─── Checkout POST ────────────────────────────────────────
         [HttpPost]
-        public IActionResult Checkout(string deliveryAddress, string paymentMethod)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout(
+            string firstName,
+            string lastName,
+            string address,
+            string city,
+            string? postalCode,
+            string phone,
+            string country,
+            string paymentMethod,
+            CancellationToken cancellationToken)
         {
             if (UserId == null) return RedirectToAction("Login", "Auth");
 
-            var items = _db.CartItems.Include(c => c.Product).Where(c => c.UserId == UserId).ToList();
-            if (!items.Any()) return RedirectToAction("Index", "Cart");
-
-            if (string.IsNullOrWhiteSpace(deliveryAddress))
-            { TempData["Error"] = "Delivery address is required."; return RedirectToAction("Checkout"); }
-
-            decimal total = items.Sum(i => i.Product!.FinalPrice * i.Quantity);
-
-            var order = new Order
+            var deliveryAddress = BuildDeliveryAddress(firstName, lastName, address, city, postalCode, phone, country);
+            if (deliveryAddress == null)
             {
-                UserId = UserId.Value,
-                TotalAmount = total,
-                DeliveryAddress = deliveryAddress,
-                PaymentMethod = paymentMethod,
-                Status = "pending"
-            };
-            _db.Orders.Add(order);
-            _db.SaveChanges();
-
-            foreach (var item in items)
-            {
-                _db.OrderItems.Add(new OrderItem
-                {
-                    OrderId = order.Id,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.Product!.FinalPrice
-                });
-                // Reduce stock
-                if (item.Product != null) item.Product.Stock -= item.Quantity;
+                TempData["Error"] = "Please fill in all required delivery fields.";
+                return RedirectToAction("Checkout");
             }
 
-            // Clear cart
-            _db.CartItems.RemoveRange(items);
-            _db.SaveChanges();
+            try
+            {
+                // Keep profile phone in sync for admin order list
+                var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+                if (user != null && !string.IsNullOrWhiteSpace(phone))
+                {
+                    user.Phone = phone.Trim();
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
 
-            TempData["OrderId"] = order.Id;
-            return RedirectToAction("Confirmation");
+                var result = await _checkout.ProcessAsync(UserId.Value, deliveryAddress, paymentMethod, cancellationToken);
+
+                if (!result.Success)
+                {
+                    TempData["Error"] = result.Error;
+                    return RedirectToAction("Checkout");
+                }
+
+                TempData["OrderId"] = result.OrderId!.Value.ToString();
+                TempData["NewBalance"] = result.NewBalance!.Value.ToString("F2");
+                TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
+                return RedirectToAction("Confirmation");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not place order: {ex.Message}";
+                return RedirectToAction("Checkout");
+            }
         }
 
         // ─── Order Confirmation ──────────────────────────────────
         public IActionResult Confirmation()
         {
             ViewBag.OrderId = TempData["OrderId"];
+            ViewBag.NewBalance = TempData["NewBalance"];
             return View();
         }
 
@@ -88,6 +117,38 @@ namespace ShoppingApp.Controllers
                 .OrderByDescending(o => o.CreatedAt)
                 .ToList();
             return View(orders);
+        }
+
+        private static string? BuildDeliveryAddress(
+            string firstName,
+            string lastName,
+            string address,
+            string city,
+            string? postalCode,
+            string phone,
+            string country)
+        {
+            firstName = firstName?.Trim() ?? "";
+            lastName = lastName?.Trim() ?? "";
+            address = address?.Trim() ?? "";
+            city = city?.Trim() ?? "";
+            phone = phone?.Trim() ?? "";
+            country = string.IsNullOrWhiteSpace(country) ? "Pakistan" : country.Trim();
+
+            if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) ||
+                string.IsNullOrEmpty(address) || string.IsNullOrEmpty(city) || string.IsNullOrEmpty(phone))
+                return null;
+
+            var lines = new List<string>
+            {
+                $"{firstName} {lastName}",
+                address,
+                string.IsNullOrWhiteSpace(postalCode) ? city : $"{city}, {postalCode.Trim()}",
+                country,
+                $"Phone: {phone}"
+            };
+
+            return string.Join(Environment.NewLine, lines);
         }
     }
 }

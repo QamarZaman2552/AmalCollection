@@ -1,54 +1,191 @@
 @model List<ShoppingApp.Models.CartItem>
 @{
-    ViewData["Title"] = "Checkout";
+    ViewData["Title"] = "Checkout — Delivery";
+    ViewData["BodyClass"] = "checkout-body";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
     decimal total = (decimal)(ViewBag.Total ?? 0);
+    decimal balance = (decimal)(ViewBag.Balance ?? 0);
+    bool canAfford = ViewBag.CanAfford == true;
+    int itemCount = Model.Sum(i => i.Quantity);
+
+    string firstName = ViewBag.FirstName as string ?? "";
+    string lastName = ViewBag.LastName as string ?? "";
+    string email = ViewBag.Email as string ?? "";
+    string phone = ViewBag.Phone as string ?? "";
 }
 
-<section class="section">
-    <h1 class="section-title">✅ Checkout</h1>
-    <div class="checkout-layout">
-        <div class="checkout-form-wrap">
-            <form method="post" action="/Orders/Checkout" class="checkout-form">
-                <h2>Delivery Details</h2>
-                <div class="form-group">
-                    <label for="deliveryAddress">Delivery Address *</label>
-                    <textarea id="deliveryAddress" name="deliveryAddress" placeholder="House #, Street, City, Province" required rows="3"></textarea>
-                </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+}
 
-                <h2>Payment Method</h2>
-                <div class="payment-options">
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
-                        <span class="payment-label">💵 Cash on Delivery</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
-                        <span class="payment-label">💳 Credit / Debit Card</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="paymentMethod" value="Bank Transfer" />
-                        <span class="payment-label">🏦 Bank Transfer</span>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn-primary btn-full">Place Order PKR @total.ToString("N0") →</button>
-            </form>
+<div class="checkout-shell">
+    <!-- Left: delivery & contact -->
+    <div class="checkout-main">
+        <div class="checkout-brand">
+            <a href="/">🛍️ ShopAI</a>
+            <a href="/Cart" class="checkout-back">← Back to cart</a>
         </div>
 
-        <div class="checkout-summary">
-            <h2>Order Items</h2>
-            @foreach (var item in Model)
-            {
-                <div class="checkout-item">
-                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" />
-                    <div>
-                        <div class="checkout-item-name">@item.Product?.Name</div>
-                        <div class="checkout-item-qty">x@item.Quantity</div>
+        <nav class="checkout-breadcrumb" aria-label="Checkout progress">
+            <a href="/Cart">Cart</a>
+            <span>›</span>
+            <span class="active">Delivery</span>
+            <span>›</span>
+            <span>Confirmation</span>
+        </nav>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="checkout-alert checkout-alert-error">⚠️ @TempData["Error"]</div>
+        }
+
+        @if (canAfford)
+        {
+            <div class="checkout-wallet">
+                Wallet balance: <strong>PKR @balance.ToString("N0")</strong>
+                · After order: <strong>PKR @((balance - total).ToString("N0"))</strong>
+            </div>
+        }
+        else
+        {
+            <div class="checkout-wallet warn">
+                Insufficient balance (PKR @balance.ToString("N0")). Need PKR @((total - balance).ToString("N0")) more.
+                <a href="/Cart" style="color:#7c3aed;margin-left:0.35rem;">Top up →</a>
+            </div>
+        }
+
+        <form method="post" action="/Orders/Checkout" class="checkout-delivery-form" id="checkoutForm">
+            @Html.AntiForgeryToken()
+            <!-- Contact -->
+            <section class="checkout-section">
+                <div class="checkout-section-header">
+                    <h2>Contact</h2>
+                </div>
+                <div class="checkout-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" value="@email" readonly />
+                </div>
+                <div class="checkout-field">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" value="@phone" placeholder="03XX-XXXXXXX" required />
+                </div>
+            </section>
+
+            <!-- Shipping address -->
+            <section class="checkout-section">
+                <div class="checkout-section-header">
+                    <h2>Delivery address</h2>
+                </div>
+
+                <div class="checkout-field">
+                    <label for="country">Country / Region</label>
+                    <select id="country" name="country" required>
+                        <option value="Pakistan" selected>Pakistan</option>
+                    </select>
+                </div>
+
+                <div class="checkout-row-2">
+                    <div class="checkout-field">
+                        <label for="firstName">First name</label>
+                        <input type="text" id="firstName" name="firstName" value="@firstName" required autocomplete="given-name" />
                     </div>
-                    <div class="checkout-item-price">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+                    <div class="checkout-field">
+                        <label for="lastName">Last name</label>
+                        <input type="text" id="lastName" name="lastName" value="@lastName" required autocomplete="family-name" />
+                    </div>
                 </div>
-            }
-            <div class="summary-total"><span>Total</span><span>PKR @total.ToString("N0")</span></div>
-        </div>
+
+                <div class="checkout-field">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" placeholder="House #, Street, Area" required autocomplete="street-address" />
+                </div>
+
+                <div class="checkout-row-2">
+                    <div class="checkout-field">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" placeholder="e.g. Lahore, Multan" required autocomplete="address-level2" />
+                    </div>
+                    <div class="checkout-field">
+                        <label for="postalCode">Postal code <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
+                        <input type="text" id="postalCode" name="postalCode" placeholder="60000" autocomplete="postal-code" />
+                    </div>
+                </div>
+
+                <label class="checkout-checkbox">
+                    <input type="checkbox" name="saveAddress" value="true" />
+                    Save this information for next time
+                </label>
+            </section>
+
+            <!-- Payment (compact) -->
+            <section class="checkout-payment-compact">
+                <h3>Payment method</h3>
+                <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem;">Amount deducted from your ShopAI wallet balance.</p>
+                <div class="checkout-pay-options">
+                    <label class="checkout-pay-option">
+                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
+                        <span>💵 Cash on Delivery</span>
+                    </label>
+                    <label class="checkout-pay-option">
+                        <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
+                        <span>💳 Credit / Debit Card</span>
+                    </label>
+                    <label class="checkout-pay-option">
+                        <input type="radio" name="paymentMethod" value="Bank Transfer" />
+                        <span>🏦 Bank Transfer</span>
+                    </label>
+                </div>
+            </section>
+
+            <div class="checkout-actions">
+                <a href="/Cart" class="checkout-back">← Return to cart</a>
+                @if (canAfford)
+                {
+                    <button type="submit" class="checkout-submit">Place order</button>
+                }
+                else
+                {
+                    <button type="button" class="checkout-submit" disabled>Place order</button>
+                }
+            </div>
+        </form>
     </div>
-</section>
+
+    <!-- Right: order summary -->
+    <aside class="checkout-sidebar">
+        <p class="checkout-sidebar-title">Order summary · @itemCount item@(itemCount == 1 ? "" : "s")</p>
+
+        @foreach (var item in Model)
+        {
+            <div class="checkout-product">
+                <div class="checkout-product-thumb">
+                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
+                         alt="@item.Product?.Name"
+                         onerror="this.src='/images/placeholder.jpg'" />
+                    <span class="checkout-qty-badge">@(item.Quantity)</span>
+                </div>
+                <div class="checkout-product-info">
+                    <div class="checkout-product-name">@item.Product?.Name</div>
+                    <div class="checkout-product-meta">@item.Product?.Category · @item.Product?.Brand</div>
+                </div>
+                <div class="checkout-product-price">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+            </div>
+        }
+
+        <div class="checkout-totals">
+            <div class="checkout-total-row">
+                <span>Subtotal</span>
+                <span>PKR @total.ToString("N0")</span>
+            </div>
+            <div class="checkout-total-row">
+                <span>Shipping</span>
+                <span class="free">FREE</span>
+            </div>
+            <div class="checkout-total-row grand">
+                <span>Total</span>
+                <span>PKR @total.ToString("N0")</span>
+            </div>
+        </div>
+    </aside>
+</div>

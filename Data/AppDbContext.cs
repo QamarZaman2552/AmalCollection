@@ -16,6 +16,10 @@ namespace ShoppingApp.Data
         public DbSet<BrowseHistory> BrowseHistories { get; set; }
         public DbSet<SaleAnalytics> SaleAnalytics { get; set; } = null!;
         public DbSet<HeroSlide> HeroSlides { get; set; } = null!;
+        public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
+        public DbSet<Review> Reviews { get; set; } = null!;
+        public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,10 +31,11 @@ namespace ShoppingApp.Data
                 Id = 1,
                 FullName = "Admin",
                 Email = "admin@shop.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                PasswordHash = "$2a$11$er/rWvJvUGL4UdHoN0iTXexco2pMcVaE2mmU8GBI7YPAHt0QnrJqq", // BCrypt hash of "Admin@123" (matches snapshot - static)
                 Role = "admin",
                 Phone = "0300-0000000",
-                CreatedAt = new DateTime(2024, 1, 1)
+                Balance = 0m,
+                CreatedAt = new DateTime(2026, 3, 1)
             });
 
             // Seed sample products

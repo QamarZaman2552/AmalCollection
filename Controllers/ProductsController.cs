@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
+using ShoppingApp.Models;
 using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
@@ -15,25 +17,31 @@ namespace ShoppingApp.Controllers
             _rec = rec;
         }
 
-        // ─── Homepage / Product List ─────────────────────────────
-        public IActionResult Index(string? category, string? brand)
+        // ─── Homepage / Product List ──────────────────────────────────────
+        public IActionResult Index(string? category, string? brand, string? sort)
         {
             var query = _db.Products.AsQueryable();
             if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category == category);
             if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand == brand);
 
-            var products = query.OrderByDescending(p => p.CreatedAt).ToList();
+            // Sort by price
+            query = sort switch
+            {
+                "price_asc"  => query.OrderBy(p => p.Price * (1 - p.Discount / 100m)),
+                "price_desc" => query.OrderByDescending(p => p.Price * (1 - p.Discount / 100m)),
+                _            => query.OrderByDescending(p => p.CreatedAt)
+            };
+
+            var products = query.ToList();
 
             var userId = HttpContext.Session.GetInt32("UserId");
             ViewBag.Recommendations = _rec.GetRecommendations(userId, 4);
 
-            // Hero slides from DB (active only, ordered by SortOrder)
             ViewBag.HeroSlides = _db.HeroSlides
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.SortOrder)
                 .ToList();
 
-            // Filter out nulls so views get clean List<string>
             ViewBag.Categories = _db.Products
                 .Select(p => p.Category).Distinct().ToList()
                 .Where(c => c != null).Select(c => c!).ToList();
@@ -43,6 +51,7 @@ namespace ShoppingApp.Controllers
 
             ViewBag.SelectedCategory = category;
             ViewBag.SelectedBrand    = brand;
+            ViewBag.SelectedSort     = sort ?? "";
             return View(products);
         }
 
@@ -84,7 +93,68 @@ namespace ShoppingApp.Controllers
                 .Where(p => p.Category == cat && p.Id != id && p.Stock > 0)
                 .Take(4).ToList();
 
+            // Load reviews with user names
+            var reviews = _db.Reviews
+                .Include(r => r.User)
+                .Where(r => r.ProductId == id)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            ViewBag.Reviews       = reviews;
+            ViewBag.ReviewCount   = reviews.Count;
+            ViewBag.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0.0;
+
+            // Has the current user already reviewed?
+            ViewBag.UserReviewed = userId.HasValue &&
+                reviews.Any(r => r.UserId == userId.Value);
+
+            // Has the current user purchased this product?
+            ViewBag.HasPurchased = userId.HasValue && _db.OrderItems
+                .Any(oi => oi.ProductId == id && oi.Order != null && oi.Order.UserId == userId.Value);
+
             return View(product);
+        }
+
+        // ─── Submit Review ───────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SubmitReview(int productId, int rating, string? comment)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                TempData["Error"] = "Please login to submit a review.";
+                return RedirectToAction("Login", "Auth", new { returnUrl = Url.Action("Detail", "Products", new { id = productId }) });
+            }
+
+            // Only verified buyers can review
+            bool hasPurchased = _db.OrderItems
+                .Any(oi => oi.ProductId == productId && oi.Order != null && oi.Order.UserId == userId.Value);
+            if (!hasPurchased)
+            {
+                TempData["Error"] = "Only verified buyers can review this product.";
+                return RedirectToAction("Detail", new { id = productId });
+            }
+
+            // One review per user per product
+            bool alreadyReviewed = _db.Reviews
+                .Any(r => r.ProductId == productId && r.UserId == userId.Value);
+
+            if (!alreadyReviewed && rating >= 1 && rating <= 5)
+            {
+                _db.Reviews.Add(new Review
+                {
+                    ProductId = productId,
+                    UserId    = userId.Value,
+                    Rating    = rating,
+                    Comment   = comment?.Trim(),
+                    CreatedAt = DateTime.UtcNow
+                });
+                _db.SaveChanges();
+                TempData["Success"] = "Your review has been submitted. Thank you!";
+            }
+
+            return RedirectToAction("Detail", new { id = productId });
         }
     }
 }
