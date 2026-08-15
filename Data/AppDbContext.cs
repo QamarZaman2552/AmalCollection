@@ -14,7 +14,6 @@ namespace ShoppingApp.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ChatbotLog> ChatbotLogs { get; set; }
         public DbSet<BrowseHistory> BrowseHistories { get; set; }
-        public DbSet<SaleAnalytics> SaleAnalytics { get; set; } = null!;
         public DbSet<HeroSlide> HeroSlides { get; set; } = null!;
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
         public DbSet<Review> Reviews { get; set; } = null!;
@@ -25,13 +24,66 @@ namespace ShoppingApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Unique indexes & constraints
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique()
+                .HasDatabaseName("IX_Users_Email");
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Category)
+                .HasDatabaseName("IX_Products_Category");
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Brand)
+                .HasDatabaseName("IX_Products_Brand");
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.UserId)
+                .HasDatabaseName("IX_Orders_UserId");
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.CreatedAt)
+                .HasDatabaseName("IX_Orders_CreatedAt");
+
+            modelBuilder.Entity<CartItem>()
+                .HasIndex(c => new { c.UserId, c.ProductId })
+                .IsUnique()
+                .HasDatabaseName("IX_CartItems_UserId_ProductId");
+
+            modelBuilder.Entity<WishlistItem>()
+                .HasIndex(w => new { w.UserId, w.ProductId })
+                .IsUnique()
+                .HasDatabaseName("IX_WishlistItems_UserId_ProductId");
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => new { r.UserId, r.ProductId })
+                .IsUnique()
+                .HasDatabaseName("IX_Reviews_UserId_ProductId");
+
+            modelBuilder.Entity<ChatbotLog>()
+                .HasIndex(c => c.UserId)
+                .HasDatabaseName("IX_ChatbotLogs_UserId");
+
+            modelBuilder.Entity<BrowseHistory>()
+                .HasIndex(b => new { b.UserId, b.ProductId, b.ViewedAt })
+                .HasDatabaseName("IX_BrowseHistory_UserId_ProductId_ViewedAt");
+
+            modelBuilder.Entity<ContactMessage>()
+                .HasIndex(c => c.CreatedAt)
+                .HasDatabaseName("IX_ContactMessages_CreatedAt");
+
+            modelBuilder.Entity<HeroSlide>()
+                .HasIndex(h => new { h.SortOrder, h.IsActive })
+                .HasDatabaseName("IX_HeroSlides_SortOrder_IsActive");
+
             // Seed admin user (password: Admin@123)
             modelBuilder.Entity<User>().HasData(new User
             {
                 Id = 1,
                 FullName = "Admin",
                 Email = "admin@shop.com",
-                PasswordHash = "$2a$11$er/rWvJvUGL4UdHoN0iTXexco2pMcVaE2mmU8GBI7YPAHt0QnrJqq", // BCrypt hash of "Admin@123" (matches snapshot - static)
+                PasswordHash = "$2a$11$LX99SXQPAaze0rMQSZTxGuPW0GuKLzFfSWd287Vdcr66oy3xFXLYm", // BCrypt hash of "Admin@123"
                 Role = "admin",
                 Phone = "0300-0000000",
                 Balance = 0m,

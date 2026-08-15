@@ -152,6 +152,8 @@ select option:checked {
   flex-shrink: 0;
 }
 .brand-icon { -webkit-text-fill-color: initial; }
+.brand-logo { height: 28px; width: auto; object-fit: contain; }
+.auth-logo-img { height: 60px; width: auto; object-fit: contain; }
 
 .nav-search {
   flex: 1; max-width: 480px; display: flex;
@@ -505,7 +507,7 @@ select option:checked {
   border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 440px;
   box-shadow: var(--shadow-lg);
 }
-.auth-logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-2); text-align: center; margin-bottom: 1rem; }
+.auth-logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-2); text-align: center; margin-bottom: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
 .auth-title { font-size: 1.5rem; font-weight: 700; text-align: center; }
 .auth-sub { color: var(--text-2); text-align: center; margin-bottom: 1.5rem; font-size: 0.9rem; margin-top: 0.3rem; }
 .auth-form { display: flex; flex-direction: column; gap: 1rem; }
@@ -688,7 +690,7 @@ select option:checked {
 
 .chatbot-window {
   position: fixed; bottom: 6.5rem; right: 2rem; z-index: 500;
-  width: 360px; height: 500px;
+  width: 360px; height: 420px;
   background: var(--bg-2); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow-lg);
   display: none; flex-direction: column; overflow: hidden;
@@ -721,6 +723,11 @@ select option:checked {
 }
 .chat-msg.bot .chat-bubble { background: var(--bg-3); border: 1px solid var(--border); border-bottom-left-radius: 4px; color: var(--text); }
 .chat-msg.user .chat-bubble { background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: white; border-bottom-right-radius: 4px; }
+.chat-msg a { color: #4fc3f7; background: rgba(79,195,247,0.12); padding: 2px 8px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 4px; transition: background 0.2s; }
+.chat-msg a:hover { background: rgba(79,195,247,0.25); text-decoration: underline; }
+
+.chat-error { justify-content: center; }
+.chat-error .chat-bubble { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; border-radius: 10px; font-size: 0.82rem; text-align: center; max-width: 90%; padding: 0.5rem 0.8rem; }
 
 .typing .chat-bubble { display: flex; gap: 4px; align-items: center; padding: 0.8rem 1rem; }
 .typing-dot { width: 8px; height: 8px; background: var(--text-3); border-radius: 50%; animation: typingBounce 1s infinite; }
@@ -746,6 +753,9 @@ select option:checked {
   flex-shrink: 0;
 }
 #chatSend:hover { opacity: 0.9; }
+.chat-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 0.75rem 0.5rem; }
+.chip { padding: 0.3rem 0.7rem; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-2); border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent), 0.08); }
 
 /* ─── Footer ──────────────────────────────────────────── */
 .footer { border-top: 1px solid var(--border); padding: 1.5rem 2rem; margin-top: 2rem; }
@@ -766,8 +776,8 @@ select option:checked {
   .nav-search { max-width: 200px; }
   .hero { padding: 3rem 1rem 2rem; }
   .section { padding: 2rem 1rem; }
-  .chatbot-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5.5rem; }
-  .chatbot-bubble { bottom: 1.5rem; right: 1.5rem; }
+  .chatbot-window { width: calc(100vw - 1.5rem); right: 0.75rem; bottom: 5rem; height: calc(100vh - 120px); max-height: 480px; }
+  .chatbot-bubble { bottom: 1.25rem; right: 1.25rem; }
   .hero-stats { gap: 1.5rem; }
 }
 

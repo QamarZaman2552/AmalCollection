@@ -59,14 +59,13 @@
             <div class="cart-summary">
                 <h2>Order Summary</h2>
                 <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
-                <div class="summary-row"><span>Your balance</span><span>PKR @balance.ToString("N0")</span></div>
                 <div class="summary-row"><span>Delivery</span><span class="text-green">Free</span></div>
                 <div class="summary-total"><span>Cart total</span><span>PKR @total.ToString("N0")</span></div>
                 @if (!canAfford)
                 {
                     var shortfall = total - balance;
                     <div class="alert alert-error" style="margin-top:0.75rem;">
-                        Insufficient balance. You need PKR @shortfall.ToString("N0") more to checkout.
+                        Insufficient balance. Please add balance to proceed to checkout.
                     </div>
                     <div class="topup-box" style="margin-top:1rem;padding:1rem;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);">
                         <h3 style="font-size:0.95rem;margin-bottom:0.75rem;">💳 Add balance to your account</h3>
@@ -75,7 +74,7 @@
                                  @Html.AntiForgeryToken()
                                  <input type="hidden" name="returnUrl" value="/Cart" />
                                  <input type="hidden" name="amount" value="@((int)Math.Ceiling(shortfall))" />
-                                 <button type="submit" class="btn-glass" style="font-size:0.8rem;padding:0.4rem 0.75rem;">+ PKR @shortfall.ToString("N0") (exact)</button>
+                                  <button type="submit" class="btn-glass" style="font-size:0.8rem;padding:0.4rem 0.75rem;">+ Add Exact Amount</button>
                              </form>
                              <form method="post" action="/Profile/TopUp" style="display:inline;">
                                  @Html.AntiForgeryToken()
@@ -108,7 +107,7 @@
                 }
                 else
                 {
-                    <button type="button" class="btn-primary btn-full" disabled title="Add balance first — cart total must be ≤ your balance">Proceed to Checkout →</button>
+                    <button type="button" class="btn-primary btn-full" disabled title="Add balance first to proceed to checkout">Proceed to Checkout →</button>
                 }
                 <a href="/" class="btn-glass btn-full" style="margin-top:0.5rem;">Continue Shopping</a>
             </div>

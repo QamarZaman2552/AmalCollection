@@ -34,11 +34,6 @@
                 <div class="pstat-label">Total Orders</div>
             </div>
             <div class="pstat-card">
-                <div class="pstat-icon">💳</div>
-                <div class="pstat-num">PKR @Model.Balance.ToString("N0")</div>
-                <div class="pstat-label">Account Balance</div>
-            </div>
-            <div class="pstat-card">
                 <div class="pstat-icon">💰</div>
                 <div class="pstat-num">PKR @totalSpent.ToString("N0")</div>
                 <div class="pstat-label">Total Spent</div>
@@ -74,9 +69,6 @@
         {
             <div class="profile-form-card" id="topup-balance">
                 <h2 class="profile-form-title">💳 Top Up Balance</h2>
-                <p style="color:var(--text-2);font-size:0.88rem;margin-bottom:1rem;">
-                    Current balance: <strong>PKR @Model.Balance.ToString("N0")</strong>
-                </p>
                 <form method="post" action="/Profile/TopUp" class="auth-form">
                     @Html.AntiForgeryToken()
                     @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string))

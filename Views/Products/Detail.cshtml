@@ -81,7 +81,7 @@
             }
             else if (Model.Stock > 0)
             {
-                <form method="post" action="/Cart/Add" class="add-cart-form">
+                <form method="post" action="/Cart/AddPost" class="add-cart-form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="productId" value="@Model.Id" />
                     <div class="qty-row">

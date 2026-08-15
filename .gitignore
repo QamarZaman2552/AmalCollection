@@ -365,3 +365,26 @@ FodyWeavers.xsd
 # App settings with secrets
 appsettings.json
 appsettings.Development.json
+appsettings.Production.json
+
+# Logs
+logs/
+*.log
+
+# User secrets
+.secrets/
+
+# Docker
+.docker/
+
+# IDE
+.vs/
+*.user
+*.suo
+# Dev artifacts
+build_errors.txt
+build_output.txt
+db_update.txt
+migration_out.txt
+original_sitejs.txt
+filelist.txt

@@ -63,10 +63,17 @@ const chatMsgs  = document.getElementById('chatMessages');
 if (bubble && chatWin) {
   bubble.addEventListener('click', () => {
     chatWin.classList.toggle('open');
+    bubble.style.display = chatWin.classList.contains('open') ? 'none' : 'flex';
     if (chatWin.classList.contains('open')) chatInput.focus();
   });
 
-  chatClose.addEventListener('click', () => chatWin.classList.remove('open'));
+  chatClose.addEventListener('click', () => { chatWin.classList.remove('open'); bubble.style.display = 'flex'; });
+  document.addEventListener('click', (e) => {
+    if (chatWin.classList.contains('open') && !chatWin.contains(e.target) && !bubble.contains(e.target)) {
+      chatWin.classList.remove('open');
+      bubble.style.display = 'flex';
+    }
+  });
 
   chatSend.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', (e) => {
@@ -77,13 +84,36 @@ if (bubble && chatWin) {
 function addMsg(text, type) {
   const msg = document.createElement('div');
   msg.className = `chat-msg ${type}`;
+  if (type === 'bot' && text.startsWith('\u26A0')) msg.classList.add('chat-error');
   const bubble_el = document.createElement('div');
   bubble_el.className = 'chat-bubble';
-  bubble_el.textContent = text;
+  if (type === 'bot') {
+    bubble_el.innerHTML = text
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/_([^_]+)_/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  } else {
+    bubble_el.textContent = text;
+  }
   msg.appendChild(bubble_el);
   chatMsgs.appendChild(msg);
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
   return msg;
+}
+
+function showChips(chips) {
+  chatMsgs.querySelectorAll('.chat-chips').forEach(c => c.remove());
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-chips';
+  chips.forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = label;
+    btn.onclick = () => { chatInput.value = label; sendMessage(); };
+    wrap.appendChild(btn);
+  });
+  chatMsgs.appendChild(wrap);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
 }
 
 function showTyping() {
@@ -118,6 +148,9 @@ async function sendMessage() {
     const data = await res.json();
     hideTyping();
     addMsg(data.reply, 'bot');
+    const lc = data.reply.toLowerCase();
+    if (lc.includes('product') || lc.includes('item')) showChips(['budget', 'expensive', 'show all']);
+    else if (lc.includes('recommend') || lc.includes('suggest')) showChips(['budget', 'show all']);
   } catch {
     hideTyping();
     addMsg('⚠️ Connection error. Please try again.', 'bot');

@@ -38,10 +38,18 @@ namespace ShoppingApp.Controllers
             return View(items);
         }
 
-        // ─── Add to Cart ─────────────────────────────────────────
-        [HttpGet, HttpPost]
-        [ValidateAntiForgeryToken]
+        // ─── Add to Cart (GET redirects, POST processes) ─────────
+        [HttpGet]
         public IActionResult Add(int productId, int quantity = 1)
+        {
+            // Redirect GET requests to product detail with error
+            TempData["Error"] = "Invalid request. Please use the Add to Cart button on the product page.";
+            return RedirectToAction("Detail", "Products", new { id = productId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddPost(int productId, int quantity = 1)
         {
             if (UserId == null) return RedirectToAction("Login", "Auth", new { returnUrl = Url.Action("Add", "Cart", new { productId, quantity }) });
             if (HttpContext.Session.GetString("UserRole") == "admin")

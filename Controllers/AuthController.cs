@@ -156,8 +156,8 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     email,
-                    "ShopAI Password Reset Confirmation",
-                    "Hello,\n\nThis is to confirm that your ShopAI account password was successfully changed.\n\nIf you made this change, no further action is required.\n\nIf you did not request this change, please secure your account immediately by resetting your password and contacting our support team.\n\nRegards,\nShopAI Security Team"
+                    "BaazWix Password Reset Confirmation",
+                    "Hello,\n\nThis is to confirm that your BaazWix account password was successfully changed.\n\nIf you made this change, no further action is required.\n\nIf you did not request this change, please secure your account immediately by resetting your password and contacting our support team.\n\nRegards,\nBaazWix Security Team"
                 );
             }
             catch
