@@ -20,7 +20,7 @@ COPY --from=build /app/publish .
 RUN mkdir -p /app/logs && chown -R appuser:appuser /app
 USER appuser
 
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080}
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 8080
