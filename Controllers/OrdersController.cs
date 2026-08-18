@@ -9,14 +9,21 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly CheckoutService _checkout;
+        private readonly IEmailSender _emailSender;
 
-        public OrdersController(AppDbContext db, CheckoutService checkout)
+        public OrdersController(AppDbContext db, CheckoutService checkout, IEmailSender emailSender)
         {
             _db = db;
             _checkout = checkout;
+            _emailSender = emailSender;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
+
+        private string SiteUrl =>
+            $"{Request.Scheme}://{Request.Host}";
+
+        private string Logo => EmailTemplates.GetLogoUrl(SiteUrl);
 
         // ─── Checkout GET ─────────────────────────────────────────
         [HttpGet]
@@ -32,8 +39,6 @@ namespace ShoppingApp.Controllers
 
             var cartTotal = CheckoutService.ComputeCartTotal(items);
             ViewBag.Total = cartTotal;
-            ViewBag.Balance = user.Balance;
-            ViewBag.CanAfford = user.Balance >= cartTotal;
             ViewBag.Email = user.Email;
             ViewBag.Phone = user.Phone ?? "";
 
@@ -85,8 +90,29 @@ namespace ShoppingApp.Controllers
                     return RedirectToAction("Checkout");
                 }
 
+                if (user != null)
+                {
+                    try
+                    {
+                        await _emailSender.SendAsync(
+                            user.Email,
+                            $"BaazWix Order Confirmation #{result.OrderId}",
+                            EmailTemplates.OrderConfirmation(
+                                user.FullName,
+                                result.OrderId!.Value.ToString(),
+                                result.OrderTotal?.ToString("N0") ?? "",
+                                paymentMethod,
+                                Logo,
+                                SiteUrl)
+                        );
+                    }
+                    catch
+                    {
+                        // Never block checkout if email fails
+                    }
+                }
+
                 TempData["OrderId"] = result.OrderId!.Value.ToString();
-                TempData["NewBalance"] = result.NewBalance!.Value.ToString("F2");
                 TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
                 return RedirectToAction("Confirmation");
             }
@@ -101,7 +127,6 @@ namespace ShoppingApp.Controllers
         public IActionResult Confirmation()
         {
             ViewBag.OrderId = TempData["OrderId"];
-            ViewBag.NewBalance = TempData["NewBalance"];
             return View();
         }
 

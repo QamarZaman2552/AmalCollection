@@ -29,15 +29,37 @@
                 <input type="tel" id="phone" name="phone" placeholder="0300-1234567" />
             </div>
             <div class="form-group">
-                <label for="password">Password * <small>(min 6 chars)</small></label>
-                <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="6" />
+                <label for="password">Password *</label>
+                <div class="pw-field">
+                    <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" />
+                    <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                </div>
+                <div class="pw-strength" aria-live="polite">
+                    <div class="pw-strength-bar"><span></span></div>
+                    <div class="pw-strength-label">Password strength</div>
+                </div>
+                <ul class="pw-reqs">
+                    <li data-rule="length">At least 8 characters</li>
+                    <li data-rule="lower">A lowercase letter</li>
+                    <li data-rule="upper">An uppercase letter</li>
+                    <li data-rule="digit">A number</li>
+                    <li data-rule="symbol">A symbol (!#$%…)</li>
+                </ul>
             </div>
             <div class="form-group">
                 <label for="confirmPassword">Confirm Password *</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" required />
+                <div class="pw-field">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" required autocomplete="new-password" data-match="password" />
+                    <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                </div>
+                <div class="pw-match"></div>
             </div>
             <button type="submit" class="btn-primary btn-full">Create Account →</button>
         </form>
+
+        <div class="spam-note" style="margin-top:1.25rem;padding:0.85rem 1rem;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-3);line-height:1.5;">
+            📬 A <strong>welcome email</strong> will be sent to your inbox after registration. Please check your <strong>Spam / Junk</strong> folder and the <strong>Promotions</strong> tab if you don't see it — emails from BaazWix may sometimes land there. Mark it as <strong>"Not Spam"</strong> so future emails go to your inbox.
+        </div>
 
         <p class="auth-switch">Already have an account? <a href="/Auth/Login?returnUrl=@System.Net.WebUtility.UrlEncode(ViewBag.ReturnUrl as string)">Sign in</a></p>
     </div>

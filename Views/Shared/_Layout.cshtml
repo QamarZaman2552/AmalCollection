@@ -17,6 +17,7 @@
 <body class="@ViewData["BodyClass"]">
     <!-- ─── Navigation ─────────────────────────────────────── -->
     <header class="navbar">
+    <div class="navbar-inner">
         <a href="/" class="brand">
             <img src="~/images/baazwix-logo.png" alt="BaazWix" class="brand-logo" />
             <span>BaazWix</span>
@@ -24,8 +25,8 @@
 
         <!-- Search Bar -->
         <form class="nav-search" action="/Products/Search" method="get">
-            <input type="text" name="q" placeholder="Search products…" value="@ViewBag.Query" autocomplete="off" />
-            <button type="submit">🔍</button>
+            <input type="text" name="q" placeholder="Search products, brands &amp; categories..." value="@ViewBag.Query" autocomplete="off" />
+                <button type="submit"><img src="~/images/baazwix-logo.png" alt="BaazWix" class="brand-logo" /></button>
         </form>
 
         <!-- Nav Links -->
@@ -37,6 +38,7 @@
             {
                 var unreadMsgs = _db.ContactMessages.Count(m => !m.IsRead);
                 <a href="/Admin/Products" class="nav-admin">⚙ Admin</a>
+                <a href="/Admin/Users" class="nav-admin">👥 Users</a>
                 <a href="/Admin/Messages" class="nav-admin">
                     ✉ Messages
                     @if (unreadMsgs > 0)
@@ -71,13 +73,14 @@
         <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
+    </div>
     </header>
 
     <!-- ─── Mobile Menu ──────────────────────────────────── -->
     <div class="mobile-menu" id="mobileMenu">
         <!-- Mobile Search -->
         <form class="mobile-search" action="/Products/Search" method="get">
-            <input type="text" name="q" placeholder="Search products…" autocomplete="off" />
+            <input type="text" name="q" placeholder="Search products, brands &amp; categories..." autocomplete="off" />
             <button type="submit">🔍</button>
         </form>
         <a href="/">🏠 Home</a>
@@ -87,6 +90,7 @@
         {
             var unreadMsgs = _db.ContactMessages.Count(m => !m.IsRead);
             <a href="/Admin/Products" style="color:var(--accent-2)">⚙️ Admin Panel</a>
+            <a href="/Admin/Users" style="color:var(--accent-2)">👥 Users</a>
             <a href="/Admin/Messages" style="color:var(--accent-2)">
                 ✉️ Messages
                 @if (unreadMsgs > 0)
@@ -113,6 +117,8 @@
             <a href="/Auth/Register" style="color:var(--accent-2)">✨ Register</a>
         }
     </div>
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu-overlay" id="mobileOverlay"></div>
 
     <!-- ─── Toast Notifications ──────────────────────────────── -->
     @if (TempData["Success"] != null)

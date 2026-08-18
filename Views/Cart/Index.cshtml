@@ -2,8 +2,6 @@
 @{
     ViewData["Title"] = "Shopping Cart";
     decimal total = (decimal)(ViewBag.CartTotal ?? Model.Sum(i => (i.Product?.FinalPrice ?? 0) * i.Quantity));
-    decimal balance = (decimal)(ViewBag.Balance ?? 0);
-    bool canAfford = ViewBag.CanAfford == true;
 }
 
 <section class="section">
@@ -61,54 +59,7 @@
                 <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
                 <div class="summary-row"><span>Delivery</span><span class="text-green">Free</span></div>
                 <div class="summary-total"><span>Cart total</span><span>PKR @total.ToString("N0")</span></div>
-                @if (!canAfford)
-                {
-                    var shortfall = total - balance;
-                    <div class="alert alert-error" style="margin-top:0.75rem;">
-                        Insufficient balance. Please add balance to proceed to checkout.
-                    </div>
-                    <div class="topup-box" style="margin-top:1rem;padding:1rem;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);">
-                        <h3 style="font-size:0.95rem;margin-bottom:0.75rem;">💳 Add balance to your account</h3>
-                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
-                             <form method="post" action="/Profile/TopUp" style="display:inline;">
-                                 @Html.AntiForgeryToken()
-                                 <input type="hidden" name="returnUrl" value="/Cart" />
-                                 <input type="hidden" name="amount" value="@((int)Math.Ceiling(shortfall))" />
-                                  <button type="submit" class="btn-glass" style="font-size:0.8rem;padding:0.4rem 0.75rem;">+ Add Exact Amount</button>
-                             </form>
-                             <form method="post" action="/Profile/TopUp" style="display:inline;">
-                                 @Html.AntiForgeryToken()
-                                 <input type="hidden" name="returnUrl" value="/Cart" />
-                                 <input type="hidden" name="amount" value="50000" />
-                                 <button type="submit" class="btn-glass" style="font-size:0.8rem;padding:0.4rem 0.75rem;">+ 50,000</button>
-                             </form>
-                             <form method="post" action="/Profile/TopUp" style="display:inline;">
-                                 @Html.AntiForgeryToken()
-                                 <input type="hidden" name="returnUrl" value="/Cart" />
-                                 <input type="hidden" name="amount" value="100000" />
-                                 <button type="submit" class="btn-glass" style="font-size:0.8rem;padding:0.4rem 0.75rem;">+ 100,000</button>
-                             </form>
-                        </div>
-                         <form method="post" action="/Profile/TopUp" class="topup-form">
-                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="returnUrl" value="/Cart" />
-                            <div class="form-group" style="margin-bottom:0.75rem;">
-                                <label style="font-size:0.82rem;">Or enter custom amount (PKR)</label>
-                                <input type="number" name="amount" min="1" step="1" value="@((int)Math.Ceiling(shortfall))" required />
-                            </div>
-                            <button type="submit" class="btn-primary btn-full">Add Balance →</button>
-                        </form>
-                        <p style="font-size:0.75rem;color:var(--text-3);margin-top:0.6rem;">Simulated wallet top-up for demo checkout.</p>
-                    </div>
-                }
-                @if (canAfford)
-                {
-                    <a href="/Orders/Checkout" class="btn-primary btn-full">Proceed to Checkout →</a>
-                }
-                else
-                {
-                    <button type="button" class="btn-primary btn-full" disabled title="Add balance first to proceed to checkout">Proceed to Checkout →</button>
-                }
+                <a href="/Orders/Checkout" class="btn-primary btn-full">Proceed to Checkout →</a>
                 <a href="/" class="btn-glass btn-full" style="margin-top:0.5rem;">Continue Shopping</a>
             </div>
         </div>

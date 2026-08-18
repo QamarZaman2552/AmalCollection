@@ -23,9 +23,6 @@ namespace ShoppingApp.Models
         public bool IsLocked { get; set; } = false;
         public int FailedAttempts { get; set; } = 0;
 
-        /// <summary>Account wallet balance (PKR). Must stay ≥ 0 after checkout.</summary>
-        public decimal Balance { get; set; } = 100_000m;
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation

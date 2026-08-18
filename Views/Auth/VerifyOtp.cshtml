@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Verify Code";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo"><img src="~/images/baazwix-logo.png" alt="BaazWix" class="auth-logo-img" /><span>BaazWix</span></div>
+        <h1 class="auth-title">Enter Verification Code</h1>
+        <p class="auth-sub">A 6-digit code was sent to <strong>@ViewBag.Email</strong></p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">✅ @TempData["Success"]</div>
+        }
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-error">⚠️ @ViewBag.Error</div>
+        }
+
+        <form method="post" action="/Auth/VerifyOtp" class="auth-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <input type="hidden" name="email" value="@ViewBag.Email" />
+            <div class="form-group">
+                <label for="otp">Verification Code</label>
+                <input type="text" id="otp" name="otp" placeholder="6-digit code" required
+                       pattern="[0-9]{6}" maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+                       style="font-size:1.4rem; letter-spacing:8px; text-align:center; font-weight:bold;" />
+            </div>
+            <button type="submit" class="btn-primary btn-full">Verify Code →</button>
+        </form>
+
+        <p class="auth-switch">
+            Didn't get the code? <a href="/Auth/ForgotPassword">Resend</a>
+        </p>
+
+        <div class="spam-note" style="margin-top:1.25rem;padding:0.85rem 1rem;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-3);line-height:1.5;">
+            📬 <strong>Didn't receive the email?</strong> Please check your <strong>Spam / Junk</strong> folder and the <strong>Promotions</strong> tab — emails from BaazWix may sometimes land there. If you find it, mark it as <strong>"Not Spam"</strong> so future emails go to your inbox. If it's still not there, try <a href="/Auth/ForgotPassword">resending the code</a>.
+        </div>
+    </div>
+</div>

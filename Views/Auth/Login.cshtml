@@ -22,7 +22,10 @@
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password" />
+                <div class="pw-field">
+                    <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password" />
+                    <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                </div>
             </div>
             <div class="auth-forgot">
                 <a class="auth-forgot-link" href="/Auth/ForgotPassword?returnUrl=@System.Net.WebUtility.UrlEncode(ViewBag.ReturnUrl as string)">

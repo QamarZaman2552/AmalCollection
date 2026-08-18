@@ -324,6 +324,84 @@ namespace ShoppingApp.Controllers
             return RedirectToAction("HeroSlides");
         }
 
+        // ─── Users Management (Active/Inactive) ─────────────────
+        public IActionResult Users()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var users = _db.Users.OrderByDescending(u => u.Role == "admin").ThenBy(u => u.Id).ToList();
+            return View(users);
+        }
+
+        // ─── Toggle User Active/Inactive ─────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleUser(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("Users");
+            }
+
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (currentUserId.HasValue && currentUserId.Value == id)
+            {
+                TempData["Error"] = "You cannot deactivate your own account.";
+                return RedirectToAction("Users");
+            }
+
+            user.IsLocked = !user.IsLocked;
+            user.FailedAttempts = 0;
+            _db.SaveChanges();
+            TempData["Success"] = user.IsLocked
+                ? $"{user.FullName} has been deactivated."
+                : $"{user.FullName} has been activated.";
+            return RedirectToAction("Users");
+        }
+
+        // ─── Delete User (with all related data) ──────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteUser(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("Users");
+            }
+
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (currentUserId.HasValue && currentUserId.Value == id)
+            {
+                TempData["Error"] = "You cannot delete your own account.";
+                return RedirectToAction("Users");
+            }
+
+            var userId = user.Id;
+
+            _db.PasswordResetTokens.RemoveRange(_db.PasswordResetTokens.Where(t => t.UserId == userId));
+            _db.CartItems.RemoveRange(_db.CartItems.Where(c => c.UserId == userId));
+            _db.WishlistItems.RemoveRange(_db.WishlistItems.Where(w => w.UserId == userId));
+            _db.BrowseHistories.RemoveRange(_db.BrowseHistories.Where(b => b.UserId == userId));
+            _db.Reviews.RemoveRange(_db.Reviews.Where(r => r.UserId == userId));
+            _db.ChatbotLogs.RemoveRange(_db.ChatbotLogs.Where(l => l.UserId == userId));
+
+            var orderIds = _db.Orders.Where(o => o.UserId == userId).Select(o => o.Id).ToList();
+            _db.OrderItems.RemoveRange(_db.OrderItems.Where(oi => orderIds.Contains(oi.OrderId)));
+            _db.Orders.RemoveRange(_db.Orders.Where(o => o.UserId == userId));
+
+            _db.Users.Remove(user);
+            _db.SaveChanges();
+            TempData["Success"] = $"{user.FullName} deleted permanently.";
+            return RedirectToAction("Users");
+        }
+
         // ─── Contact Messages ─────────────────────────────────────
         public IActionResult Messages()
         {

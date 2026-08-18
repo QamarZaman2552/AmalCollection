@@ -5,28 +5,32 @@
 namespace ShoppingApp.Migrations
 {
     /// <inheritdoc />
-    public partial class AddHeroSlideProductPrice : Migration
+    public partial class RemoveBalance : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: 1,
-                column: "PasswordHash",
-                value: "$2a$11$pucAIZAeIPsG/tbm3Pb5kOoGmB/nIzCP9mLlD4v330UWyywVD/yI6");
+            migrationBuilder.DropColumn(
+                name: "Balance",
+                table: "Users");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<decimal>(
+                name: "Balance",
+                table: "Users",
+                type: "numeric",
+                nullable: false,
+                defaultValue: 0m);
+
             migrationBuilder.UpdateData(
                 table: "Users",
                 keyColumn: "Id",
                 keyValue: 1,
-                column: "PasswordHash",
-                value: "$2a$11$0lA1W1oImTyrMoOs8tNLLuctCmJ7mi7/N.cJfbIYnUcBagWtDpgAa");
+                column: "Balance",
+                value: 0m);
         }
     }
 }

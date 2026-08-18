@@ -5,7 +5,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     decimal total = (decimal)(ViewBag.Total ?? 0);
-    bool canAfford = ViewBag.CanAfford == true;
     int itemCount = Model.Sum(i => i.Quantity);
 
     string firstName = ViewBag.FirstName as string ?? "";
@@ -37,14 +36,6 @@
         @if (TempData["Error"] != null)
         {
             <div class="checkout-alert checkout-alert-error">⚠️ @TempData["Error"]</div>
-        }
-
-        @if (!canAfford)
-        {
-            <div class="checkout-wallet warn">
-                Insufficient balance. Please add balance to your account to place this order.
-                <a href="/Cart" style="color:#7c3aed;margin-left:0.35rem;">Top up →</a>
-            </div>
         }
 
         <form method="post" action="/Orders/Checkout" class="checkout-delivery-form" id="checkoutForm">
@@ -137,14 +128,7 @@
 
             <div class="checkout-actions">
                 <a href="/Cart" class="checkout-back">← Return to cart</a>
-                @if (canAfford)
-                {
-                    <button type="submit" class="checkout-submit">Place order</button>
-                }
-                else
-                {
-                    <button type="button" class="checkout-submit" disabled>Place order</button>
-                }
+                <button type="submit" class="checkout-submit">Place order</button>
             </div>
         </form>
     </div>
@@ -187,8 +171,16 @@
     </aside>
 </div>
 
+<!-- Mobile summary drawer toggle -->
+<button class="checkout-summary-toggle" id="summaryToggle">
+    <span class="toggle-label">Order Summary · @itemCount item@(itemCount == 1 ? "" : "s")</span>
+    <span class="toggle-price">PKR @total.ToString("N0") ▾</span>
+</button>
+<div class="checkout-drawer-overlay" id="drawerOverlay"></div>
+
 @section Scripts {
     <script>
+        // Payment coming-soon
         document.querySelectorAll('.checkout-pay-option.coming-soon input').forEach(function (input) {
             input.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -203,5 +195,20 @@
                 }
             });
         });
+
+        // Mobile summary drawer
+        var toggle = document.getElementById('summaryToggle');
+        var sidebar = document.querySelector('.checkout-sidebar');
+        var overlay = document.getElementById('drawerOverlay');
+        if (toggle && sidebar && overlay) {
+            toggle.addEventListener('click', function () {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+            });
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            });
+        }
     </script>
 }

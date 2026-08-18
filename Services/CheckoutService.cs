@@ -40,10 +40,6 @@ namespace ShoppingApp.Services
                         $"Not enough stock for \"{item.Product.Name}\". Available: {item.Product.Stock}, in cart: {item.Quantity}.");
             }
 
-            if (user.Balance < cartTotal)
-                return CheckoutValidation.Fail(
-                    $"Insufficient balance. Cart total: PKR {cartTotal:N0}, your balance: PKR {user.Balance:N0}.");
-
             return CheckoutValidation.Ok(cartTotal);
         }
 
@@ -80,8 +76,6 @@ namespace ShoppingApp.Services
                     product.Stock -= item.Quantity;
                 }
 
-                user.Balance -= cartTotal;
-
                 var order = new Order
                 {
                     UserId = userId,
@@ -106,7 +100,7 @@ namespace ShoppingApp.Services
                 _db.CartItems.RemoveRange(items);
                 await _db.SaveChangesAsync(cancellationToken);
 
-                return CheckoutResult.Ok(order.Id, user.Balance);
+                return CheckoutResult.Ok(order.Id, order.TotalAmount);
             }
             catch (Exception ex)
             {
@@ -133,10 +127,10 @@ namespace ShoppingApp.Services
         public bool Success { get; init; }
         public string? Error { get; init; }
         public int? OrderId { get; init; }
-        public decimal? NewBalance { get; init; }
+        public decimal? OrderTotal { get; init; }
 
-        public static CheckoutResult Ok(int orderId, decimal newBalance) =>
-            new() { Success = true, OrderId = orderId, NewBalance = newBalance };
+        public static CheckoutResult Ok(int orderId, decimal orderTotal) =>
+            new() { Success = true, OrderId = orderId, OrderTotal = orderTotal };
 
         public static CheckoutResult Fail(string error) =>
             new() { Success = false, Error = error };

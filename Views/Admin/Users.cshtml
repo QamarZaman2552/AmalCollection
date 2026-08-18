@@ -1,0 +1,121 @@
+@model List<ShoppingApp.Models.User>
+@{
+    ViewData["Title"] = "Admin – Users";
+    var currentUserId = Context.Session.GetInt32("UserId");
+}
+
+<section class="section">
+    <div class="admin-header">
+        <h1 class="section-title">👥 Users Management</h1>
+        <div class="admin-header-actions">
+            <a href="/Admin/Products"   class="btn-glass">⚙️ Products</a>
+            <a href="/Admin/Orders"     class="btn-glass">📦 Orders</a>
+            <a href="/Admin/Analytics"  class="btn-glass">📊 Analytics</a>
+            <a href="/Admin/HeroSlides" class="btn-glass">🖼️ Hero Slides</a>
+            <a href="/Admin/ChatLogs"   class="btn-glass">📜 Chat Logs</a>
+            <a href="/Admin/Messages"   class="btn-glass">✉️ Messages</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">⚠️ @TempData["Error"]</div>
+    }
+
+    <!-- Summary Stats -->
+    <div class="orders-stats-row">
+        <div class="ostat-card">
+            <span class="ostat-num">@Model.Count</span>
+            <span class="ostat-label">Total Users</span>
+        </div>
+        <div class="ostat-card">
+            <span class="ostat-num">@Model.Count(u => u.Role == "admin")</span>
+            <span class="ostat-label">Admins</span>
+        </div>
+        <div class="ostat-card">
+            <span class="ostat-num">@Model.Count(u => u.Role == "customer")</span>
+            <span class="ostat-label">Customers</span>
+        </div>
+        <div class="ostat-card">
+            <span class="ostat-num">@Model.Count(u => u.IsLocked)</span>
+            <span class="ostat-label">Inactive</span>
+        </div>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td><strong>#@user.Id</strong></td>
+                        <td>@user.FullName</td>
+                        <td class="cell-sub">@user.Email</td>
+                        <td class="cell-sub">@(user.Phone ?? "—")</td>
+                        <td>
+                            @if (user.Role == "admin")
+                            {
+                                <span class="payment-badge" style="background: rgba(128,90,213,0.15); color: var(--accent-2);">ADMIN</span>
+                            }
+                            else
+                            {
+                                <span class="payment-badge" style="background: rgba(52,211,153,0.12); color: #34d399;">CUSTOMER</span>
+                            }
+                        </td>
+                        <td class="cell-sub">@user.CreatedAt.AddHours(5).ToString("dd MMM yy")</td>
+                        <td>
+                            @if (user.IsLocked)
+                            {
+                                <span class="order-status status-pending">INACTIVE</span>
+                            }
+                            else
+                            {
+                                <span class="order-status status-delivered">ACTIVE</span>
+                            }
+                        </td>
+                        <td>
+                            @if (currentUserId == user.Id)
+                            {
+                                <span class="cell-sub">(You)</span>
+                            }
+                            else
+                            {
+                                <form method="post" action="/Admin/ToggleUser/@user.Id" onsubmit="return confirm('@(user.IsLocked ? "Activate" : "Deactivate") this user: @user.FullName?');">
+                                    @Html.AntiForgeryToken()
+                                    @if (user.IsLocked)
+                                    {
+                                        <button type="submit" class="btn-save-status" style="background:#34d399;">✔ Activate</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn-save-status" style="background:#ff6b6b;">✖ Deactivate</button>
+                                    }
+                                </form>
+                                <form method="post" action="/Admin/DeleteUser/@user.Id" onsubmit="return confirm('⚠️ PERMANENTLY delete @user.FullName and ALL their data (orders, cart, reviews)?');" style="margin-top:6px;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-save-status" style="background:#b91c1c; width:100%;">🗑️ Delete</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

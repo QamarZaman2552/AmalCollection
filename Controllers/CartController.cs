@@ -24,16 +24,13 @@ namespace ShoppingApp.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
             var items = _db.CartItems
                 .Include(c => c.Product)
                 .Where(c => c.UserId == UserId)
                 .ToList();
 
             var cartTotal = CheckoutService.ComputeCartTotal(items);
-            ViewBag.Balance = user?.Balance ?? 0m;
             ViewBag.CartTotal = cartTotal;
-            ViewBag.CanAfford = user != null && user.Balance >= cartTotal && cartTotal > 0;
 
             return View(items);
         }

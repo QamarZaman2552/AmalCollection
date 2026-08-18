@@ -58,7 +58,7 @@ namespace ShoppingApp.Services
                 From = new MailAddress(_settings.FromEmail, _settings.FromName),
                 Subject = subject,
                 Body = body,
-                IsBodyHtml = false
+                IsBodyHtml = true
             };
             message.To.Add(toEmail);
 

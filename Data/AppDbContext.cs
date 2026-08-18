@@ -18,11 +18,23 @@ namespace ShoppingApp.Data
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
         public DbSet<Review> Reviews { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Use "timestamp without time zone" for all DateTime columns to
+            // avoid Npgsql timezone conversion issues with seed data
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                        property.SetColumnType("timestamp without time zone");
+                }
+            }
 
             // Unique indexes & constraints
             modelBuilder.Entity<User>()
@@ -77,6 +89,10 @@ namespace ShoppingApp.Data
                 .HasIndex(h => new { h.SortOrder, h.IsActive })
                 .HasDatabaseName("IX_HeroSlides_SortOrder_IsActive");
 
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasIndex(t => new { t.UserId, t.Token })
+                .HasDatabaseName("IX_PasswordResetTokens_UserId_Token");
+
             // Seed admin user (password: Admin@123)
             modelBuilder.Entity<User>().HasData(new User
             {
@@ -86,7 +102,6 @@ namespace ShoppingApp.Data
                 PasswordHash = "$2a$11$LX99SXQPAaze0rMQSZTxGuPW0GuKLzFfSWd287Vdcr66oy3xFXLYm", // BCrypt hash of "Admin@123"
                 Role = "admin",
                 Phone = "0300-0000000",
-                Balance = 0m,
                 CreatedAt = new DateTime(2026, 3, 1)
             });
 

@@ -10,16 +10,23 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly AuthService  _auth;
+        private readonly IEmailSender _emailSender;
 
-        public ProfileController(AppDbContext db, AuthService auth)
+        public ProfileController(AppDbContext db, AuthService auth, IEmailSender emailSender)
         {
             _db   = db;
             _auth = auth;
+            _emailSender = emailSender;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
 
         private bool IsAdmin => HttpContext.Session.GetString("UserRole") == "admin";
+
+        private string SiteUrl =>
+            $"{Request.Scheme}://{Request.Host}";
+
+        private string Logo => EmailTemplates.GetLogoUrl(SiteUrl);
 
         // ─── View Profile ─────────────────────────────────────
         public IActionResult Index()
@@ -81,44 +88,95 @@ namespace ShoppingApp.Controllers
             return RedirectToAction("Index");
         }
 
-        // ─── Top up account balance ───────────────────────────
+        // ─── Send OTP for password change (logged-in user) ──────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult TopUp(decimal amount, string? returnUrl)
+        public async Task<IActionResult> SendPasswordOtp()
         {
             if (UserId == null) return RedirectToAction("Login", "Auth");
-            if (IsAdmin)
-            {
-                TempData["Error"] = "Admin accounts cannot top up balance.";
-                return RedirectToAction("Index");
-            }
-
-            if (amount <= 0)
-            {
-                TempData["Error"] = "Top-up amount must be greater than zero.";
-                return RedirectBack(returnUrl);
-            }
-
-            if (amount > 5_000_000m)
-            {
-                TempData["Error"] = "Maximum top-up per transaction is PKR 5,000,000.";
-                return RedirectBack(returnUrl);
-            }
 
             var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
             if (user == null) return NotFound();
 
-            user.Balance += amount;
-            _db.SaveChanges();
+            var (otp, error) = _auth.CreateResetOtp(user.Email);
+            if (otp == null)
+            {
+                TempData["Error"] = error ?? "Could not create verification code.";
+                return RedirectToAction("Index");
+            }
 
-            TempData["Success"] = $"PKR {amount:N0} added to your account. New balance: PKR {user.Balance:N0}.";
-            return RedirectBack(returnUrl);
+            try
+            {
+                await _emailSender.SendAsync(
+                    user.Email,
+                    "BaazWix Password Change Verification Code",
+                    EmailTemplates.ResetOtp(user.FullName, otp, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                TempData["Error"] = "Could not send the verification email. Please check your email settings and try again.";
+                return RedirectToAction("Index");
+            }
+
+            TempData["OtpSent"] = true;
+            TempData["Success"] = $"A 6-digit verification code has been sent to {user.Email}. It expires in 10 minutes.";
+            return RedirectToAction("Index");
         }
 
-        private IActionResult RedirectBack(string? returnUrl)
+        // ─── Verify OTP + Change Password (logged-in user) ──────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string otp, string newPassword, string confirmPassword)
         {
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
+            if (UserId == null) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+            if (user == null) return NotFound();
+
+            if (newPassword != confirmPassword)
+            {
+                TempData["Error"] = "Passwords do not match.";
+                return RedirectToAction("Index");
+            }
+
+            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 8 ||
+                !newPassword.Any(char.IsLower) || !newPassword.Any(char.IsUpper) ||
+                !newPassword.Any(char.IsDigit) || !newPassword.Any(c => !char.IsLetterOrDigit(c)))
+            {
+                TempData["Error"] = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%).";
+                return RedirectToAction("Index");
+            }
+
+            var (verified, verifyError) = _auth.VerifyResetOtp(user.Email, otp?.Trim() ?? "");
+            if (verified == null)
+            {
+                TempData["Error"] = verifyError ?? "Invalid verification code.";
+                return RedirectToAction("Index");
+            }
+
+            var (ok, error) = _auth.ResetPasswordForUser(user.Id, newPassword);
+            if (!ok)
+            {
+                TempData["Error"] = error ?? "Could not update password.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                await _emailSender.SendAsync(
+                    user.Email,
+                    "BaazWix Password Change Confirmation",
+                    EmailTemplates.PasswordResetConfirmation(user.FullName, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                // Never block if confirmation email fails
+            }
+
+            TempData["OtpSent"] = null;
+            TempData["Success"] = "Password changed successfully!";
             return RedirectToAction("Index");
         }
 

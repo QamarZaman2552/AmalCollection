@@ -2,21 +2,26 @@
 (function () {
   const btn  = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('mobileMenu');
+  const overlay = document.getElementById('mobileOverlay');
   if (!btn || !menu) return;
 
-  function openMenu()  { btn.classList.add('open'); menu.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
-  function closeMenu() { btn.classList.remove('open'); menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+  function openMenu()  {
+    btn.classList.add('open'); menu.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    if (overlay) overlay.classList.add('open');
+  }
+  function closeMenu() {
+    btn.classList.remove('open'); menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    if (overlay) overlay.classList.remove('open');
+  }
   function toggleMenu() { btn.classList.contains('open') ? closeMenu() : openMenu(); }
 
   btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+  if (overlay) overlay.addEventListener('click', closeMenu);
 
   // Close when any menu link is clicked
   menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
-
-  // Close when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!menu.contains(e.target) && !btn.contains(e.target)) closeMenu();
-  });
 
   // Close on resize back to desktop
   window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
@@ -391,4 +396,83 @@ window.addEventListener('scroll', () => {
     nav.style.background = 'rgba(10,13,20,0.85)';
   }
 }, { passive: true });
+
+// ─── Password: show/hide + strength meter + match ────────
+(function () {
+  function scorePassword(pw) {
+    if (!pw) return 0;
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    if (pw.length >= 12) score++;
+    return score; // 0–5
+  }
+  function levelOf(score, len) {
+    if (len === 0) return '';
+    if (score <= 2) return 'weak';
+    if (score === 3 || score === 4) return 'medium';
+    return 'strong';
+  }
+
+  document.querySelectorAll('.pw-field input').forEach(function (input) {
+    const field = input.closest('.pw-field');
+    const group = field.parentElement;
+    const toggle = field.querySelector('.pw-toggle');
+    const strength = group.querySelector('.pw-strength');
+
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        toggle.textContent = show ? '🙈' : '👁️';
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    }
+
+    if (!strength) return;
+    const bar = strength.querySelector('.pw-strength-bar span');
+    const label = strength.querySelector('.pw-strength-label');
+    const reqs = group.querySelector('.pw-reqs');
+
+    function update() {
+      const pw = input.value;
+      const level = levelOf(scorePassword(pw), pw.length);
+      bar.className = level;
+      label.className = 'pw-strength-label' + (level ? ' ' + level : '');
+      label.textContent = level ? level.charAt(0).toUpperCase() + level.slice(1) : 'Password strength';
+      if (reqs) {
+        const rules = {
+          length: pw.length >= 8,
+          lower: /[a-z]/.test(pw),
+          upper: /[A-Z]/.test(pw),
+          digit: /\d/.test(pw),
+          symbol: /[^A-Za-z0-9]/.test(pw)
+        };
+        reqs.querySelectorAll('li').forEach(function (li) {
+          li.classList.toggle('valid', !!rules[li.dataset.rule]);
+        });
+      }
+    }
+    input.addEventListener('input', update);
+    update();
+  });
+
+  document.querySelectorAll('input[data-match]').forEach(function (m) {
+    const target = document.getElementById(m.dataset.match);
+    if (!target) return;
+    const hint = m.closest('.form-group').querySelector('.pw-match');
+    function sync() {
+      if (!m.value) { if (hint) hint.textContent = ''; return; }
+      const ok = m.value === target.value;
+      if (hint) {
+        hint.textContent = ok ? '✓ Passwords match' : '✗ Passwords do not match';
+        hint.className = 'pw-match ' + (ok ? 'ok' : 'no');
+      }
+    }
+    m.addEventListener('input', sync);
+    target.addEventListener('input', sync);
+  });
+})();
 

@@ -15,6 +15,11 @@ namespace ShoppingApp.Controllers
             _emailSender = emailSender;
         }
 
+        private string SiteUrl =>
+            $"{Request.Scheme}://{Request.Host}";
+
+        private string Logo => EmailTemplates.GetLogoUrl(SiteUrl);
+
         // ─── Register ───────────────────────────────────────────
         [HttpGet]
         public IActionResult Register(string? returnUrl = null)
@@ -25,7 +30,7 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(string fullName, string email, string password, string confirmPassword, string? phone, string? returnUrl = null)
+        public async Task<IActionResult> Register(string fullName, string email, string password, string confirmPassword, string? phone, string? returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -34,12 +39,25 @@ namespace ShoppingApp.Controllers
             if (password != confirmPassword)
             { ViewBag.Error = "Passwords do not match."; return View(); }
 
-            if (password.Length < 6)
-            { ViewBag.Error = "Password must be at least 6 characters."; return View(); }
+            if (!IsStrongPassword(password))
+            { ViewBag.Error = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%)."; return View(); }
 
             var user = _auth.Register(fullName, email, password, phone);
             if (user == null)
             { ViewBag.Error = "An account with this email already exists."; return View(); }
+
+            try
+            {
+                await _emailSender.SendAsync(
+                    user.Email,
+                    "Welcome to BaazWix!",
+                    EmailTemplates.Welcome(user.FullName, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                // Never block registration if email fails
+            }
 
             HttpContext.Session.SetInt32("UserId", user.Id);
             HttpContext.Session.SetString("UserName", user.FullName);
@@ -125,7 +143,7 @@ namespace ShoppingApp.Controllers
             return RedirectToAction("Login");
         }
 
-        // ─── Forgot Password ───────────────────────────────────
+        // ─── Forgot Password (Step 1: Request OTP) ──────────────
         [HttpGet]
         public IActionResult ForgotPassword(string? returnUrl = null)
         {
@@ -135,9 +153,100 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(string email, string newPassword, string confirmPassword, string? returnUrl = null)
+        public async Task<IActionResult> ForgotPassword(string email, string? returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Email is required.";
+                return View();
+            }
+
+            var (otp, error) = _auth.CreateResetOtp(email.Trim());
+            if (otp == null)
+            {
+                ViewBag.Error = error;
+                return View();
+            }
+
+            var user = _auth.GetByEmail(email.Trim());
+            var userName = user?.FullName ?? email.Trim();
+
+            try
+            {
+                await _emailSender.SendAsync(
+                    email.Trim(),
+                    "BaazWix Password Reset Verification Code",
+                    EmailTemplates.ResetOtp(userName, otp, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                ViewBag.Error = "Could not send the verification email. Please try again later.";
+                return View();
+            }
+
+            TempData["ResetEmail"] = email.Trim();
+            TempData["Success"] = $"A 6-digit verification code has been sent to {email.Trim()}. It expires in 10 minutes.";
+            return RedirectToAction("VerifyOtp", new { returnUrl });
+        }
+
+        // ─── Verify OTP (Step 2) ────────────────────────────────
+        [HttpGet]
+        public IActionResult VerifyOtp(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            ViewBag.Email = TempData["ResetEmail"] as string;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult VerifyOtp(string email, string otp, string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            ViewBag.Email = email;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ViewBag.Error = "Email is required.";
+                return View();
+            }
+
+            var (user, error) = _auth.VerifyResetOtp(email.Trim(), otp?.Trim() ?? "");
+            if (user == null)
+            {
+                ViewBag.Error = error;
+                return View();
+            }
+
+            TempData["ResetUserId"] = user.Id;
+            TempData["Success"] = "Verification successful. Now set your new password.";
+            return RedirectToAction("ResetPassword", new { returnUrl });
+        }
+
+        // ─── Set New Password (Step 3) ──────────────────────────
+        [HttpGet]
+        public IActionResult ResetPassword(string? returnUrl = null)
+        {
+            if (TempData["ResetUserId"] == null)
+                return RedirectToAction("ForgotPassword", new { returnUrl });
+
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(string newPassword, string confirmPassword, string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+
+            if (TempData["ResetUserId"] == null)
+                return RedirectToAction("ForgotPassword", new { returnUrl });
+
+            var userId = (int)TempData["ResetUserId"];
 
             if (newPassword != confirmPassword)
             {
@@ -145,19 +254,26 @@ namespace ShoppingApp.Controllers
                 return View();
             }
 
-            var (ok, error) = _auth.ResetPasswordByEmail(email, newPassword);
+            if (!IsStrongPassword(newPassword))
+            { ViewBag.Error = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%)."; return View(); }
+
+            var (ok, error) = _auth.ResetPasswordForUser(userId, newPassword);
             if (!ok)
             {
                 ViewBag.Error = error;
                 return View();
             }
 
+            var user = _auth.GetById(userId);
+            var userEmail = user?.Email ?? "";
+            var userName = user?.FullName ?? userEmail;
+
             try
             {
                 await _emailSender.SendAsync(
-                    email,
+                    userEmail,
                     "BaazWix Password Reset Confirmation",
-                    "Hello,\n\nThis is to confirm that your BaazWix account password was successfully changed.\n\nIf you made this change, no further action is required.\n\nIf you did not request this change, please secure your account immediately by resetting your password and contacting our support team.\n\nRegards,\nBaazWix Security Team"
+                    EmailTemplates.PasswordResetConfirmation(userName, Logo, SiteUrl)
                 );
             }
             catch
@@ -167,6 +283,16 @@ namespace ShoppingApp.Controllers
 
             TempData["Success"] = "Password updated. You can sign in now.";
             return RedirectToAction("Login", new { returnUrl });
+        }
+
+        private static bool IsStrongPassword(string pw)
+        {
+            if (string.IsNullOrWhiteSpace(pw) || pw.Length < 8) return false;
+            if (!pw.Any(char.IsLower)) return false;
+            if (!pw.Any(char.IsUpper)) return false;
+            if (!pw.Any(char.IsDigit)) return false;
+            if (!pw.Any(c => !char.IsLetterOrDigit(c))) return false;
+            return true;
         }
     }
 }

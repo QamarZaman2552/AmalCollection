@@ -68,12 +68,13 @@ builder.Services.AddRateLimiter(options =>
 });
 
 // Database
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var connectionString = builder.Configuration.GetConnectionString("dbcs")
-    ?? "Server=localhost;Database=ShopAI;Trusted_Connection=True;TrustServerCertificate=True;";
+    ?? "Host=localhost;Database=ShopAI;Username=postgres;Password=postgres;";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString,
-        sql => sql.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorNumbersToAdd: null)));
+    options.UseNpgsql(connectionString,
+        npgsql => npgsql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null)));
 
 // Health Checks
 builder.Services.AddHealthChecks()
@@ -161,6 +162,15 @@ app.Use(async (context, next) =>
 });
 
 #region Pipeline - Security First
+// Trust proxy headers (Render terminates TLS at its edge)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+        | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto,
+    KnownNetworks = { },
+    KnownProxies = { }
+});
+
 // Serilog request logging
 app.UseSerilogRequestLogging(options =>
 {
@@ -284,13 +294,18 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Products}/{action=Index}/{id?}");
 
-#region Startup Logging (No Auto-Migrate)
+#region Startup Logging (Auto-Migrate on Production)
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (app.Environment.IsProduction())
+        {
+            await db.Database.MigrateAsync();
+            logger.LogInformation("Database migrated and seeded");
+        }
         var canConnect = await db.Database.CanConnectAsync();
         logger.LogInformation("Database connectivity: {Status}", canConnect ? "OK" : "FAILED");
         logger.LogInformation("Application starting in {Environment} mode", app.Environment.EnvironmentName);
