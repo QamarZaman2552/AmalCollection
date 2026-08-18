@@ -14,11 +14,11 @@ RUN dotnet publish ShoppingApp.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
-# Non-root user for security
-RUN useradd -m -u 1000 appuser
+# Non-root user (Choreo requires non-root; uses documented UID 10014)
+RUN groupadd -g 10014 choreo && useradd --no-create-home --uid 10014 --gid 10014 choreo
 COPY --from=build /app/publish .
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app
-USER appuser
+RUN mkdir -p /app/logs && chown -R choreo:choreo /app
+USER choreo
 
 ENV ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080}
 ENV ASPNETCORE_ENVIRONMENT=Production
