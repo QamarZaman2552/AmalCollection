@@ -290,6 +290,24 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
 {
     Predicate = _ => false
 });
+
+app.MapGet("/diag-email", async (EmailSettings s, IEmailSender sender) =>
+{
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine($"Enabled={s.Enabled}; Host={s.Host}; Port={s.Port}; Ssl={s.EnableSsl}; User={s.UserName}; From={s.FromEmail}; FromName={s.FromName}; PwdLen={(s.Password ?? "").Length}");
+    sb.AppendLine($"SenderType={sender.GetType().Name}");
+    try
+    {
+        await sender.SendAsync("qamarbaloch2023@gmail.com", "BaazWix Live SMTP Test", "<p>Test from Railway</p>");
+        sb.AppendLine("SEND_OK");
+    }
+    catch (Exception ex)
+    {
+        sb.AppendLine($"SEND_FAIL: {ex.GetType().Name}: {ex.Message}");
+        if (ex.InnerException != null) sb.AppendLine($"INNER: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+    }
+    return Results.Text(sb.ToString());
+});
 #endregion
 
 app.MapControllerRoute(
