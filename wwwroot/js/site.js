@@ -145,7 +145,7 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const res = await fetch('/Chatbot/Chat', {
+    const res = await fetch('/Chat/SendMessage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })

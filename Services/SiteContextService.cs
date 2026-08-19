@@ -73,24 +73,31 @@ namespace ShoppingApp.Services
             if (categories.Any())
                 sb.AppendLine(string.Join(", ", categories));
 
-            // Add FAQs if they exist in the database
-            var faqProperty = typeof(AppDbContext).GetProperty("Faqs");
-            if (faqProperty != null)
-            {
-                var faqSet = faqProperty.GetValue(_db) as IQueryable;
-                if (faqSet != null)
-                {
-                    sb.AppendLine("\n=== FAQs ===");
-                    // Use raw SQL or assume FAQ model exists with Question/Answer properties
-                }
-            }
+            // Add brands section
+            sb.AppendLine("\n=== BRANDS ===");
+            var brands = await _db.Products
+                .Where(p => p.Stock > 0 && !string.IsNullOrEmpty(p.Brand))
+                .Select(p => p.Brand)
+                .Distinct()
+                .ToListAsync();
 
-            // Static site info (shipping, returns, policies)
+            if (brands.Any())
+                sb.AppendLine(string.Join(", ", brands));
+
+            // Static site info (shipping, returns, policies, features)
             sb.AppendLine("\n=== SITE INFO ===");
+            sb.AppendLine("Store name: BaazWix - online shopping website (Pakistan).");
             sb.AppendLine("Shipping: We ship nationwide across Pakistan. Standard delivery takes 3-5 business days. Express delivery available in major cities.");
             sb.AppendLine("Returns: 7-day return policy on all items. Items must be in original packaging.");
             sb.AppendLine("Payment: Cash on Delivery (COD) available nationwide. Credit/debit card payments accepted.");
-            sb.AppendLine("FAQ: Visit /Home/About for more info or contact us at qamarbaloch2023@gmail.com.");
+            sb.AppendLine("Contact: Email us at qamarbaloch2023@gmail.com or use the Contact page (/Home/Contact).");
+            sb.AppendLine("About: Visit /Home/About for more info about our store.");
+            sb.AppendLine("Accounts: Users can register (sign up) and login on the website. Password reset is available via Forgot Password.");
+            sb.AppendLine("Shopping: Add products to cart, then checkout to place an order. Users can also add products to their wishlist.");
+            sb.AppendLine("Admin: The admin panel (/Admin) is used by store staff to add/edit/delete products and manage orders.");
+            sb.AppendLine("Discounts: Some products show a discount percentage. The final (discounted) price is what customers pay.");
+            sb.AppendLine("Recommendations: The homepage shows AI-powered product recommendations based on browsing history.");
+            sb.AppendLine("Reviews: Registered users who purchased a product can submit a rating and review on the product detail page.");
 
             return sb.ToString();
         }
@@ -100,8 +107,12 @@ namespace ShoppingApp.Services
             if (string.IsNullOrWhiteSpace(userMessage))
                 return string.Empty;
 
-            var words = userMessage.Split(new[] { ' ', ',', '.', '?', '!' }, StringSplitOptions.RemoveEmptyEntries)
+            // Skip common stop words so the relevance filter picks a real product word
+            var stopWords = new[] { "what", "which", "where", "when", "how", "who", "why", "the", "and", "for", "you", "your", "our", "show", "tell", "about", "with", "this", "that", "please", "price", "cost", "buy", "get", "give", "want", "need", "recommend", "recommendation", "best", "cheap", "cheapest", "expensive", "any", "some", "have", "has", "there", "here" };
+
+            var words = userMessage.Split(new[] { ' ', ',', '.', '?', '!', '\'', '"' }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(w => w.Length > 2)
+                .Where(w => !stopWords.Contains(w.ToLowerInvariant()))
                 .Select(w => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(w.ToLower()))
                 .ToList();
 

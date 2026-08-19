@@ -21,8 +21,8 @@ namespace ShoppingApp.Controllers
         public IActionResult Index(string? category, string? brand, string? sort)
         {
             var query = _db.Products.AsQueryable();
-            if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category == category);
-            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand == brand);
+            if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
+            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand != null && p.Brand.ToLower() == brand.ToLower());
 
             // Sort by price
             query = sort switch
@@ -42,12 +42,8 @@ namespace ShoppingApp.Controllers
                 .OrderBy(s => s.SortOrder)
                 .ToList();
 
-            ViewBag.Categories = _db.Products
-                .Select(p => p.Category).Distinct().ToList()
-                .Where(c => c != null).Select(c => c!).ToList();
-            ViewBag.Brands = _db.Products
-                .Select(p => p.Brand).Distinct().ToList()
-                .Where(b => b != null).Select(b => b!).ToList();
+            ViewBag.Categories = GetFilterValues(p => p.Category);
+            ViewBag.Brands = GetFilterValues(p => p.Brand);
 
             ViewBag.SelectedCategory = category;
             ViewBag.SelectedBrand    = brand;
@@ -64,18 +60,28 @@ namespace ShoppingApp.Controllers
             var query = _db.Products.AsQueryable();
             query = query.Where(p => p.Name.Contains(q) ||
                                      (p.Description != null && p.Description.Contains(q)));
-            if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category == category);
-            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand == brand);
+            if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
+            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand != null && p.Brand.ToLower() == brand.ToLower());
 
             var results = query.ToList();
             ViewBag.Query = q;
-            ViewBag.Categories = _db.Products
-                .Select(p => p.Category).Distinct().ToList()
-                .Where(c => c != null).Select(c => c!).ToList();
-            ViewBag.Brands = _db.Products
-                .Select(p => p.Brand).Distinct().ToList()
-                .Where(b => b != null).Select(b => b!).ToList();
+            ViewBag.Categories = GetFilterValues(p => p.Category);
+            ViewBag.Brands = GetFilterValues(p => p.Brand);
             return View(results);
+        }
+
+        // Distinct, trimmed, case-insensitive, sorted, in-stock only
+        private List<string> GetFilterValues(Func<Product, string?> selector)
+        {
+            return _db.Products
+                .Where(p => p.Stock > 0)
+                .Select(p => selector(p))
+                .ToList()
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(v => v!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         // ─── Product Detail ──────────────────────────────────────

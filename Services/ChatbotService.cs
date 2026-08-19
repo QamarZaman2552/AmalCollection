@@ -167,7 +167,8 @@ namespace ShoppingApp.Services
             foreach (var word in words)
             {
                 candidates = candidates
-                    .Where(p => p.Name.ToLower().Contains(word) || p.Category.ToLower().Contains(word))
+                    .Where(p => p.Name.ToLower().Contains(word) ||
+                                (p.Category ?? string.Empty).ToLower().Contains(word))
                     .ToList();
                 if (!candidates.Any()) break;
             }
