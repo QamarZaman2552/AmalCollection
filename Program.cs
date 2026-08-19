@@ -292,17 +292,6 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
 });
 #endregion
 
-// TEMP DIAGNOSTIC - remove after fixing HTTPS detection behind Railway proxy
-app.MapGet("/diag", (HttpContext ctx) => Results.Json(new
-{
-    scheme = ctx.Request.Scheme,
-    isHttps = ctx.Request.IsHttps,
-    xForwardedProto = ctx.Request.Headers["X-Forwarded-Proto"].ToString(),
-    xForwardedFor = ctx.Request.Headers["X-Forwarded-For"].ToString(),
-    host = ctx.Request.Host.ToString(),
-    env = app.Environment.EnvironmentName
-}));
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Products}/{action=Index}/{id?}");
