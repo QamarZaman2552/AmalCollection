@@ -476,3 +476,28 @@ window.addEventListener('scroll', () => {
   });
 })();
 
+// ─── Auth Pages: prevent zoom + shake on mobile ──────
+(function () {
+  var authPage = document.querySelector('.auth-page');
+  if (!authPage) return;
+
+  // Prevent pinch zoom on auth pages
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+
+  // Prevent rubber-band scroll shake on iOS/Android
+  var startX = 0, startY = 0;
+  authPage.addEventListener('touchstart', function (e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  authPage.addEventListener('touchmove', function (e) {
+    var dx = Math.abs(e.touches[0].clientX - startX);
+    var dy = Math.abs(e.touches[0].clientY - startY);
+    // If mostly horizontal swipe, prevent default to stop page shake
+    if (dx > dy && dx > 10) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+})();
+
