@@ -1167,7 +1167,8 @@ select option:checked {
 }
 .rn-panel {
   justify-content: center !important;
-  padding: 0 1rem !important;
+  align-items: flex-end !important;
+  padding: 0 1rem 3rem !important;
 }
 .rn-cta {
   padding: 0.85rem 2.8rem !important;
