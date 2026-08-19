@@ -104,6 +104,18 @@ builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<ChatbotService>();
 builder.Services.AddScoped<RecommendationService>();
 
+// Image Storage — Cloudinary (free) or local fallback
+var cloudinarySettings = builder.Configuration.GetSection("Cloudinary").Get<CloudinarySettings>() ?? new CloudinarySettings();
+builder.Services.AddSingleton(cloudinarySettings);
+if (!string.IsNullOrWhiteSpace(cloudinarySettings.CloudName) && !string.IsNullOrWhiteSpace(cloudinarySettings.UploadPreset))
+{
+    builder.Services.AddHttpClient<IImageService, CloudinaryImageService>();
+}
+else
+{
+    builder.Services.AddScoped<IImageService, LocalImageService>();
+}
+
 // Gemini Chatbot Service
 builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
 builder.Services.AddHttpClient<IGeminiChatService, GeminiChatService>();

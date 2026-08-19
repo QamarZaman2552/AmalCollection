@@ -2,13 +2,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
 using ShoppingApp.Models;
+using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
 {
     public class AdminController : Controller
     {
         private readonly AppDbContext _db;
-        public AdminController(AppDbContext db) { _db = db; }
+        private readonly IImageService _imageService;
+        public AdminController(AppDbContext db, IImageService imageService) { _db = db; _imageService = imageService; }
 
         private bool IsAdmin => HttpContext.Session.GetString("UserRole") == "admin";
 
@@ -30,17 +32,13 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(Product product, IFormFile? imageFile)
+        public async Task<IActionResult> Add(Product product, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-                var path = Path.Combine("wwwroot", "images", fileName);
-                using var stream = System.IO.File.Create(path);
-                imageFile.CopyTo(stream);
-                product.ImagePath = "/images/" + fileName;
+                product.ImagePath = await _imageService.UploadAsync(imageFile);
             }
 
             _db.Products.Add(product);
@@ -61,7 +59,7 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Product updated, IFormFile? imageFile)
+        public async Task<IActionResult> Edit(Product updated, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var product = _db.Products.FirstOrDefault(p => p.Id == updated.Id);
@@ -77,11 +75,7 @@ namespace ShoppingApp.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-                var path = Path.Combine("wwwroot", "images", fileName);
-                using var stream = System.IO.File.Create(path);
-                imageFile.CopyTo(stream);
-                product.ImagePath = "/images/" + fileName;
+                product.ImagePath = await _imageService.UploadAsync(imageFile);
             }
 
             _db.SaveChanges();
@@ -227,17 +221,13 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddSlide(HeroSlide slide, IFormFile? imageFile)
+        public async Task<IActionResult> AddSlide(HeroSlide slide, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                var fileName = "hero_" + Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-                var path = Path.Combine("wwwroot", "images", fileName);
-                using var stream = System.IO.File.Create(path);
-                imageFile.CopyTo(stream);
-                slide.ImagePath = "/images/" + fileName;
+                slide.ImagePath = await _imageService.UploadAsync(imageFile, "hero");
             }
 
             // If a product is linked, auto-fill price from that product
@@ -267,7 +257,7 @@ namespace ShoppingApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EditSlide(HeroSlide updated, IFormFile? imageFile)
+        public async Task<IActionResult> EditSlide(HeroSlide updated, IFormFile? imageFile)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var slide = _db.HeroSlides.FirstOrDefault(s => s.Id == updated.Id);
@@ -285,11 +275,7 @@ namespace ShoppingApp.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                var fileName = "hero_" + Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-                var path = Path.Combine("wwwroot", "images", fileName);
-                using var stream = System.IO.File.Create(path);
-                imageFile.CopyTo(stream);
-                slide.ImagePath = "/images/" + fileName;
+                slide.ImagePath = await _imageService.UploadAsync(imageFile, "hero");
             }
 
             _db.SaveChanges();
