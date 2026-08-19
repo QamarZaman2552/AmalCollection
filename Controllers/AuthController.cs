@@ -233,6 +233,7 @@ namespace ShoppingApp.Controllers
             if (TempData["ResetUserId"] == null)
                 return RedirectToAction("ForgotPassword", new { returnUrl });
 
+            TempData.Keep("ResetUserId");
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }

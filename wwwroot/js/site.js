@@ -54,7 +54,7 @@ updateWishlistBadge();
 
 
 // ─── Auto-dismiss Toast ─────────────────────────────────
-const toast = document.getElementById('toast');
+const toast = document.getElementById('toast') || document.getElementById('toast-success') || document.getElementById('toast-error');
 if (toast) setTimeout(() => toast.remove(), 4000);
 
 // ─── Chatbot Widget ─────────────────────────────────────

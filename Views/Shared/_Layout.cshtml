@@ -123,11 +123,11 @@
     <!-- ─── Toast Notifications ──────────────────────────────── -->
     @if (TempData["Success"] != null)
     {
-        <div class="toast toast-success" id="toast">✅ @TempData["Success"]</div>
+        <div class="toast toast-success" id="toast-success">✅ @TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="toast toast-error" id="toast">❌ @TempData["Error"]</div>
+        <div class="toast toast-error" id="toast-error">❌ @TempData["Error"]</div>
     }
 
     <!-- ─── Main Content ─────────────────────────────────────── -->
@@ -201,8 +201,6 @@
         })();
     </script>
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
