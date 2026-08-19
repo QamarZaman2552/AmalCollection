@@ -138,7 +138,7 @@
     <!-- ─── Footer ──────────────────────────────────────────── -->
     <footer class="footer">
         <div class="footer-inner">
-            <p>© 2026 <strong>BaazWix</strong> — CS-UEM-BS-F22E8 · University of Education, Lahore – Multan Campus</p>
+            <p>© 2026 <strong>BaazWix</strong> — CS-UEM-BS-F22E8 · University of Education, Lahore – Multan Campus · Developed by <strong>Qamar Zaman</strong></p>
             <div class="footer-links">
                 <a href="/Products/Search?q=">All Products</a>
                 <span>·</span>
@@ -178,6 +178,28 @@
             <button id="chatSend">➤</button>
         </div>
     </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Scroll Preservation: save position before navigation, restore on load -->
+    <script>
+        (function () {
+            const KEY = 'baazwix_scroll_' + window.location.pathname;
+            // Save on beforeunload (any navigation, reload, form submit)
+            window.addEventListener('beforeunload', function () {
+                sessionStorage.setItem(KEY, window.scrollY.toString());
+            });
+            // Restore on load
+            window.addEventListener('load', function () {
+                var pos = parseInt(sessionStorage.getItem(KEY), 10);
+                if (!isNaN(pos) && pos > 0) {
+                    window.scrollTo(0, pos);
+                    sessionStorage.removeItem(KEY);
+                }
+            });
+        })();
+    </script>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
