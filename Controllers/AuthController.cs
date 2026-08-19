@@ -8,11 +8,13 @@ namespace ShoppingApp.Controllers
     {
         private readonly AuthService _auth;
         private readonly IEmailSender _emailSender;
+        private readonly EmailSettings _emailSettings;
 
-        public AuthController(AuthService auth, IEmailSender emailSender)
+        public AuthController(AuthService auth, IEmailSender emailSender, EmailSettings emailSettings)
         {
             _auth = auth;
             _emailSender = emailSender;
+            _emailSettings = emailSettings;
         }
 
         private string SiteUrl =>
@@ -57,6 +59,24 @@ namespace ShoppingApp.Controllers
             catch
             {
                 // Never block registration if email fails
+            }
+
+            // Notify admin about the new registration
+            var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
+            if (!string.IsNullOrWhiteSpace(adminEmail))
+            {
+                try
+                {
+                    await _emailSender.SendAsync(
+                        adminEmail,
+                        "BaazWix - New User Registered",
+                        EmailTemplates.NewRegistration(user.FullName, user.Email, Logo, SiteUrl)
+                    );
+                }
+                catch
+                {
+                    // Never block registration if admin email fails
+                }
             }
 
             HttpContext.Session.SetInt32("UserId", user.Id);

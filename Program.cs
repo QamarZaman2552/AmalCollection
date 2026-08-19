@@ -84,7 +84,12 @@ builder.Services.AddHealthChecks()
 // Email Settings
 var emailSettings = builder.Configuration.GetSection("Email").Get<EmailSettings>() ?? new EmailSettings();
 builder.Services.AddSingleton(emailSettings);
-if (emailSettings.Enabled && !string.IsNullOrWhiteSpace(emailSettings.Host))
+if (!string.IsNullOrWhiteSpace(emailSettings.ApiKey))
+{
+    // HTTPS email API (Brevo etc.) - works on hosts that block SMTP (Railway free/trial)
+    builder.Services.AddHttpClient<IEmailSender, HttpEmailSender>();
+}
+else if (emailSettings.Enabled && !string.IsNullOrWhiteSpace(emailSettings.Host))
 {
     builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 }
@@ -294,7 +299,7 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
 app.MapGet("/diag-email", async (EmailSettings s, IEmailSender sender) =>
 {
     var sb = new System.Text.StringBuilder();
-    sb.AppendLine($"Enabled={s.Enabled}; Host={s.Host}; Port={s.Port}; Ssl={s.EnableSsl}; User={s.UserName}; From={s.FromEmail}; FromName={s.FromName}; PwdLen={(s.Password ?? "").Length}");
+    sb.AppendLine($"Enabled={s.Enabled}; Host={s.Host}; Port={s.Port}; Ssl={s.EnableSsl}; User={s.UserName}; From={s.FromEmail}; FromName={s.FromName}; PwdLen={(s.Password ?? "").Length}; ApiKeyLen={(s.ApiKey ?? "").Length}; AdminEmail={s.AdminEmail}");
     sb.AppendLine($"SenderType={sender.GetType().Name}");
     try
     {

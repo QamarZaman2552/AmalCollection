@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Mail;
+using System.Text;
+using System.Text.Json;
 
 namespace ShoppingApp.Services
 {
@@ -13,6 +15,15 @@ namespace ShoppingApp.Services
         public string Password { get; set; } = string.Empty;
         public string FromEmail { get; set; } = string.Empty;
         public string FromName { get; set; } = "BaazWix";
+
+        // HTTPS transactional email API (e.g. Brevo). Preferred on hosts
+        // that block outbound SMTP (Railway free/trial plans).
+        public string ApiKey { get; set; } = string.Empty;
+        public string ApiUrl { get; set; } = "https://api.brevo.com/v3/smtp/email";
+
+        // Where admin notifications are sent (new registration, new order).
+        // Falls back to FromEmail when empty.
+        public string AdminEmail { get; set; } = string.Empty;
     }
 
     public interface IEmailSender
@@ -63,6 +74,43 @@ namespace ShoppingApp.Services
             message.To.Add(toEmail);
 
             await client.SendMailAsync(message);
+        }
+    }
+
+    public class HttpEmailSender : IEmailSender
+    {
+        private readonly EmailSettings _settings;
+        private readonly HttpClient _httpClient;
+
+        public HttpEmailSender(EmailSettings settings, HttpClient httpClient)
+        {
+            _settings = settings;
+            _httpClient = httpClient;
+        }
+
+        public async Task SendAsync(string toEmail, string subject, string body)
+        {
+            var payload = new
+            {
+                sender = new { name = _settings.FromName, email = _settings.FromEmail },
+                to = new[] { new { email = toEmail } },
+                subject,
+                htmlContent = body
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var request = new HttpRequestMessage(HttpMethod.Post, _settings.ApiUrl)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            request.Headers.TryAddWithoutValidation("api-key", _settings.ApiKey);
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException($"Email API error {(int)response.StatusCode}: {error}");
+            }
         }
     }
 }

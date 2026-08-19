@@ -10,12 +10,14 @@ namespace ShoppingApp.Controllers
         private readonly AppDbContext _db;
         private readonly CheckoutService _checkout;
         private readonly IEmailSender _emailSender;
+        private readonly EmailSettings _emailSettings;
 
-        public OrdersController(AppDbContext db, CheckoutService checkout, IEmailSender emailSender)
+        public OrdersController(AppDbContext db, CheckoutService checkout, IEmailSender emailSender, EmailSettings emailSettings)
         {
             _db = db;
             _checkout = checkout;
             _emailSender = emailSender;
+            _emailSettings = emailSettings;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
@@ -109,6 +111,30 @@ namespace ShoppingApp.Controllers
                     catch
                     {
                         // Never block checkout if email fails
+                    }
+
+                    // Notify admin about the new order
+                    var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
+                    if (!string.IsNullOrWhiteSpace(adminEmail))
+                    {
+                        try
+                        {
+                            await _emailSender.SendAsync(
+                                adminEmail,
+                                $"BaazWix New Order #{result.OrderId}",
+                                EmailTemplates.NewOrder(
+                                    user.FullName,
+                                    result.OrderId!.Value.ToString(),
+                                    result.OrderTotal?.ToString("N0") ?? "",
+                                    paymentMethod,
+                                    Logo,
+                                    SiteUrl)
+                            );
+                        }
+                        catch
+                        {
+                            // Never block checkout if admin email fails
+                        }
                     }
                 }
 

@@ -124,5 +124,53 @@ namespace ShoppingApp.Services
 
             return Wrap("Order Confirmation #" + orderId, body, logoUrl, siteUrl);
         }
+
+        public static string NewRegistration(string userName, string userEmail, string logoUrl, string siteUrl)
+        {
+            var body = $@"<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">A new user just registered on BaazWix.</p>
+<table role=""presentation"" cellpadding=""0"" cellspacing=""0"" style=""background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; padding:14px 18px; margin:0 0 18px; width:100%;"">
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Name:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">{userName}</td>
+    </tr>
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Email:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">{userEmail}</td>
+    </tr>
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Time:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">{DateTime.UtcNow.AddHours(5).ToString("dd MMM yyyy 'at' hh:mm tt")} (PKT)</td>
+    </tr>
+</table>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:20px 0 0;"">Regards,<br><strong>BaazWix System</strong></p>";
+
+            return Wrap("New User Registered", body, logoUrl, siteUrl);
+        }
+
+        public static string NewOrder(string userName, string orderId, string total, string paymentMethod, string logoUrl, string siteUrl)
+        {
+            var body = $@"<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">A new order has been placed on BaazWix.</p>
+<table role=""presentation"" cellpadding=""0"" cellspacing=""0"" style=""background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; padding:14px 18px; margin:0 0 18px; width:100%;"">
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Customer:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">{userName}</td>
+    </tr>
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Order Number:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">#{orderId}</td>
+    </tr>
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Total Amount:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">PKR {total}</td>
+    </tr>
+    <tr>
+        <td style=""font-size:13px; color:#374151; padding:4px 0;""><strong>Payment Method:</strong></td>
+        <td style=""font-size:13px; color:#111827; padding:4px 0; text-align:right;"">{paymentMethod}</td>
+    </tr>
+</table>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:20px 0 0;"">Regards,<br><strong>BaazWix System</strong></p>";
+
+            return Wrap("New Order #" + orderId, body, logoUrl, siteUrl);
+        }
     }
 }
