@@ -162,14 +162,16 @@ app.Use(async (context, next) =>
 });
 
 #region Pipeline - Security First
-// Trust proxy headers (Render terminates TLS at its edge)
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+// Trust proxy headers (Render/Railway terminate TLS at their edge)
+var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
-        | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto,
-    KnownNetworks = { },
-    KnownProxies = { }
-});
+        | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+};
+// Trust all proxies: Railway/Render edge IPs are dynamic
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
 
 // Serilog request logging
 app.UseSerilogRequestLogging(options =>
