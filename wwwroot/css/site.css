@@ -212,7 +212,7 @@ select option:checked {
 .btn-primary {
   display: inline-block; padding: 0.65rem 1.5rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-3));
-  color: #111318; border: none; border-radius: 50px;
+  color: #111318 !important; border: none; border-radius: 50px;
   font-weight: 700; cursor: pointer; font-size: 0.9rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   text-align: center;
@@ -242,18 +242,18 @@ select option:checked {
 .btn-primary-sm {
   padding: 0.4rem 1rem; font-size: 0.82rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-3));
-  color: #111318; border-radius: 50px; font-weight: 700;
+  color: #111318 !important; border-radius: 50px; font-weight: 700;
   transition: opacity var(--transition);
 }
 .btn-primary-sm:hover { opacity: 0.9; }
 
 .btn-outline-sm {
   padding: 0.4rem 1rem; font-size: 0.82rem;
-  border: 1px solid rgba(255,255,255,0.12); color: var(--text-2);
+  border: 1px solid rgba(255,255,255,0.12); color: var(--text-2) !important;
   border-radius: 12px; transition: all 0.2s ease;
   background: transparent;
 }
-.btn-outline-sm:hover { border-color: var(--accent-2); color: var(--accent-2); background: rgba(138,155,181,0.06); }
+.btn-outline-sm:hover { border-color: var(--accent-2); color: #111318 !important; background: rgba(138,155,181,0.12); }
 
 .btn-full { width: 100%; display: block; }
 .btn-edit { padding: 0.3rem 0.7rem; background: var(--accent); color: #111318; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; transition: opacity var(--transition); }
