@@ -10,7 +10,11 @@
     <script>
         (function () {
             var t = localStorage.getItem('theme');
-            if (t !== 'dark') document.body.classList.add('light-mode');
+            if (t !== 'dark') {
+                function applyLight() { document.body.classList.add('light-mode'); }
+                if (document.body) { applyLight(); }
+                else { document.addEventListener('DOMContentLoaded', applyLight); }
+            }
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
