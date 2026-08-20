@@ -10,7 +10,7 @@
     <script>
         (function () {
             var t = localStorage.getItem('baazwix_theme');
-            if (t) document.documentElement.setAttribute('data-theme', t);
+            document.documentElement.setAttribute('data-theme', t || 'light');
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

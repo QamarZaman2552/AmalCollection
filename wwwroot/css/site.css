@@ -1022,7 +1022,7 @@ select option:checked {
 [data-theme="light"] .mobile-theme-toggle .theme-icon-moon { display: none; }
 
 @media (max-width: 768px) {
-  .theme-toggle { display: none; }
+  .theme-toggle { width: 34px; height: 34px; font-size: 0.95rem; }
 }
 @media (min-width: 769px) {
   .mobile-theme-toggle { display: none !important; }
