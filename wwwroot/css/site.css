@@ -1257,20 +1257,22 @@ body.light-mode .icon-moon { display: none; }
 .rn-cta {
   display: inline-block;
   padding: 0.65rem 1.8rem;
-  background: #fff;
-  color: #111;
+  background: transparent !important;
+  color: #fff !important;
+  border: 1.5px solid rgba(255,255,255,0.6);
   border-radius: 50px;
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   text-decoration: none;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  transition: all 0.25s ease;
   margin-top: 0.4rem;
 }
 .rn-cta:hover {
-  background: #f1f5f9;
+  background: rgba(255,255,255,0.15) !important;
+  border-color: #fff;
   transform: translateY(-2px);
-  color: #111;
+  color: #fff !important;
 }
 
 /* Large circle arrows — like Ronin */
@@ -1366,17 +1368,19 @@ body.light-mode .icon-moon { display: none; }
   padding: 0.85rem 2.8rem !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
-  background: rgba(255,255,255,0.95) !important;
-  color: #111 !important;
+  background: transparent !important;
+  color: #fff !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
   border-radius: 50px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.35) !important;
+  box-shadow: none !important;
   transition: all 0.3s ease !important;
   text-decoration: none !important;
 }
 .rn-cta:hover {
-  background: #fff !important;
+  background: rgba(255,255,255,0.15) !important;
+  border-color: #fff !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
 }
 
 .shop-hero-slider {
