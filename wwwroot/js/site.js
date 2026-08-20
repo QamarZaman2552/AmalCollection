@@ -501,3 +501,24 @@ window.addEventListener('scroll', () => {
   }, { passive: false });
 })();
 
+// ─── Light/Dark Theme Toggle ───────────────────────
+(function () {
+  var html = document.documentElement;
+  var KEY = 'baazwix_theme';
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem(KEY, theme);
+  }
+
+  function toggleTheme() {
+    var current = html.getAttribute('data-theme');
+    setTheme(current === 'light' ? 'dark' : 'light');
+  }
+
+  var btn = document.getElementById('themeToggle');
+  var mobileBtn = document.getElementById('mobileThemeToggle');
+  if (btn) btn.addEventListener('click', toggleTheme);
+  if (mobileBtn) mobileBtn.addEventListener('click', toggleTheme);
+})();
+
