@@ -524,7 +524,14 @@ function toggleTheme() {
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-  if (localStorage.getItem('theme') === 'light') {
+  var saved = localStorage.getItem('theme');
+  if (saved === 'dark') {
+    document.body.classList.remove('light-mode');
+    var icon = document.getElementById('themeIcon');
+    var label = document.getElementById('themeLabel');
+    if (icon) icon.innerHTML = moonPath;
+    if (label) label.textContent = 'Dark';
+  } else {
     document.body.classList.add('light-mode');
     var icon = document.getElementById('themeIcon');
     var label = document.getElementById('themeLabel');
