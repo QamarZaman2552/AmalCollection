@@ -194,7 +194,7 @@
 </section>
 
 <!-- AI Recommendations -->
-@if (recommendations.Any())
+@if (recommendations.Any() && string.IsNullOrEmpty(selectedCat) && string.IsNullOrEmpty(selectedBrand))
 {
     <section class="section recs-section">
         <h2 class="section-title">✨ Recommended For You</h2>
