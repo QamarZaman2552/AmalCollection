@@ -1126,7 +1126,6 @@ body.light-mode .icon-moon { display: none; }
 /* ─── Mobile Search Bar (below navbar) ─────────────── */
 .mobile-search-bar {
   display: none;
-  position: fixed; top: 68px; left: 0; right: 0; z-index: 99;
   background: rgba(10,13,20,0.95);
   backdrop-filter: blur(16px);
   padding: 0.6rem 1.25rem;
@@ -1167,7 +1166,6 @@ body.light-mode .mobile-search-icon { color: #8890A8; }
 
 @media (max-width: 768px) {
   .mobile-search-bar { display: block; }
-  body { padding-top: 52px; }
 }
 
 /* ═══════════════════════════════════════════════════
