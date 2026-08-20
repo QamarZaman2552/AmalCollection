@@ -212,8 +212,8 @@ select option:checked {
 .btn-primary {
   display: inline-block; padding: 0.65rem 1.5rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-3));
-  color: white; border: none; border-radius: 50px;
-  font-weight: 600; cursor: pointer; font-size: 0.9rem;
+  color: #111318; border: none; border-radius: 50px;
+  font-weight: 700; cursor: pointer; font-size: 0.9rem;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   text-align: center;
   position: relative; overflow: hidden;
@@ -242,7 +242,7 @@ select option:checked {
 .btn-primary-sm {
   padding: 0.4rem 1rem; font-size: 0.82rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-3));
-  color: white; border-radius: 50px; font-weight: 600;
+  color: #111318; border-radius: 50px; font-weight: 700;
   transition: opacity var(--transition);
 }
 .btn-primary-sm:hover { opacity: 0.9; }
@@ -256,7 +256,7 @@ select option:checked {
 .btn-outline-sm:hover { border-color: var(--accent-2); color: var(--accent-2); background: rgba(138,155,181,0.06); }
 
 .btn-full { width: 100%; display: block; }
-.btn-edit { padding: 0.3rem 0.7rem; background: var(--accent); color: white; border-radius: var(--radius-sm); font-size: 0.8rem; transition: opacity var(--transition); }
+.btn-edit { padding: 0.3rem 0.7rem; background: var(--accent); color: #111318; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; transition: opacity var(--transition); }
 .btn-edit:hover { opacity: 0.85; }
 .btn-remove { padding: 0.3rem 0.7rem; background: var(--red); color: white; border: none; border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer; transition: opacity var(--transition); }
 .btn-remove:hover { opacity: 0.85; }
@@ -1708,10 +1708,10 @@ select option:checked {
 }
 .btn-save-status {
   padding: 0.3rem 0.7rem;
-  background: var(--accent); color: white;
+  background: var(--accent); color: #111318;
   border: none; border-radius: var(--radius-sm);
   font-size: 0.78rem; cursor: pointer;
-  font-family: inherit; font-weight: 600;
+  font-family: inherit; font-weight: 700;
   transition: opacity var(--transition);
 }
 .btn-save-status:hover { opacity: 0.85; }
