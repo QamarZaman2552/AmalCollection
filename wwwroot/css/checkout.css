@@ -57,7 +57,7 @@ body.checkout-body .main-content {
   text-decoration: none;
 }
 
-.checkout-brand a:hover { color: #7c3aed; }
+.checkout-brand a:hover { color: #C8CDD8; }
 
 .checkout-breadcrumb {
   display: flex;
@@ -75,7 +75,7 @@ body.checkout-body .main-content {
 }
 
 .checkout-breadcrumb a {
-  color: #7c3aed;
+  color: #C8CDD8;
   text-decoration: none;
 }
 
@@ -101,7 +101,7 @@ body.checkout-body .main-content {
 
 .checkout-section-header a {
   font-size: 0.85rem;
-  color: #7c3aed;
+  color: #C8CDD8;
   text-decoration: none;
 }
 
@@ -135,8 +135,8 @@ body.checkout-body .main-content {
 .checkout-field input:focus,
 .checkout-field select:focus,
 .checkout-field textarea:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  border-color: #C8CDD8;
+  box-shadow: 0 0 0 3px rgba(200, 205, 216, 0.12);
 }
 
 .checkout-field input:read-only {
@@ -163,7 +163,7 @@ body.checkout-body .main-content {
 .checkout-checkbox input {
   width: 16px;
   height: 16px;
-  accent-color: #7c3aed;
+  accent-color: #C8CDD8;
 }
 
 .checkout-wallet {
@@ -214,11 +214,11 @@ body.checkout-body .main-content {
 }
 
 .checkout-pay-option:has(input:checked) {
-  border-color: #7c3aed;
+  border-color: #C8CDD8;
   background: #f5f3ff;
 }
 
-.checkout-pay-option input { accent-color: #7c3aed; }
+.checkout-pay-option input { accent-color: #C8CDD8; }
 
 .checkout-actions {
   display: flex;
@@ -231,7 +231,7 @@ body.checkout-body .main-content {
 }
 
 .checkout-back {
-  color: #7c3aed;
+  color: #C8CDD8;
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -251,7 +251,7 @@ body.checkout-body .main-content {
 }
 
 .checkout-submit:hover:not(:disabled) {
-  background: #7c3aed;
+  background: #C8CDD8;
 }
 
 .checkout-submit:disabled {
@@ -426,7 +426,7 @@ body.checkout-body .main-content {
     box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
   }
   .checkout-summary-toggle .toggle-price {
-    color: #7c3aed;
+    color: #C8CDD8;
     font-weight: 700;
   }
   .checkout-drawer-overlay {
