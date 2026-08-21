@@ -994,6 +994,14 @@ select option:checked {
   .footer-links { justify-content: center; gap: 0.5rem; }
   .auth-page { padding: 1.25rem; min-height: calc(100vh - 120px); }
   .auth-card { padding: 1.8rem 1.4rem; }
+  /* Cart mobile */
+  .cart-item { flex-wrap: wrap; gap: 0.75rem; padding: 0.85rem; }
+  .cart-item-img { width: 64px; height: 64px; }
+  .cart-item-info { min-width: 0; }
+  .cart-item-info h3 { font-size: 0.9rem; word-break: break-word; }
+  .cart-item-actions { width: 100%; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .cart-item-subtotal { min-width: auto; font-size: 0.9rem; }
+  .cart-summary { padding: 1rem; }
 }
 @media (max-width: 420px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
