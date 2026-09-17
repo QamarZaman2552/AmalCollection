@@ -13,7 +13,7 @@
             <div class="alert alert-error">⚠️ @ViewBag.Error</div>
         }
 
-        <form method="post" action="/Auth/Login" class="auth-form">
+        <form method="post" action="/Auth/Login" class="auth-form" autocomplete="off">
             @Html.AntiForgeryToken()
             <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
             <div class="form-group">
