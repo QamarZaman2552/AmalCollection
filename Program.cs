@@ -68,13 +68,12 @@ builder.Services.AddRateLimiter(options =>
 });
 
 // Database
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var connectionString = builder.Configuration.GetConnectionString("dbcs")
-    ?? "Host=localhost;Database=ShopAI;Username=postgres;Password=postgres;";
+    ?? "Server=(localdb)\\mssqllocaldb;Database=BaazWixDb;Trusted_Connection=True;MultipleActiveResultSets=true;";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString,
-        npgsql => npgsql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null)));
+    options.UseSqlServer(connectionString,
+        sql => sql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null)));
 
 // Health Checks
 builder.Services.AddHealthChecks()

@@ -25,17 +25,6 @@ namespace ShoppingApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Use "timestamp without time zone" for all DateTime columns to
-            // avoid Npgsql timezone conversion issues with seed data
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                foreach (var property in entityType.GetProperties())
-                {
-                    if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
-                        property.SetColumnType("timestamp without time zone");
-                }
-            }
-
             // Unique indexes & constraints
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
