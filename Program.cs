@@ -319,11 +319,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        if (app.Environment.IsProduction())
-        {
-            await db.Database.MigrateAsync();
-            logger.LogInformation("Database migrated and seeded");
-        }
+        await db.Database.MigrateAsync();
+        logger.LogInformation("Database migrated and seeded");
         var canConnect = await db.Database.CanConnectAsync();
         logger.LogInformation("Database connectivity: {Status}", canConnect ? "OK" : "FAILED");
         logger.LogInformation("Application starting in {Environment} mode", app.Environment.EnvironmentName);
