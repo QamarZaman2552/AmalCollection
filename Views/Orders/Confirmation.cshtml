@@ -22,8 +22,15 @@
             <div class="step">🏠 Delivered</div>
         </div>
         <div class="confirm-actions">
-            <a href="/Orders/History" class="btn-primary">View My Orders</a>
+            @if (ViewBag.IsGuest as bool? != true)
+            {
+                <a href="/Orders/History" class="btn-primary">View My Orders</a>
+            }
             <a href="/" class="btn-glass">Continue Shopping</a>
         </div>
+        @if (ViewBag.IsGuest as bool? == true)
+        {
+            <p class="confirm-guest-note">You checked out as a guest — keep order number <strong>#@ViewBag.OrderId</strong> for reference. Support: 0321-6068091</p>
+        }
     </div>
 </section>

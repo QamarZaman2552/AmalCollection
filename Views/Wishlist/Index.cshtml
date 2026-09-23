@@ -5,14 +5,14 @@
 
 <section class="section">
     <div class="wishlist-header">
-        <h1 class="section-title">❤️ My Wishlist <span class="badge">@Model.Count items</span></h1>
+        <h1 class="section-title">My Wishlist <span class="badge">@Model.Count items</span></h1>
         <a href="/" class="btn-glass">← Continue Shopping</a>
     </div>
 
     @if (!Model.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">💝</div>
+            <div class="empty-icon">Your wishlist is empty</div>
             <p>Your wishlist is empty! Explore products and save your favourites.</p>
             <a href="/" class="btn-primary">Discover Products</a>
         </div>
@@ -53,7 +53,7 @@
                                 <form method="post" action="/Wishlist/MoveToCart" style="flex:1">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@p.Id" />
-                                    <button type="submit" class="btn-primary btn-full">🛒 Move to Cart</button>
+                                    <button type="submit" class="btn-primary btn-full">Move to Cart</button>
                                 </form>
                             }
                             else

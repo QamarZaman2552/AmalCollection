@@ -2,21 +2,61 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
 using ShoppingApp.Models;
+using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
 {
     public class WishlistController : Controller
     {
         private readonly AppDbContext _db;
-        public WishlistController(AppDbContext db) { _db = db; }
+        private readonly GuestWishlistService _guestWish;
+        private readonly GuestCartService _guestCart;
+
+        public WishlistController(AppDbContext db, GuestWishlistService guestWish, GuestCartService guestCart)
+        {
+            _db = db;
+            _guestWish = guestWish;
+            _guestCart = guestCart;
+        }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
+        private bool IsAdmin => HttpContext.Session.GetString("UserRole") == "admin";
+
+        private List<WishlistItem> HydrateGuest(List<int> productIds)
+        {
+            if (productIds.Count == 0) return new List<WishlistItem>();
+            var products = _db.Products.Where(p => productIds.Contains(p.Id)).ToList();
+            var items = new List<WishlistItem>();
+            foreach (var id in productIds)
+            {
+                var p = products.FirstOrDefault(x => x.Id == id);
+                if (p == null) continue;
+                items.Add(new WishlistItem
+                {
+                    Id = -id,
+                    UserId = -1,
+                    ProductId = id,
+                    AddedAt = DateTime.UtcNow,
+                    Product = p
+                });
+            }
+            return items;
+        }
 
         // ─── View Wishlist ────────────────────────────────────
         public IActionResult Index()
         {
+            if (IsAdmin)
+            {
+                TempData["Error"] = "Admins do not use the wishlist.";
+                return RedirectToAction("Index", "Home");
+            }
+
             if (UserId == null)
-                return RedirectToAction("Login", "Auth", new { returnUrl = "/Wishlist" });
+            {
+                var guest = _guestWish.Get(HttpContext.Session);
+                return View(HydrateGuest(guest));
+            }
 
             var uid = UserId.Value;
             var items = _db.WishlistItems
@@ -33,8 +73,33 @@ namespace ShoppingApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Toggle(int productId, string? returnUrl = null)
         {
+            if (IsAdmin)
+            {
+                TempData["Error"] = "Admins do not use the wishlist.";
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
+
             if (UserId == null)
-                return RedirectToAction("Login", "Auth", new { returnUrl = $"/Products/Detail/{productId}" });
+            {
+                var guest = _guestWish.Get(HttpContext.Session);
+                if (guest.Contains(productId))
+                {
+                    guest.Remove(productId);
+                    TempData["WishlistMsg"] = "removed";
+                }
+                else
+                {
+                    guest.Add(productId);
+                    TempData["WishlistMsg"] = "added";
+                }
+                _guestWish.Save(HttpContext.Session, guest);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
 
             var uid = UserId.Value;
             var existing = _db.WishlistItems
@@ -69,7 +134,15 @@ namespace ShoppingApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Remove(int productId)
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
+            if (UserId == null)
+            {
+                var guest = _guestWish.Get(HttpContext.Session);
+                guest.Remove(productId);
+                _guestWish.Save(HttpContext.Session, guest);
+                TempData["Success"] = "Removed from wishlist.";
+                return RedirectToAction("Index");
+            }
+
             var uid = UserId.Value;
             var item = _db.WishlistItems.FirstOrDefault(w => w.UserId == uid && w.ProductId == productId);
             if (item != null) { _db.WishlistItems.Remove(item); _db.SaveChanges(); }
@@ -82,8 +155,6 @@ namespace ShoppingApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult MoveToCart(int productId)
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
-
             var product = _db.Products.FirstOrDefault(p => p.Id == productId);
             if (product == null || product.Stock <= 0)
             {
@@ -91,14 +162,25 @@ namespace ShoppingApp.Controllers
                 return RedirectToAction("Index");
             }
 
+            if (UserId == null)
+            {
+                var guestWish = _guestWish.Get(HttpContext.Session);
+                var guestCart = _guestCart.Get(HttpContext.Session);
+                var existing = guestCart.FirstOrDefault(g => g.ProductId == productId);
+                if (existing != null) existing.Quantity++;
+                else guestCart.Add(new GuestCartItem { ProductId = productId, Quantity = 1, Size = "", Color = "" });
+                guestWish.Remove(productId);
+                _guestCart.Save(HttpContext.Session, guestCart);
+                _guestWish.Save(HttpContext.Session, guestWish);
+                TempData["Success"] = $"{product.Name} moved to cart!";
+                return RedirectToAction("Index", "Cart");
+            }
+
             var uid = UserId.Value;
-
-            // Add to cart
-            var cartItem = _db.CartItems.FirstOrDefault(c => c.UserId == uid && c.ProductId == productId);
+            var cartItem = _db.CartItems.FirstOrDefault(c => c.UserId == uid && c.ProductId == productId && c.Size == "" && c.Color == "");
             if (cartItem != null) cartItem.Quantity++;
-            else _db.CartItems.Add(new CartItem { UserId = uid, ProductId = productId, Quantity = 1 });
+            else _db.CartItems.Add(new CartItem { UserId = uid, ProductId = productId, Quantity = 1, Size = "", Color = "" });
 
-            // Remove from wishlist
             var wish = _db.WishlistItems.FirstOrDefault(w => w.UserId == uid && w.ProductId == productId);
             if (wish != null) _db.WishlistItems.Remove(wish);
 
@@ -110,7 +192,7 @@ namespace ShoppingApp.Controllers
         // ─── Count (for badge) ────────────────────────────────
         public IActionResult Count()
         {
-            if (UserId == null) return Json(0);
+            if (UserId == null) return Json(_guestWish.Count(HttpContext.Session));
             var uid = UserId.Value;
             var count = _db.WishlistItems.Count(w => w.UserId == uid);
             return Json(count);

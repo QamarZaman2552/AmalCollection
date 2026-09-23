@@ -237,6 +237,7 @@ namespace ShoppingApp.Controllers
         public IActionResult Confirmation()
         {
             ViewBag.OrderId = TempData["OrderId"];
+            ViewBag.IsGuest = UserId == null;
             return View();
         }
 

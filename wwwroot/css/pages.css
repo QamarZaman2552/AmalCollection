@@ -1,3 +1,71 @@
+/* ─── Contact Page ───────────────────────────────────── */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.5rem;
+}
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; }
+}
+.contact-info-card {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.contact-channel {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+.contact-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: var(--gold-soft, rgba(184,150,79,0.15));
+  color: var(--gold, #b8964f);
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.contact-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3, #9d978d);
+  margin-bottom: 0.15rem;
+}
+.contact-channel a,
+.contact-channel span {
+  color: var(--text, #1c1b19);
+  font-weight: 500;
+  text-decoration: none;
+}
+.contact-channel a:hover { color: var(--gold, #b8964f); }
+.contact-notes {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, #e6e0d6);
+  color: var(--text-2, #6f6a62);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.contact-form-wrap { padding: 2rem; }
+.contact-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  background: rgba(47,158,99,0.1);
+  border: 1px solid rgba(47,158,99,0.25);
+  color: #2f9e63;
+}
+.contact-submit { width: 100%; margin-top: 0.25rem; }
+.confirm-guest-note {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-2, #6f6a62);
+}
+
 /* ─── About Page Utilities ──────────────────────────── */
 .about-gradient-text {
     background: linear-gradient(135deg, var(--accent-2), var(--accent-3));

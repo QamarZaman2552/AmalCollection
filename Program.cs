@@ -120,6 +120,7 @@ builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gem
 builder.Services.AddHttpClient<IGeminiChatService, GeminiChatService>();
 builder.Services.AddScoped<SiteContextService>();
     builder.Services.AddSingleton<GuestCartService>();
+    builder.Services.AddSingleton<GuestWishlistService>();
 
 // Session - Environment-aware
 builder.Services.AddSession(options =>
@@ -322,6 +323,36 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.MigrateAsync();
         logger.LogInformation("Database migrated and seeded");
+
+        // Replace leftover BaazWix electronics hero slides with Amal Collection suit slides
+        var activeSlides = db.HeroSlides.Where(s => s.IsActive).ToList();
+        var hasSuitSlide = activeSlides.Any(s =>
+            s.ImagePath != null && s.ImagePath.Contains("suit-hero", StringComparison.OrdinalIgnoreCase));
+        if (!hasSuitSlide)
+        {
+            foreach (var old in activeSlides) old.IsActive = false;
+            if (activeSlides.Count == 0)
+            {
+                db.HeroSlides.AddRange(
+                    new ShoppingApp.Models.HeroSlide { Tagline = "FRESH FABRICS FOR EVERY SEASON", Title = "SUMMER LAWN SUITS", CategoryLabel = "SUMMER COLLECTION", Hashtag = "#StayCool", LinkUrl = "/?season=Summer", ImagePath = "/images/suit-hero-summer.jpg", SortOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "WARM, ELEGANT, WINTER-READY", Title = "KHADDAR & WOOL", CategoryLabel = "WINTER COLLECTION", Hashtag = "#StayWarm", LinkUrl = "/?season=Winter", ImagePath = "/images/suit-hero-winter.jpg", SortOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "UNSTITCHED TO STITCHED", Title = "CUSTOM FIT", CategoryLabel = "LAWN · COTTON · CHIFFON", Hashtag = "#YourStyle", LinkUrl = "/", ImagePath = "/images/suit-hero-unstitched.jpg", SortOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "ORDER IN MINUTES", Title = "NO LOGIN NEEDED", CategoryLabel = "COD AVAILABLE", Hashtag = "#EasyOrder", LinkUrl = "/", ImagePath = "/images/suit-hero-cod.jpg", SortOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
+                );
+            }
+            else
+            {
+                db.HeroSlides.AddRange(
+                    new ShoppingApp.Models.HeroSlide { Tagline = "FRESH FABRICS FOR EVERY SEASON", Title = "SUMMER LAWN SUITS", CategoryLabel = "SUMMER COLLECTION", Hashtag = "#StayCool", LinkUrl = "/?season=Summer", ImagePath = "/images/suit-hero-summer.jpg", SortOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "WARM, ELEGANT, WINTER-READY", Title = "KHADDAR & WOOL", CategoryLabel = "WINTER COLLECTION", Hashtag = "#StayWarm", LinkUrl = "/?season=Winter", ImagePath = "/images/suit-hero-winter.jpg", SortOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "UNSTITCHED TO STITCHED", Title = "CUSTOM FIT", CategoryLabel = "LAWN · COTTON · CHIFFON", Hashtag = "#YourStyle", LinkUrl = "/", ImagePath = "/images/suit-hero-unstitched.jpg", SortOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ShoppingApp.Models.HeroSlide { Tagline = "ORDER IN MINUTES", Title = "NO LOGIN NEEDED", CategoryLabel = "COD AVAILABLE", Hashtag = "#EasyOrder", LinkUrl = "/", ImagePath = "/images/suit-hero-cod.jpg", SortOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
+                );
+            }
+            await db.SaveChangesAsync();
+            logger.LogInformation("Installed Amal Collection hero slides (replaced {Count} old active slides)", activeSlides.Count);
+        }
+
         var canConnect = await db.Database.CanConnectAsync();
         logger.LogInformation("Database connectivity: {Status}", canConnect ? "OK" : "FAILED");
         logger.LogInformation("Application starting in {Environment} mode", app.Environment.EnvironmentName);

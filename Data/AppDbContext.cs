@@ -156,6 +156,23 @@ namespace ShoppingApp.Data
                 new Product { Id = 9, Name = "Cotton Net Summer Suit", Description = "Lightweight cotton net with inner slip. Summer party wear.", Price = 3999, Discount = 0, Stock = 25, Category = "Summer Suit", Brand = "Amal", ImagePath = "/images/suit-summer-5.jpg", Season = "Summer", Fabric = "Cotton", Sizes = "S,M,L,XL", Colors = "Lavender,Ivory", StitchedType = "Stitched", Pieces = 3, IsFreeDelivery = true, CreatedAt = new DateTime(2024, 1, 1) },
                 new Product { Id = 10, Name = "Khaddar Unstitched Winter", Description = "Unstitched khaddar 3-piece with warm shawl.", Price = 2599, Discount = 10, Stock = 50, Category = "Winter Suit", Brand = "Amal", ImagePath = "/images/suit-winter-5.jpg", Season = "Winter", Fabric = "Khaddar", Sizes = "Unstitched", Colors = "Grey,Rust", StitchedType = "Unstitched", Pieces = 3, IsFreeDelivery = true, CreatedAt = new DateTime(2024, 1, 1) }
             );
+
+            // Cover gallery rows (SortOrder 0) for product detail thumbs
+            modelBuilder.Entity<ProductImage>().HasData(
+                new ProductImage { Id = 1,  ProductId = 1,  ImagePath = "/images/suit-summer-1.jpg", SortOrder = 0 },
+                new ProductImage { Id = 2,  ProductId = 2,  ImagePath = "/images/suit-summer-2.jpg", SortOrder = 0 },
+                new ProductImage { Id = 3,  ProductId = 3,  ImagePath = "/images/suit-summer-3.jpg", SortOrder = 0 },
+                new ProductImage { Id = 4,  ProductId = 4,  ImagePath = "/images/suit-winter-1.jpg", SortOrder = 0 },
+                new ProductImage { Id = 5,  ProductId = 5,  ImagePath = "/images/suit-winter-2.jpg", SortOrder = 0 },
+                new ProductImage { Id = 6,  ProductId = 6,  ImagePath = "/images/suit-summer-4.jpg", SortOrder = 0 },
+                new ProductImage { Id = 7,  ProductId = 7,  ImagePath = "/images/suit-winter-3.jpg", SortOrder = 0 },
+                new ProductImage { Id = 8,  ProductId = 8,  ImagePath = "/images/suit-winter-4.jpg", SortOrder = 0 },
+                new ProductImage { Id = 9,  ProductId = 9,  ImagePath = "/images/suit-summer-5.jpg", SortOrder = 0 },
+                new ProductImage { Id = 10, ProductId = 10, ImagePath = "/images/suit-winter-5.jpg", SortOrder = 0 }
+            );
+
+            // Homepage hero slides are installed at startup (Program.cs) to avoid PK conflicts
+            // with any leftover BaazWix slides still in the live database.
         }
     }
 }

@@ -18,7 +18,8 @@
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
@@ -73,8 +74,11 @@
             }
             else
             {
-                <a href="/Auth/Login" class="btn-outline-sm">Login</a>
-                <a href="/Auth/Register" class="btn-primary-sm">Register</a>
+                    <a href="/Auth/Login" class="btn-outline-sm">Login</a>
+                    <a href="/Auth/Register" class="btn-primary-sm">Register</a>
+                    <a href="/Cart" class="cart-link">
+                        Cart <span class="cart-badge" id="cartBadge">0</span>
+                    </a>
             }
         </nav>
 
@@ -130,7 +134,7 @@
             if (Context.Session.GetString("UserRole") != "admin")
             {
                 <a href="/Orders/History">📋 My Orders</a>
-                <a href="/Wishlist">❤️ Wishlist</a>
+                    <a href="/Wishlist">Wishlist</a>
                 <a href="/Cart">🛒 Cart</a>
             }
             <a href="/Profile">👤 @Context.Session.GetString("UserName")</a>
