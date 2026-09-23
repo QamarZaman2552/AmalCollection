@@ -8,7 +8,7 @@
         @if (ViewBag.OrderId == null)
         {
             <h1>Order status unknown</h1>
-            <p>We could not confirm your order. Please check <a href="/Orders/History">My Orders</a> or contact support.</p>
+            <p>We could not confirm your order. Please check <a href="/Orders/History">My Orders</a> or <a href="/Contact">contact support</a>.</p>
         }
         else
         {
@@ -30,7 +30,7 @@
         </div>
         @if (ViewBag.IsGuest as bool? == true)
         {
-            <p class="confirm-guest-note">You checked out as a guest — keep order number <strong>#@ViewBag.OrderId</strong> for reference. Support: 0321-6068091</p>
+            <p class="confirm-guest-note">You checked out as a guest — keep order number <strong>#@ViewBag.OrderId</strong> for reference. Support: <a href="/Contact">@ViewBag.SupportPhone</a></p>
         }
     </div>
 </section>

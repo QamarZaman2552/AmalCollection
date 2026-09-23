@@ -101,36 +101,39 @@
                         <input type="text" id="postalCode" name="postalCode" placeholder="60000" autocomplete="postal-code" />
                     </div>
                 </div>
-
-                <label class="checkout-checkbox">
-                    <input type="checkbox" name="saveAddress" value="true" />
-                    Save this information for next time
-                </label>
             </section>
 
             <!-- Payment (compact) -->
             <section class="checkout-payment-compact">
                 <h3>Payment method</h3>
-                <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem;">Cash on Delivery — pay when your order arrives.</p>
-                <div class="checkout-pay-options">
-                    <label class="checkout-pay-option">
-                        <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
-                        <span>💵 Cash on Delivery</span>
-                    </label>
-                    <label class="checkout-pay-option coming-soon">
-                        <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
-                        <span>💳 Credit / Debit Card</span>
-                        <span class="soon-badge">Coming soon</span>
-                    </label>
-                    <label class="checkout-pay-option coming-soon">
-                        <input type="radio" name="paymentMethod" value="Bank Transfer" />
-                        <span>🏦 Bank Transfer</span>
-                        <span class="soon-badge">Coming soon</span>
-                    </label>
-                </div>
-                <div class="payment-soon-msg" id="paymentSoonMsg" style="display:none;">
-                    ⏳ Credit/Debit Card &amp; Bank Transfer payments will be available soon. For now, please use Cash on Delivery.
-                </div>
+                @if (ViewBag.CodEnabled as bool? != false)
+                {
+                    <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem;">Cash on Delivery — pay when your order arrives.</p>
+                    <div class="checkout-pay-options">
+                        <label class="checkout-pay-option">
+                            <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
+                            <span>Cash on Delivery</span>
+                        </label>
+                        <label class="checkout-pay-option coming-soon">
+                            <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
+                            <span>Credit / Debit Card</span>
+                            <span class="soon-badge">Coming soon</span>
+                        </label>
+                        <label class="checkout-pay-option coming-soon">
+                            <input type="radio" name="paymentMethod" value="Bank Transfer" />
+                            <span>Bank Transfer</span>
+                            <span class="soon-badge">Coming soon</span>
+                        </label>
+                    </div>
+                    <div class="payment-soon-msg" id="paymentSoonMsg" style="display:none;">
+                        Credit/Debit Card &amp; Bank Transfer payments will be available soon. For now, please use Cash on Delivery.
+                    </div>
+                }
+                else
+                {
+                    <div class="checkout-alert checkout-alert-error">Cash on Delivery is currently disabled. Please contact support to place an order.</div>
+                    <input type="hidden" name="paymentMethod" value="Cash on Delivery" />
+                }
             </section>
 
             <div class="checkout-actions">

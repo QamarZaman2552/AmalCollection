@@ -66,7 +66,16 @@ namespace ShoppingApp.Services
 
             // --- CONTACT / SUPPORT ---
             if (ContainsAny(msg, "contact", "support", "admin", "reach", "email", "phone", "call", "help me contact"))
-                return "You can reach our team at:\n📧 qamarbaloch2023@gmail.com\n📞 +92-300-1234567\n\nOr visit our Contact page: /Home/Contact";
+            {
+                var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+                var phone = settings?.ContactPhone ?? "0321-6068091";
+                var emailAddr = settings?.ContactEmail ?? "hello@amalcollection.pk";
+                var wa = settings?.ContactWhatsapp;
+                var waLine = string.IsNullOrWhiteSpace(wa)
+                    ? ""
+                    : $"\n💬 WhatsApp: {wa}";
+                return $"You can reach our team at:\n📧 {emailAddr}\n📞 {phone}{waLine}\n\nOr visit our Contact page: /Contact";
+            }
 
             // --- FOLLOW-UP CONTEXT (refers to last discussed product) ---
             var lastPid = GetLastProductId(userId);

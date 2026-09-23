@@ -8,6 +8,7 @@ body.checkout-body {
 body.checkout-body .navbar,
 body.checkout-body .footer,
 body.checkout-body .chatbot-bubble,
+body.checkout-body .wa-float,
 body.checkout-body .chatbot-window {
   display: none !important;
 }

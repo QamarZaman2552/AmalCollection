@@ -85,16 +85,24 @@ namespace ShoppingApp.Services
                 sb.AppendLine(string.Join(", ", brands));
 
             // Static site info (shipping, returns, policies, features)
+            var settings = await _db.SiteSettings.FirstOrDefaultAsync(s => s.Id == 1);
+            var contactPhone = settings?.ContactPhone ?? "0321-6068091";
+            var contactEmail = settings?.ContactEmail ?? "hello@amalcollection.pk";
+            var contactWa = settings?.ContactWhatsapp;
             sb.AppendLine("\n=== SITE INFO ===");
             sb.AppendLine("Store name: Amal Collection - ladies summer and winter suits online store (Pakistan).");
             sb.AppendLine("Shipping: We ship nationwide across Pakistan. Standard delivery takes 3-5 business days. Express delivery available in major cities.");
             sb.AppendLine("Returns: 7-day return policy on all items. Items must be in original packaging.");
-            sb.AppendLine("Payment: Cash on Delivery (COD) available nationwide. Credit/debit card payments accepted.");
-            sb.AppendLine("Contact: Email us at qamarbaloch2023@gmail.com or use the Contact page (/Home/Contact).");
-            sb.AppendLine("About: Visit /Home/About for more info about our store.");
-            sb.AppendLine("Accounts: Users can register (sign up) and login on the website. Password reset is available via Forgot Password.");
+            sb.AppendLine(settings == null || settings.CodEnabled
+                ? "Payment: Cash on Delivery (COD) available nationwide."
+                : "Payment: Cash on Delivery is currently disabled — contact support for payment options.");
+            sb.AppendLine($"Contact: Email us at {contactEmail} or call {contactPhone}" +
+                          (string.IsNullOrWhiteSpace(contactWa) ? "" : $" / WhatsApp {contactWa}") +
+                          ". Contact page: /Contact");
+            sb.AppendLine("About: Visit /About for more info about our store.");
+            sb.AppendLine("Accounts: Users can register (sign up) and login on the website. Password reset is available via Forgot Password. Guest checkout is also available (no login needed).");
             sb.AppendLine("Shopping: Add products to cart, then checkout to place an order. Users can also add products to their wishlist.");
-            sb.AppendLine("Admin: The admin panel (/Admin) is used by store staff to add/edit/delete products and manage orders.");
+            sb.AppendLine("Admin: The admin panel (/Admin/Products) is used by store staff to add/edit/delete products and manage orders.");
             sb.AppendLine("Discounts: Some products show a discount percentage. The final (discounted) price is what customers pay.");
             sb.AppendLine("Recommendations: The homepage shows AI-powered product recommendations based on browsing history.");
             sb.AppendLine("Reviews: Registered users who purchased a product can submit a rating and review on the product detail page.");

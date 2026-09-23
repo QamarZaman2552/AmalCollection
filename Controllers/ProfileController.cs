@@ -38,6 +38,12 @@ namespace ShoppingApp.Controllers
             if (user == null) return NotFound();
 
             ViewBag.ReturnUrl = Request.Query["returnUrl"].ToString();
+            // Keep OTP form visible across refresh / failed change-password attempts
+            if (TempData["OtpSent"] != null)
+            {
+                ViewBag.OtpSent = true;
+                TempData.Keep("OtpSent");
+            }
 
             // Stats
             ViewBag.TotalOrders    = _db.Orders.Count(o => o.UserId == UserId);
@@ -136,6 +142,7 @@ namespace ShoppingApp.Controllers
 
             if (newPassword != confirmPassword)
             {
+                TempData.Keep("OtpSent");
                 TempData["Error"] = "Passwords do not match.";
                 return RedirectToAction("Index");
             }
@@ -144,6 +151,7 @@ namespace ShoppingApp.Controllers
                 !newPassword.Any(char.IsLower) || !newPassword.Any(char.IsUpper) ||
                 !newPassword.Any(char.IsDigit) || !newPassword.Any(c => !char.IsLetterOrDigit(c)))
             {
+                TempData.Keep("OtpSent");
                 TempData["Error"] = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%).";
                 return RedirectToAction("Index");
             }
@@ -151,6 +159,7 @@ namespace ShoppingApp.Controllers
             var (verified, verifyError) = _auth.VerifyResetOtp(user.Email, otp?.Trim() ?? "");
             if (verified == null)
             {
+                TempData.Keep("OtpSent");
                 TempData["Error"] = verifyError ?? "Invalid verification code.";
                 return RedirectToAction("Index");
             }
@@ -158,6 +167,7 @@ namespace ShoppingApp.Controllers
             var (ok, error) = _auth.ResetPasswordForUser(user.Id, newPassword);
             if (!ok)
             {
+                TempData.Keep("OtpSent");
                 TempData["Error"] = error ?? "Could not update password.";
                 return RedirectToAction("Index");
             }

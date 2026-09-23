@@ -88,6 +88,7 @@ namespace ShoppingApp.Controllers
             ViewBag.DeliveryCharge = delivery;
             ViewBag.GrandTotal = cartTotal + delivery;
             ViewBag.IsGuest = UserId == null;
+            ViewBag.CodEnabled = settings?.CodEnabled ?? true;
 
             if (UserId != null)
             {
@@ -164,7 +165,47 @@ namespace ShoppingApp.Controllers
                     _guestCart.Clear(HttpContext.Session);
                     TempData["OrderId"] = result.OrderId!.Value.ToString();
                     TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
-                    return RedirectToAction("Confirmation");
+
+                    if (!string.IsNullOrWhiteSpace(email))
+                    {
+                        try
+                        {
+                            await _emailSender.SendAsync(
+                                email.Trim(),
+                                $"Amal Collection Order Confirmation #{result.OrderId}",
+                                EmailTemplates.OrderConfirmation(
+                                    $"{firstName} {lastName}".Trim(),
+                                    result.OrderId!.Value.ToString(),
+                                    result.OrderTotal?.ToString("N0") ?? "",
+                                    paymentMethod,
+                                    Logo,
+                                    SiteUrl)
+                            );
+                        }
+                        catch { }
+                    }
+
+                    var guestAdminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
+                    if (!string.IsNullOrWhiteSpace(guestAdminEmail))
+                    {
+                        try
+                        {
+                            await _emailSender.SendAsync(
+                                guestAdminEmail,
+                                $"Amal Collection New Order #{result.OrderId}",
+                                EmailTemplates.NewOrder(
+                                    $"{firstName} {lastName}".Trim(),
+                                    result.OrderId!.Value.ToString(),
+                                    result.OrderTotal?.ToString("N0") ?? "",
+                                    paymentMethod,
+                                    Logo,
+                                    SiteUrl)
+                            );
+                        }
+                        catch { }
+                    }
+
+                    return RedirectToAction("Confirmation", new { id = result.OrderId });
                 }
 
                 // Logged-in checkout
@@ -224,7 +265,7 @@ namespace ShoppingApp.Controllers
 
                 TempData["OrderId"] = userResult.OrderId!.Value.ToString();
                 TempData["Success"] = $"Order #{userResult.OrderId} placed successfully!";
-                return RedirectToAction("Confirmation");
+                return RedirectToAction("Confirmation", new { id = userResult.OrderId });
             }
             catch (Exception ex)
             {
@@ -234,10 +275,19 @@ namespace ShoppingApp.Controllers
         }
 
         // ─── Order Confirmation ──────────────────────────────────
-        public IActionResult Confirmation()
+        public IActionResult Confirmation(int? id)
         {
-            ViewBag.OrderId = TempData["OrderId"];
+            var orderId = id?.ToString();
+            if (string.IsNullOrEmpty(orderId))
+                orderId = TempData["OrderId"] as string;
+            else
+                TempData.Remove("OrderId");
+
+            ViewBag.OrderId = orderId;
             ViewBag.IsGuest = UserId == null;
+
+            var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+            ViewBag.SupportPhone = settings?.ContactPhone ?? "0321-6068091";
             return View();
         }
 

@@ -1,5 +1,5 @@
 /*
-   ShopAI – Premium Dark Mode Design System
+   Amal Collection – Premium Dark Mode Design System
 */
 
 :root {
@@ -9,9 +9,9 @@
   --card:        rgba(255,255,255,0.04);
   --card-hover:  rgba(255,255,255,0.08);
   --border:      rgba(255,255,255,0.08);
-  --accent:      #C8CDD8;
-  --accent-2:    #8A9BB5;
-  --accent-3:    #8A9BB5;
+  --accent:      #b8964f;
+  --accent-2:    #d4af6a;
+  --accent-3:    #8a7340;
   --green:       #22c55e;
   --red:         #ef4444;
   --orange:      #f97316;
@@ -25,7 +25,7 @@
   --font:        'Inter', system-ui, sans-serif;
   --font-head:   'Playfair Display', Georgia, serif;
   --transition:  0.25s ease;
-  --glow-accent: 0 0 24px rgba(200,205,216,0.35);
+  --glow-accent: 0 0 24px rgba(184,150,79,0.35);
   --glow-green:  0 0 18px rgba(34,197,94,0.4);
   --gold:        #b8964f;
   --gold-soft:   #f4ecdd;
@@ -911,6 +911,24 @@ body.light-mode .brand span.gold { color: #b8964f; -webkit-text-fill-color: #b89
   transition: transform var(--transition), box-shadow var(--transition);
 }
 .chatbot-bubble:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(200,205,216,0.7); }
+
+/* ─── WhatsApp Float ──────────────────────────────────── */
+.wa-float {
+  position: fixed; bottom: 2rem; right: 6.5rem; z-index: 500;
+  width: 56px; height: 56px;
+  background: #25d366; color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.45);
+  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37, 211, 102, 0.6); color: #fff; }
+body.light-mode .wa-float { box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); }
+@media (max-width: 768px) {
+  .wa-float { bottom: 5.5rem; right: 1.25rem; width: 50px; height: 50px; }
+  .chatbot-bubble { bottom: 1.25rem; right: 1.25rem; }
+}
 .chatbot-ping {
   position: absolute; top: 4px; right: 4px;
   width: 12px; height: 12px;

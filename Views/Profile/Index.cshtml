@@ -101,7 +101,7 @@
                 A 6-digit verification code will be sent to <strong>@Model.Email</strong> before changing your password.
             </p>
 
-            @if (TempData["OtpSent"] != null)
+            @if (TempData["OtpSent"] != null || ViewBag.OtpSent == true)
             {
                 <form method="post" action="/Profile/ChangePassword" class="auth-form">
                     @Html.AntiForgeryToken()

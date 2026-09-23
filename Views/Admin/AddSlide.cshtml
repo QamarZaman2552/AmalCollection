@@ -17,23 +17,23 @@
             <div class="form-grid-2">
                 <div class="form-group">
                     <label>Tagline <small>(small text above title)</small></label>
-                    <input name="Tagline" placeholder="e.g. SOUND THAT COMPLETES THE FIT" required />
+                    <input name="Tagline" placeholder="e.g. FRESH FABRICS FOR EVERY SEASON" required />
                 </div>
                 <div class="form-group">
                     <label>Title <small>(big bold name)</small></label>
-                    <input name="Title" placeholder="e.g. MAGNITUDE" required />
+                    <input name="Title" placeholder="e.g. SUMMER LAWN SUITS" required />
                 </div>
                 <div class="form-group">
                     <label>Category Label</label>
-                    <input name="CategoryLabel" placeholder="e.g. HEADPHONES" required />
+                    <input name="CategoryLabel" placeholder="e.g. SUMMER COLLECTION" required />
                 </div>
                 <div class="form-group">
                     <label>Hashtag <small>(optional)</small></label>
-                    <input name="Hashtag" placeholder="e.g. #SOUNDSGREAT" />
+                    <input name="Hashtag" placeholder="e.g. #StayCool" />
                 </div>
                 <div class="form-group">
                     <label>Link URL <small>(Shop Now button)</small></label>
-                    <input name="LinkUrl" placeholder="e.g. /?category=Audio" />
+                    <input name="LinkUrl" placeholder="e.g. /?season=Summer" />
                 </div>
                 <div class="form-group">
                     <label>Sort Order <small>(0 = first)</small></label>
@@ -70,6 +70,7 @@
             </div>
 
             <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+                <input type="hidden" name="IsActive" value="false" />
                 <input type="checkbox" name="IsActive" id="isActive" value="true" checked style="width:18px;height:18px;accent-color:var(--accent);" />
                 <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage)</label>
             </div>

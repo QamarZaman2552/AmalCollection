@@ -139,7 +139,7 @@ namespace ShoppingApp.Data
                 FreeDeliveryThreshold = 0,
                 CodEnabled = true,
                 ContactPhone = "0300-0000000",
-                ContactWhatsapp = "",
+                ContactWhatsapp = "0321-6068091",
                 ContactEmail = "hello@amalcollection.pk"
             });
 

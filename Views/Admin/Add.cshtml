@@ -83,13 +83,6 @@
                     <input type="text" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
                 </div>
                 <div class="form-group">
-                    <label>Size Stock *</label>
-                    <select name="SizeStock">
-                        <option value="0" selected>Out of stock</option>
-                        <option value="10">In stock</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label>Sizes (comma separated)</label>
                     <input type="text" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
                     <datalist id="sizesList">
@@ -101,6 +94,7 @@
                 </div>
                 <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center;">
                     <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
+                        <input type="hidden" name="IsFreeDelivery" value="false" />
                         <input type="checkbox" name="IsFreeDelivery" value="true" checked style="width:auto;" />
                         Free delivery
                     </label>

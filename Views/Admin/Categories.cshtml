@@ -62,6 +62,7 @@
                                 <input type="text" name="name" value="@c.Name" style="max-width:180px;" />
                                 <input type="number" name="sortOrder" value="@c.SortOrder" style="width:60px;" />
                                 <label style="display:flex;gap:0.3rem;align-items:center;font-size:0.8rem;">
+                                    <input type="hidden" name="isActive" value="false" />
                                     <input type="checkbox" name="isActive" value="true" checked="@c.IsActive" style="width:auto;" /> Active
                                 </label>
                                 <button type="submit" class="btn-primary" style="padding:4px 12px;font-size:0.8rem;">Save</button>

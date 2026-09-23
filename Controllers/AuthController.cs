@@ -218,6 +218,7 @@ namespace ShoppingApp.Controllers
         {
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.Email = TempData["ResetEmail"] as string;
+            TempData.Keep("ResetEmail");
             return View();
         }
 
@@ -264,23 +265,31 @@ namespace ShoppingApp.Controllers
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            if (TempData["ResetUserId"] == null)
+            var userIdObj = TempData["ResetUserId"];
+            if (userIdObj == null)
                 return RedirectToAction("ForgotPassword", new { returnUrl });
 
-            var userId = (int)TempData["ResetUserId"];
+            var userId = Convert.ToInt32(userIdObj);
+            TempData.Keep("ResetUserId");
 
             if (newPassword != confirmPassword)
             {
+                TempData.Keep("ResetUserId");
                 ViewBag.Error = "Passwords do not match.";
                 return View();
             }
 
             if (!IsStrongPassword(newPassword))
-            { ViewBag.Error = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%)."; return View(); }
+            {
+                TempData.Keep("ResetUserId");
+                ViewBag.Error = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a symbol (e.g. !@#$%).";
+                return View();
+            }
 
             var (ok, error) = _auth.ResetPasswordForUser(userId, newPassword);
             if (!ok)
             {
+                TempData.Keep("ResetUserId");
                 ViewBag.Error = error;
                 return View();
             }

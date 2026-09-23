@@ -76,10 +76,67 @@ namespace ShoppingApp.Controllers
 
         // ─── Add to Cart (GET redirects, POST processes) ─────────
         [HttpGet]
-        public IActionResult Add(int productId, int quantity = 1)
+        public IActionResult Add(int productId, int quantity = 1, string? size = null, string? color = null)
         {
-            TempData["Error"] = "Invalid request. Please use the Add to Cart button on the product page.";
-            return RedirectToAction("Detail", "Products", new { id = productId });
+            if (IsAdmin)
+            {
+                TempData["Error"] = "Admins cannot purchase products.";
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
+
+            var product = _db.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null) return RedirectToAction("Index", "Products");
+
+            if (quantity <= 0) quantity = 1;
+            size ??= "";
+            color ??= "";
+
+            if (UserId == null)
+            {
+                var guest = _guestCart.Get(HttpContext.Session);
+                var existing = guest.FirstOrDefault(g =>
+                    g.ProductId == productId && g.Size == size && g.Color == color);
+                var newQty = (existing?.Quantity ?? 0) + quantity;
+                if (newQty > product.Stock)
+                {
+                    TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
+                    return RedirectToAction("Detail", "Products", new { id = productId });
+                }
+
+                if (existing != null)
+                    existing.Quantity = newQty;
+                else
+                    guest.Add(new GuestCartItem { ProductId = productId, Quantity = quantity, Size = size, Color = color });
+
+                _guestCart.Save(HttpContext.Session, guest);
+                TempData["Success"] = $"{product.Name} added to cart!";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            var dbExisting = _db.CartItems.FirstOrDefault(c =>
+                c.UserId == UserId && c.ProductId == productId && c.Size == size && c.Color == color);
+            var dbNewQty = (dbExisting?.Quantity ?? 0) + quantity;
+            if (dbNewQty > product.Stock)
+            {
+                TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
+
+            if (dbExisting != null)
+                dbExisting.Quantity = dbNewQty;
+            else
+                _db.CartItems.Add(new CartItem
+                {
+                    UserId = UserId.Value,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Size = size,
+                    Color = color
+                });
+
+            _db.SaveChanges();
+            TempData["Success"] = $"{product.Name} added to cart!";
+            return RedirectToAction("Index", "Cart");
         }
 
         [HttpPost]
