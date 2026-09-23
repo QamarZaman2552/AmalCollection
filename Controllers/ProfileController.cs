@@ -109,7 +109,7 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     user.Email,
-                    "BaazWix Password Change Verification Code",
+                    "Amal Collection Password Change Verification Code",
                     EmailTemplates.ResetOtp(user.FullName, otp, Logo, SiteUrl)
                 );
             }
@@ -166,7 +166,7 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     user.Email,
-                    "BaazWix Password Change Confirmation",
+                    "Amal Collection Password Change Confirmation",
                     EmailTemplates.PasswordResetConfirmation(user.FullName, Logo, SiteUrl)
                 );
             }

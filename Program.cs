@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .Enrich.WithProperty("Application", "BaazWix")
+    .Enrich.WithProperty("Application", "AmalCollection")
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .WriteTo.File("logs/shopai-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 30,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -69,7 +69,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Database
 var connectionString = builder.Configuration.GetConnectionString("dbcs")
-    ?? "Server=(localdb)\\mssqllocaldb;Database=BaazWixDb;Trusted_Connection=True;MultipleActiveResultSets=true;";
+    ?? "Server=localhost;Database=BaazWixDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString,
@@ -119,6 +119,7 @@ else
 builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
 builder.Services.AddHttpClient<IGeminiChatService, GeminiChatService>();
 builder.Services.AddScoped<SiteContextService>();
+    builder.Services.AddSingleton<GuestCartService>();
 
 // Session - Environment-aware
 builder.Services.AddSession(options =>

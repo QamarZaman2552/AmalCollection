@@ -1,6 +1,8 @@
 @model ShoppingApp.Models.Product
 @{
     ViewData["Title"] = "Add Product";
+    var categories = ViewBag.Categories as List<ShoppingApp.Models.Category> ?? new List<ShoppingApp.Models.Category>();
+    var allSizes = new[] { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
 }
 
 <section class="section">
@@ -11,23 +13,58 @@
             <div class="form-grid-2">
                 <div class="form-group">
                     <label>Product Name *</label>
-                    <input type="text" name="Name" required placeholder="e.g. Gaming Laptop Pro" />
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" name="Brand" placeholder="e.g. Asus" />
+                    <input type="text" name="Name" required placeholder="e.g. Printed Lawn 3-Piece Suit" />
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <input type="text" name="Category" placeholder="e.g. Laptops" list="cats" />
-                    <datalist id="cats">
-                        <option value="Laptops"/><option value="Phones"/><option value="Audio"/>
-                        <option value="Monitors"/><option value="Accessories"/><option value="Storage"/>
-                    </datalist>
+                    <select name="Category">
+                        <option value="">Select category</option>
+                        @foreach (var c in categories.Where(x => x.IsActive))
+                        {
+                            <option value="@c.Name">@c.Name</option>
+                        }
+                    </select>
+                    <div style="margin-top:0.4rem;">
+                        <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Season</label>
+                    <select name="Season">
+                        <option value="">—</option>
+                        <option value="Summer">Summer</option>
+                        <option value="Winter">Winter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fabric</label>
+                    <select name="Fabric">
+                        <option value="">—</option>
+                        <option>Lawn</option>
+                        <option>Cotton</option>
+                        <option>Chiffon</option>
+                        <option>Khaddar</option>
+                        <option>Wool</option>
+                        <option>Cambric</option>
+                        <option>Jacquard</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stitched / Unstitched</label>
+                    <select name="StitchedType">
+                        <option value="">—</option>
+                        <option value="Stitched">Stitched</option>
+                        <option value="Semi-Stitched">Semi-Stitched</option>
+                        <option value="Unstitched">Unstitched</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pieces (2 / 3)</label>
+                    <input type="number" name="Pieces" min="1" max="5" placeholder="e.g. 3" />
                 </div>
                 <div class="form-group">
                     <label>Price (PKR) *</label>
-                    <input type="number" name="Price" required min="0" step="0.01" placeholder="e.g. 89999" />
+                    <input type="number" name="Price" required min="0" step="0.01" placeholder="e.g. 2499" />
                 </div>
                 <div class="form-group">
                     <label>Discount (%)</label>
@@ -37,14 +74,50 @@
                     <label>Stock *</label>
                     <input type="number" name="Stock" required min="0" value="0" />
                 </div>
+                <div class="form-group">
+                    <label>Brand</label>
+                    <input type="text" name="Brand" value="Amal" placeholder="e.g. Amal" />
+                </div>
+                <div class="form-group">
+                    <label>Colors (comma separated)</label>
+                    <input type="text" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
+                </div>
+                <div class="form-group">
+                    <label>Size Stock *</label>
+                    <select name="SizeStock">
+                        <option value="0" selected>Out of stock</option>
+                        <option value="10">In stock</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sizes (comma separated)</label>
+                    <input type="text" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
+                    <datalist id="sizesList">
+                        @foreach (var s in allSizes)
+                        {
+                            <option value="@s" />
+                        }
+                    </datalist>
+                </div>
+                <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center;">
+                    <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
+                        <input type="checkbox" name="IsFreeDelivery" value="true" checked style="width:auto;" />
+                        Free delivery
+                    </label>
+                    <div id="deliveryChargeWrap" style="display:none; flex:1;">
+                        <label>Delivery charge (PKR)</label>
+                        <input type="number" name="DeliveryCharge" min="0" step="1" placeholder="e.g. 200" />
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Description</label>
                 <textarea name="Description" rows="3" placeholder="Product description…"></textarea>
             </div>
             <div class="form-group">
-                <label>Product Image</label>
-                <input type="file" name="imageFile" accept="image/*" />
+                <label>Product Images (up to 5)</label>
+                <input type="file" name="imageFiles" accept="image/*" multiple />
+                <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First image = cover. Max 5 images.</div>
             </div>
             <div style="display:flex;gap:1rem;">
                 <button type="submit" class="btn-primary">Save Product</button>
@@ -53,3 +126,16 @@
         </form>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        const freeCb = document.querySelector('input[name="IsFreeDelivery"]');
+        const chargeWrap = document.getElementById('deliveryChargeWrap');
+        function toggleCharge() {
+            if (!freeCb || !chargeWrap) return;
+            chargeWrap.style.display = freeCb.checked ? 'none' : 'block';
+        }
+        freeCb?.addEventListener('change', toggleCharge);
+        toggleCharge();
+    </script>
+}

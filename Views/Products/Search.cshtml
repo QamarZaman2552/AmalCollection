@@ -1,8 +1,8 @@
 @model List<ShoppingApp.Models.Product>
 @{
     ViewData["Title"] = $"Search: {ViewBag.Query}";
-    var categories = ViewBag.Categories as List<string>;
-    var brands = ViewBag.Brands as List<string>;
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var seasons = ViewBag.Seasons as List<string> ?? new List<string>();
 }
 
 <section class="section">
@@ -29,9 +29,9 @@
                         @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                     </div>
                     <div class="product-info">
-                        <div class="product-category">@p.Category</div>
+                        <div class="product-category">@p.Category @(p.Season != null ? $" · {p.Season}" : "")</div>
                         <h3 class="product-name">@p.Name</h3>
-                        <div class="product-brand">@p.Brand</div>
+                        <div class="product-brand">@p.Fabric</div>
                         <div class="product-pricing">
                             <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                             @if (p.Discount > 0) { <span class="price-original">PKR @p.Price.ToString("N0")</span> }

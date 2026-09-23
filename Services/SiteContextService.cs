@@ -86,7 +86,7 @@ namespace ShoppingApp.Services
 
             // Static site info (shipping, returns, policies, features)
             sb.AppendLine("\n=== SITE INFO ===");
-            sb.AppendLine("Store name: BaazWix - online shopping website (Pakistan).");
+            sb.AppendLine("Store name: Amal Collection - ladies summer and winter suits online store (Pakistan).");
             sb.AppendLine("Shipping: We ship nationwide across Pakistan. Standard delivery takes 3-5 business days. Express delivery available in major cities.");
             sb.AppendLine("Returns: 7-day return policy on all items. Items must be in original packaging.");
             sb.AppendLine("Payment: Cash on Delivery (COD) available nationwide. Credit/debit card payments accepted.");

@@ -14,7 +14,7 @@ namespace ShoppingApp.Services
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string FromEmail { get; set; } = string.Empty;
-        public string FromName { get; set; } = "BaazWix";
+        public string FromName { get; set; } = "Amal Collection";
 
         // HTTPS transactional email API (e.g. Brevo). Preferred on hosts
         // that block outbound SMTP (Railway free/trial plans).

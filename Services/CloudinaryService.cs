@@ -32,7 +32,7 @@ namespace ShoppingApp.Services
         public async Task<string> UploadAsync(IFormFile file, string prefix = "")
         {
             var url = $"https://api.cloudinary.com/v1_1/{_settings.CloudName}/image/upload";
-            var boundary = "----BaazWixBoundary" + Guid.NewGuid().ToString("N");
+            var boundary = "----Amal CollectionBoundary" + Guid.NewGuid().ToString("N");
 
             using var body = new MemoryStream();
             void Write(string text)

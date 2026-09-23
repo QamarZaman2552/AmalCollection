@@ -1,6 +1,10 @@
 @model ShoppingApp.Models.Product
 @{
     ViewData["Title"] = "Edit Product";
+    var categories = ViewBag.Categories as List<ShoppingApp.Models.Category> ?? new List<ShoppingApp.Models.Category>();
+    var images = Model.Images?.OrderBy(i => i.SortOrder).ToList() ?? new List<ShoppingApp.Models.ProductImage>();
+    var allSizes = new[] { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
+    var selectedSizes = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
 <section class="section">
@@ -15,16 +19,62 @@
                     <input type="text" name="Name" value="@Model.Name" required />
                 </div>
                 <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" name="Brand" value="@Model.Brand" />
+                    <label>Category</label>
+                    <select name="Category">
+                        <option value="">Select category</option>
+                        @foreach (var c in categories.Where(x => x.IsActive))
+                        {
+                            if (c.Name == Model.Category)
+                            {
+                                <option value="@c.Name" selected>@c.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@c.Name">@c.Name</option>
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Category) && !categories.Any(c => c.Name == Model.Category))
+                        {
+                            <option value="@Model.Category" selected>@Model.Category</option>
+                        }
+                    </select>
+                    <div style="margin-top:0.4rem;">
+                        <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" name="Category" value="@Model.Category" list="cats" />
-                    <datalist id="cats">
-                        <option value="Laptops"/><option value="Phones"/><option value="Audio"/>
-                        <option value="Monitors"/><option value="Accessories"/><option value="Storage"/>
-                    </datalist>
+                    <label>Season</label>
+                    <select name="Season">
+                        <option value="">—</option>
+                        <option value="Summer" selected="@(Model.Season == "Summer")">Summer</option>
+                        <option value="Winter" selected="@(Model.Season == "Winter")">Winter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fabric</label>
+                    <select name="Fabric">
+                        <option value="">—</option>
+                        @foreach (var f in new[] { "Lawn", "Cotton", "Chiffon", "Khaddar", "Wool", "Cambric", "Jacquard" })
+                        {
+                            if (Model.Fabric == f) { <option selected>@f</option> }
+                            else { <option>@f</option> }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stitched / Unstitched</label>
+                    <select name="StitchedType">
+                        <option value="">—</option>
+                        @foreach (var s in new[] { "Stitched", "Semi-Stitched", "Unstitched" })
+                        {
+                            if (Model.StitchedType == s) { <option value="@s" selected>@s</option> }
+                            else { <option value="@s">@s</option> }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pieces (2 / 3)</label>
+                    <input type="number" name="Pieces" value="@(Model.Pieces?.ToString() ?? "")" min="1" max="5" />
                 </div>
                 <div class="form-group">
                     <label>Price (PKR) *</label>
@@ -38,18 +88,56 @@
                     <label>Stock</label>
                     <input type="number" name="Stock" value="@Model.Stock" min="0" />
                 </div>
+                <div class="form-group">
+                    <label>Brand</label>
+                    <input type="text" name="Brand" value="@Model.Brand" />
+                </div>
+                <div class="form-group">
+                    <label>Colors (comma separated)</label>
+                    <input type="text" name="Colors" value="@Model.Colors" placeholder="e.g. Sand, Charcoal" />
+                </div>
+                <div class="form-group">
+                    <label>Sizes (comma separated)</label>
+                    <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L" list="sizesList" />
+                    <datalist id="sizesList">
+                        @foreach (var s in allSizes)
+                        {
+                            <option value="@s" />
+                        }
+                    </datalist>
+                </div>
+                <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center;">
+                    <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
+                        <input type="checkbox" name="IsFreeDelivery" value="true" checked="@(Model.IsFreeDelivery)" style="width:auto;" />
+                        Free delivery
+                    </label>
+                    <div id="deliveryChargeWrap" style="display:@(Model.IsFreeDelivery ? "none" : "block"); flex:1;">
+                        <label>Delivery charge (PKR)</label>
+                        <input type="number" name="DeliveryCharge" value="@(Model.DeliveryCharge?.ToString() ?? "")" min="0" step="1" />
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Description</label>
                 <textarea name="Description" rows="3">@Model.Description</textarea>
             </div>
             <div class="form-group">
-                <label>Current Image</label>
-                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                <label>Current Images (@images.Count / 5)</label>
+                @if (images.Any())
                 {
-                    <img src="@Model.ImagePath" style="height:80px;border-radius:8px;margin-bottom:0.5rem;" onerror="this.style.display='none'" />
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                        @foreach (var img in images)
+                        {
+                            <div style="position:relative; text-align:center;">
+                                <img src="@img.ImagePath" style="height:70px;border-radius:6px;border:2px solid @(img.SortOrder == 0 ? "var(--gold)" : "var(--border)");" onerror="this.style.display='none'" />
+                                <div style="font-size:0.65rem;color:var(--text-3);">@(img.SortOrder == 0 ? "Cover" : "#" + (img.SortOrder + 1))</div>
+                                <button type="submit" formaction="/Admin/DeleteProductImage" name="imageId" value="@img.Id" onclick="return confirm('Delete this image?')" style="position:absolute;top:-4px;right:-4px;background:#d64545;color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:0.7rem;line-height:1;cursor:pointer;padding:0;">×</button>
+                            </div>
+                        }
+                    </div>
                 }
-                <input type="file" name="imageFile" accept="image/*" />
+                <input type="file" name="imageFiles" accept="image/*" multiple />
+                <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First new image becomes cover if no cover exists. Max 5 total.</div>
             </div>
             <div style="display:flex;gap:1rem;">
                 <button type="submit" class="btn-primary">Update Product</button>
@@ -58,3 +146,16 @@
         </form>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        const freeCb = document.querySelector('input[name="IsFreeDelivery"]');
+        const chargeWrap = document.getElementById('deliveryChargeWrap');
+        function toggleCharge() {
+            if (!freeCb || !chargeWrap) return;
+            chargeWrap.style.display = freeCb.checked ? 'none' : 'block';
+        }
+        freeCb?.addEventListener('change', toggleCharge);
+        toggleCharge();
+    </script>
+}

@@ -1,23 +1,29 @@
 @model List<ShoppingApp.Models.Product>
 @{
-    ViewData["Title"] = "Home – BaazWix";
+    ViewData["Title"] = "Home – Amal Collection";
     var recommendations = ViewBag.Recommendations as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
     var categories  = ViewBag.Categories as List<string> ?? new List<string>();
-    var brands      = ViewBag.Brands as List<string> ?? new List<string>();
+    var seasons     = ViewBag.Seasons as List<string> ?? new List<string>();
+    var fabrics     = ViewBag.Fabrics as List<string> ?? new List<string>();
+    var sizes       = ViewBag.Sizes as List<string> ?? new List<string>();
     var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
-    string selectedCat   = ViewBag.SelectedCategory ?? "";
-    string selectedBrand = ViewBag.SelectedBrand ?? "";
-    string selectedSort  = ViewBag.SelectedSort ?? "";
+    string selectedCat    = ViewBag.SelectedCategory ?? "";
+    string selectedSeason = ViewBag.SelectedSeason ?? "";
+    string selectedFabric = ViewBag.SelectedFabric ?? "";
+    string selectedSize   = ViewBag.SelectedSize ?? "";
+    string selectedSort   = ViewBag.SelectedSort ?? "";
+    bool hasFilters = !string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedSeason)
+        || !string.IsNullOrEmpty(selectedFabric) || !string.IsNullOrEmpty(selectedSize) || !string.IsNullOrEmpty(selectedSort);
 
     // Fallback static slides if no DB slides exist yet
     if (!heroSlides.Any())
     {
         heroSlides = new List<ShoppingApp.Models.HeroSlide>
         {
-            new() { Id=0, Tagline="SOUND THAT COMPLETES THE FIT", Title="MAGNITUDE",   CategoryLabel="HEADPHONES",  Hashtag="#SOUNDSGREAT", LinkUrl="/Cart/Add?productId=1&quantity=1", ImagePath="/images/hero1.jpg" },
-            new() { Id=0, Tagline="BUILT FOR THE RELENTLESS",     Title="GAMING PRO",  CategoryLabel="LAPTOPS",     Hashtag="#LEVELUP",     LinkUrl="/?category=Laptops",     ImagePath="/images/hero2.jpg" },
-            new() { Id=0, Tagline="CAPTURE EVERY MOMENT",         Title="200MP",       CategoryLabel="SMARTPHONES", Hashtag="#SHOOTBIG",    LinkUrl="/?category=Phones",      ImagePath="/images/hero3.jpg" },
-            new() { Id=0, Tagline="PRECISION AT YOUR FINGERTIPS", Title="RGB PRO",     CategoryLabel="ACCESSORIES", Hashtag="#GAMEHARDER",  LinkUrl="/?category=Accessories", ImagePath="/images/hero4.jpg" },
+            new() { Id=0, Tagline="FRESH FABRICS FOR EVERY SEASON", Title="SUMMER LAWN SUITS", CategoryLabel="SUMMER COLLECTION", Hashtag="#StayCool", LinkUrl="/?season=Summer", ImagePath="/images/hero1.jpg" },
+            new() { Id=0, Tagline="WARM, ELEGANT, WINTER-READY", Title="KHADDAR & WOOL", CategoryLabel="WINTER COLLECTION", Hashtag="#StayWarm", LinkUrl="/?season=Winter", ImagePath="/images/hero2.jpg" },
+            new() { Id=0, Tagline="UNSTITCHED TO STITCHED", Title="CUSTOM FIT", CategoryLabel="LAWN · COTTON · CHIFFON", Hashtag="#YourStyle", LinkUrl="/", ImagePath="/images/hero3.jpg" },
+            new() { Id=0, Tagline="ORDER IN MINUTES", Title="NO LOGIN NEEDED", CategoryLabel="COD AVAILABLE", Hashtag="#EasyOrder", LinkUrl="/", ImagePath="/images/hero4.jpg" },
         };
     }
 }
@@ -96,17 +102,45 @@
                 }
             }
         </select>
-        <select name="brand" onchange="this.form.submit()">
-            <option value="">All Brands</option>
-            @foreach (var b in brands)
+        <select name="season" onchange="this.form.submit()">
+            <option value="">All Seasons</option>
+            @foreach (var s in seasons)
             {
-                if (b == selectedBrand)
+                if (s == selectedSeason)
                 {
-                    <option value="@b" selected>@b</option>
+                    <option value="@s" selected>@s</option>
                 }
                 else
                 {
-                    <option value="@b">@b</option>
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+        <select name="fabric" onchange="this.form.submit()">
+            <option value="">All Fabrics</option>
+            @foreach (var f in fabrics)
+            {
+                if (f == selectedFabric)
+                {
+                    <option value="@f" selected>@f</option>
+                }
+                else
+                {
+                    <option value="@f">@f</option>
+                }
+            }
+        </select>
+        <select name="size" onchange="this.form.submit()">
+            <option value="">All Sizes</option>
+            @foreach (var s in sizes)
+            {
+                if (s == selectedSize)
+                {
+                    <option value="@s" selected>@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
                 }
             }
         </select>
@@ -121,24 +155,24 @@
             }
             @if (selectedSort == "price_asc")
             {
-                <option value="price_asc" selected>📈 Price: Low to High</option>
+                <option value="price_asc" selected>Price: Low to High</option>
             }
             else
             {
-                <option value="price_asc">📈 Price: Low to High</option>
+                <option value="price_asc">Price: Low to High</option>
             }
             @if (selectedSort == "price_desc")
             {
-                <option value="price_desc" selected>📉 Price: High to Low</option>
+                <option value="price_desc" selected>Price: High to Low</option>
             }
             else
             {
-                <option value="price_desc">📉 Price: High to Low</option>
+                <option value="price_desc">Price: High to Low</option>
             }
         </select>
-        @if (!string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedBrand) || !string.IsNullOrEmpty(selectedSort))
+        @if (hasFilters)
         {
-            <a href="/" class="btn-outline-sm">✕ Clear</a>
+            <a href="/" class="btn-outline-sm">Clear</a>
         }
     </form>
 </section>
@@ -152,8 +186,8 @@
     @if (!Model.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">📦</div>
-            <p>No products found in this category.</p>
+            <div class="empty-icon">No products found</div>
+            <p>Try different filters or clear them to see all suits.</p>
             <a href="/" class="btn-primary">See All Products</a>
         </div>
     }
@@ -176,9 +210,9 @@
                         }
                     </div>
                     <div class="product-info">
-                        <div class="product-category">@p.Category</div>
+                        <div class="product-category">@p.Category · @p.Season</div>
                         <h3 class="product-name">@p.Name</h3>
-                        <div class="product-brand">@p.Brand</div>
+                        <div class="product-brand">@p.Fabric @(p.StitchedType != null ? $" · {p.StitchedType}" : "")</div>
                         <div class="product-pricing">
                             <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                             @if (p.Discount > 0)
@@ -193,11 +227,11 @@
     }
 </section>
 
-<!-- AI Recommendations -->
-@if (recommendations.Any() && string.IsNullOrEmpty(selectedCat) && string.IsNullOrEmpty(selectedBrand))
+<!-- Recommendations -->
+@if (recommendations.Any() && !hasFilters)
 {
     <section class="section recs-section">
-        <h2 class="section-title">✨ Recommended For You</h2>
+        <h2 class="section-title">Recommended For You</h2>
         <div class="product-grid">
             @foreach (var p in recommendations)
             {

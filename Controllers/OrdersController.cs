@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
+using ShoppingApp.Models;
 using ShoppingApp.Services;
 
 namespace ShoppingApp.Controllers
@@ -9,13 +10,20 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly CheckoutService _checkout;
+        private readonly GuestCartService _guestCart;
         private readonly IEmailSender _emailSender;
         private readonly EmailSettings _emailSettings;
 
-        public OrdersController(AppDbContext db, CheckoutService checkout, IEmailSender emailSender, EmailSettings emailSettings)
+        public OrdersController(
+            AppDbContext db,
+            CheckoutService checkout,
+            GuestCartService guestCart,
+            IEmailSender emailSender,
+            EmailSettings emailSettings)
         {
             _db = db;
             _checkout = checkout;
+            _guestCart = guestCart;
             _emailSender = emailSender;
             _emailSettings = emailSettings;
         }
@@ -27,26 +35,79 @@ namespace ShoppingApp.Controllers
 
         private string Logo => EmailTemplates.GetLogoUrl(SiteUrl);
 
+        private List<CartItem> GetCheckoutItems()
+        {
+            if (UserId == null)
+            {
+                var guest = _guestCart.Get(HttpContext.Session);
+                var productIds = guest.Select(g => g.ProductId).Distinct().ToList();
+                var products = _db.Products.Where(p => productIds.Contains(p.Id)).ToList();
+                var items = new List<CartItem>();
+                for (int i = 0; i < guest.Count; i++)
+                {
+                    var g = guest[i];
+                    var p = products.FirstOrDefault(x => x.Id == g.ProductId);
+                    if (p == null) continue;
+                    items.Add(new CartItem
+                    {
+                        Id = -(i + 1),
+                        ProductId = g.ProductId,
+                        Quantity = g.Quantity,
+                        Size = g.Size,
+                        Color = g.Color,
+                        Product = p
+                    });
+                }
+                return items;
+            }
+
+            return _db.CartItems
+                .Include(c => c.Product)
+                .Where(c => c.UserId == UserId)
+                .ToList();
+        }
+
         // ─── Checkout GET ─────────────────────────────────────────
         [HttpGet]
         public IActionResult Checkout()
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
+            if (HttpContext.Session.GetString("UserRole") == "admin")
+            {
+                TempData["Error"] = "Admins cannot place orders.";
+                return RedirectToAction("Index", "Home");
+            }
 
-            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
-            if (user == null) return RedirectToAction("Login", "Auth");
-
-            var items = _db.CartItems.Include(c => c.Product).Where(c => c.UserId == UserId).ToList();
+            var items = GetCheckoutItems();
             if (!items.Any()) return RedirectToAction("Index", "Cart");
 
             var cartTotal = CheckoutService.ComputeCartTotal(items);
-            ViewBag.Total = cartTotal;
-            ViewBag.Email = user.Email;
-            ViewBag.Phone = user.Phone ?? "";
+            var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+            var delivery = CheckoutService.ComputeDeliveryCharge(items, settings);
 
-            var nameParts = (user.FullName ?? "").Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            ViewBag.FirstName = nameParts.Length > 0 ? nameParts[0] : "";
-            ViewBag.LastName = nameParts.Length > 1 ? nameParts[1] : "";
+            ViewBag.Total = cartTotal;
+            ViewBag.DeliveryCharge = delivery;
+            ViewBag.GrandTotal = cartTotal + delivery;
+            ViewBag.IsGuest = UserId == null;
+
+            if (UserId != null)
+            {
+                var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+                if (user == null) return RedirectToAction("Login", "Auth");
+
+                ViewBag.Email = user.Email;
+                ViewBag.Phone = user.Phone ?? "";
+
+                var nameParts = (user.FullName ?? "").Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                ViewBag.FirstName = nameParts.Length > 0 ? nameParts[0] : "";
+                ViewBag.LastName = nameParts.Length > 1 ? nameParts[1] : "";
+            }
+            else
+            {
+                ViewBag.Email = "";
+                ViewBag.Phone = "";
+                ViewBag.FirstName = "";
+                ViewBag.LastName = "";
+            }
 
             return View(items);
         }
@@ -63,9 +124,14 @@ namespace ShoppingApp.Controllers
             string phone,
             string country,
             string paymentMethod,
+            string? email,
             CancellationToken cancellationToken)
         {
-            if (UserId == null) return RedirectToAction("Login", "Auth");
+            if (HttpContext.Session.GetString("UserRole") == "admin")
+            {
+                TempData["Error"] = "Admins cannot place orders.";
+                return RedirectToAction("Index", "Home");
+            }
 
             var deliveryAddress = BuildDeliveryAddress(firstName, lastName, address, city, postalCode, phone, country);
             if (deliveryAddress == null)
@@ -76,7 +142,32 @@ namespace ShoppingApp.Controllers
 
             try
             {
-                // Keep profile phone in sync for admin order list
+                if (UserId == null)
+                {
+                    // Guest checkout
+                    var guestItems = GetCheckoutItems();
+                    var result = await _checkout.ProcessGuestAsync(
+                        $"{firstName} {lastName}".Trim(),
+                        phone,
+                        email,
+                        deliveryAddress,
+                        paymentMethod,
+                        guestItems,
+                        cancellationToken);
+
+                    if (!result.Success)
+                    {
+                        TempData["Error"] = result.Error;
+                        return RedirectToAction("Checkout");
+                    }
+
+                    _guestCart.Clear(HttpContext.Session);
+                    TempData["OrderId"] = result.OrderId!.Value.ToString();
+                    TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
+                    return RedirectToAction("Confirmation");
+                }
+
+                // Logged-in checkout
                 var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
                 if (user != null && !string.IsNullOrWhiteSpace(phone))
                 {
@@ -84,11 +175,11 @@ namespace ShoppingApp.Controllers
                     await _db.SaveChangesAsync(cancellationToken);
                 }
 
-                var result = await _checkout.ProcessAsync(UserId.Value, deliveryAddress, paymentMethod, cancellationToken);
+                var userResult = await _checkout.ProcessAsync(UserId.Value, deliveryAddress, paymentMethod, cancellationToken);
 
-                if (!result.Success)
+                if (!userResult.Success)
                 {
-                    TempData["Error"] = result.Error;
+                    TempData["Error"] = userResult.Error;
                     return RedirectToAction("Checkout");
                 }
 
@@ -98,22 +189,18 @@ namespace ShoppingApp.Controllers
                     {
                         await _emailSender.SendAsync(
                             user.Email,
-                            $"BaazWix Order Confirmation #{result.OrderId}",
+                            $"Amal Collection Order Confirmation #{userResult.OrderId}",
                             EmailTemplates.OrderConfirmation(
                                 user.FullName,
-                                result.OrderId!.Value.ToString(),
-                                result.OrderTotal?.ToString("N0") ?? "",
+                                userResult.OrderId!.Value.ToString(),
+                                userResult.OrderTotal?.ToString("N0") ?? "",
                                 paymentMethod,
                                 Logo,
                                 SiteUrl)
                         );
                     }
-                    catch
-                    {
-                        // Never block checkout if email fails
-                    }
+                    catch { }
 
-                    // Notify admin about the new order
                     var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
                     if (!string.IsNullOrWhiteSpace(adminEmail))
                     {
@@ -121,25 +208,22 @@ namespace ShoppingApp.Controllers
                         {
                             await _emailSender.SendAsync(
                                 adminEmail,
-                                $"BaazWix New Order #{result.OrderId}",
+                                $"Amal Collection New Order #{userResult.OrderId}",
                                 EmailTemplates.NewOrder(
                                     user.FullName,
-                                    result.OrderId!.Value.ToString(),
-                                    result.OrderTotal?.ToString("N0") ?? "",
+                                    userResult.OrderId!.Value.ToString(),
+                                    userResult.OrderTotal?.ToString("N0") ?? "",
                                     paymentMethod,
                                     Logo,
                                     SiteUrl)
                             );
                         }
-                        catch
-                        {
-                            // Never block checkout if admin email fails
-                        }
+                        catch { }
                     }
                 }
 
-                TempData["OrderId"] = result.OrderId!.Value.ToString();
-                TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
+                TempData["OrderId"] = userResult.OrderId!.Value.ToString();
+                TempData["Success"] = $"Order #{userResult.OrderId} placed successfully!";
                 return RedirectToAction("Confirmation");
             }
             catch (Exception ex)

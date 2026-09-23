@@ -18,11 +18,19 @@ namespace ShoppingApp.Controllers
         }
 
         // ─── Homepage / Product List ──────────────────────────────────────
-        public IActionResult Index(string? category, string? brand, string? sort)
+        public IActionResult Index(string? category, string? season, string? fabric, string? size, string? sort)
         {
             var query = _db.Products.AsQueryable();
             if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
-            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand != null && p.Brand.ToLower() == brand.ToLower());
+            if (!string.IsNullOrEmpty(season))  query = query.Where(p => p.Season != null && p.Season.ToLower() == season.ToLower());
+            if (!string.IsNullOrEmpty(fabric))  query = query.Where(p => p.Fabric != null && p.Fabric.ToLower() == fabric.ToLower());
+            if (!string.IsNullOrEmpty(size))
+            {
+                var s = size.Trim();
+                query = query.Where(p => p.Sizes != null &&
+                    p.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Any(x => x.ToLower() == s.ToLower()));
+            }
 
             // Sort by price
             query = sort switch
@@ -43,16 +51,20 @@ namespace ShoppingApp.Controllers
                 .ToList();
 
             ViewBag.Categories = GetFilterValues(p => p.Category);
-            ViewBag.Brands = GetFilterValues(p => p.Brand);
+            ViewBag.Seasons    = GetFilterValues(p => p.Season);
+            ViewBag.Fabrics    = GetFilterValues(p => p.Fabric);
+            ViewBag.Sizes      = new List<string> { "XS", "S", "M", "L", "XL", "XXL" };
 
             ViewBag.SelectedCategory = category;
-            ViewBag.SelectedBrand    = brand;
+            ViewBag.SelectedSeason   = season;
+            ViewBag.SelectedFabric   = fabric;
+            ViewBag.SelectedSize     = size;
             ViewBag.SelectedSort     = sort ?? "";
             return View(products);
         }
 
         // ─── Search ─────────────────────────────────────────────
-        public IActionResult Search(string q, string? category, string? brand)
+        public IActionResult Search(string q, string? category, string? season)
         {
             if (string.IsNullOrWhiteSpace(q))
                 return RedirectToAction("Index");
@@ -61,12 +73,12 @@ namespace ShoppingApp.Controllers
             query = query.Where(p => p.Name.Contains(q) ||
                                      (p.Description != null && p.Description.Contains(q)));
             if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
-            if (!string.IsNullOrEmpty(brand))    query = query.Where(p => p.Brand != null && p.Brand.ToLower() == brand.ToLower());
+            if (!string.IsNullOrEmpty(season))   query = query.Where(p => p.Season != null && p.Season.ToLower() == season.ToLower());
 
             var results = query.ToList();
             ViewBag.Query = q;
             ViewBag.Categories = GetFilterValues(p => p.Category);
-            ViewBag.Brands = GetFilterValues(p => p.Brand);
+            ViewBag.Seasons    = GetFilterValues(p => p.Season);
             return View(results);
         }
 
@@ -87,7 +99,9 @@ namespace ShoppingApp.Controllers
         // ─── Product Detail ──────────────────────────────────────
         public IActionResult Detail(int id)
         {
-            var product = _db.Products.FirstOrDefault(p => p.Id == id);
+            var product = _db.Products
+                .Include(p => p.Images)
+                .FirstOrDefault(p => p.Id == id);
             if (product == null) return NotFound();
 
             var userId = HttpContext.Session.GetInt32("UserId");

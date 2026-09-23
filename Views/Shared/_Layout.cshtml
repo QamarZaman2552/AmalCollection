@@ -5,8 +5,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="BaazWix – Pakistan's premium AI-powered shopping destination with smart chatbot assistance." />
-    <title>@ViewData["Title"] – BaazWix</title>
+    <meta name="description" content="Amal Collection – elegant summer & winter ladies suits with cash on delivery across Pakistan." />
+    <title>@ViewData["Title"] – Amal Collection</title>
     <script>
         (function () {
             var t = localStorage.getItem('theme');
@@ -29,14 +29,13 @@
     <header class="navbar">
     <div class="navbar-inner">
         <a href="/" class="brand">
-            <img src="~/images/baazwix-logo.png" alt="BaazWix" class="brand-logo" />
-            <span>BaazWix</span>
+            <span>Amal Collection</span>
         </a>
 
         <!-- Search Bar -->
         <form class="nav-search" action="/Products/Search" method="get">
-            <input type="text" name="q" placeholder="Search products, brands &amp; categories..." value="@ViewBag.Query" autocomplete="off" />
-                <button type="submit"><img src="~/images/baazwix-logo.png" alt="BaazWix" class="brand-logo" /></button>
+            <input type="text" name="q" placeholder="Search suits, fabrics &amp; categories..." value="@ViewBag.Query" autocomplete="off" />
+            <button type="submit" aria-label="Search">Search</button>
         </form>
 
         <!-- Nav Links -->
@@ -170,7 +169,7 @@
     <!-- ─── Footer ──────────────────────────────────────────── -->
     <footer class="footer">
         <div class="footer-inner">
-            <p>© 2026 <strong>BaazWix</strong> — CS-UEM-BS-F22E8 · Developed by <strong>Qamar Zaman</strong></p>
+            <p>© 2026 <strong>Amal Collection</strong> · Developed by <strong>Qamar Zaman</strong></p>
             <div class="footer-links">
                 <a href="/Products/Search?q=">All Products</a>
                 <span>·</span>
@@ -186,23 +185,23 @@
     </footer>
 
     <!-- ─── Chatbot Widget ────────────────────────────────────── -->
-    <div class="chatbot-bubble" id="chatBubble" title="Chat with BaazWix">
-        <span class="chatbot-icon">💬</span>
+    <div class="chatbot-bubble" id="chatBubble" title="Chat with Amal Collection">
+        <span class="chatbot-icon">Chat</span>
         <span class="chatbot-ping"></span>
     </div>
 
     <div class="chatbot-window" id="chatWindow">
         <div class="chatbot-header">
-            <div class="chatbot-avatar">🤖</div>
+            <div class="chatbot-avatar">AC</div>
             <div>
-                <div class="chatbot-name">BaazWix Assistant</div>
+                <div class="chatbot-name">Amal Collection Assistant</div>
                 <div class="chatbot-status">● Online</div>
             </div>
             <button class="chatbot-close" id="chatClose">✕</button>
         </div>
         <div class="chatbot-messages" id="chatMessages">
             <div class="chat-msg bot">
-                <div class="chat-bubble">👋 Hi! I'm your BaazWix assistant. Ask me about products, prices, shipping, or anything else!</div>
+                <div class="chat-bubble">Hello! I'm your Amal Collection assistant. Ask me about suits, sizes, fabrics, shipping, or anything else!</div>
             </div>
         </div>
         <div class="chatbot-input-area">
@@ -217,7 +216,7 @@
     <!-- Scroll Preservation: save position before navigation, restore on load -->
     <script>
         (function () {
-            const KEY = 'baazwix_scroll_' + window.location.pathname;
+            const KEY = 'amal_scroll_' + window.location.pathname;
             // Save on beforeunload (any navigation, reload, form submit)
             window.addEventListener('beforeunload', function () {
                 sessionStorage.setItem(KEY, window.scrollY.toString());

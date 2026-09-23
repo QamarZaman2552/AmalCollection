@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Guest checkout – no login needed. Order ladies suits with Cash on Delivery." />
+  <title>Checkout (No Login) – Amal Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="checkout-page">
+
+  <!-- ═══ Minimal checkout header (sticky) ═══ -->
+  <header class="co-header sticky-top">
+    <div class="co-header-inner">
+      <a href="index.html" class="ac-brand fs-4 text-decoration-none">Amal<em>Collection</em></a>
+      <div class="d-flex align-items-center gap-2">
+        <a href="#" class="btn ac-icon-btn position-relative" aria-label="Wishlist"><i class="bi bi-heart"></i><span class="ac-badge">2</span></a>
+        <a href="checkout.html" class="btn ac-icon-btn position-relative" aria-label="Cart"><i class="bi bi-bag"></i><span class="ac-badge">3</span></a>
+        <a href="index.html" class="co-back ms-1"><i class="bi bi-arrow-left me-1"></i> Back to shop</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container py-4">
+    <div class="row g-4 justify-content-center">
+      <!-- Order summary (mobile first, like Shopify) -->
+      <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
+        <aside class="co-summary">
+          <button type="button" class="co-sum-toggle" id="sumToggle" data-bs-toggle="collapse" data-bs-target="#orderSummary" aria-expanded="false" aria-controls="orderSummary">
+            <span class="co-sum-label"><i class="bi bi-bag me-1"></i> Order summary</span>
+            <span class="co-sum-amount">PKR 7,348</span>
+            <i class="bi bi-chevron-down co-sum-caret"></i>
+          </button>
+
+          <div class="collapse" id="orderSummary">
+            <div class="co-sum-body">
+              <div class="co-item">
+                <img src="https://placehold.co/120x150/d9d0c2/3a3128?text=Lawn" alt="Printed Lawn Suit" />
+                <div class="co-item-info">
+                  <div class="co-item-name">Printed Lawn 3-Piece</div>
+                  <div class="co-item-meta">Summer · Size M · Sand</div>
+                  <div class="co-item-qty">Qty: 1</div>
+                </div>
+                <div class="co-item-price">PKR 2,249</div>
+              </div>
+
+              <div class="co-item">
+                <img src="https://placehold.co/120x150/3a3128/e8dfce?text=Khaddar" alt="Khaddar Winter Suit" />
+                <div class="co-item-info">
+                  <div class="co-item-name">Khaddar Winter Suit</div>
+                  <div class="co-item-meta">Winter · Size L · Charcoal</div>
+                  <div class="co-item-qty">Qty: 1</div>
+                </div>
+                <div class="co-item-price">PKR 5,099</div>
+              </div>
+
+              <div class="co-totals">
+                <div class="co-total-row"><span>Subtotal</span><span>PKR 7,348</span></div>
+                <div class="co-total-row"><span>Shipping</span><span>COD par confirm</span></div>
+                <div class="co-total-row grand"><span>Total</span><span>PKR 7,348</span></div>
+              </div>
+
+              <div class="co-assure">
+                <div><i class="bi bi-check-circle me-1"></i> No login required</div>
+                <div><i class="bi bi-check-circle me-1"></i> 7-day exchange</div>
+                <div><i class="bi bi-check-circle me-1"></i> COD available</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Left: form -->
+      <div class="col-12 col-lg-7 order-2 order-lg-1">
+        <div class="co-main">
+          <nav aria-label="Checkout progress" class="mb-3">
+            <ol class="breadcrumb small mb-0" style="--bs-breadcrumb-divider: '›';">
+              <li class="breadcrumb-item"><a href="#">Cart</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Details</li>
+              <li class="breadcrumb-item text-muted">Confirm</li>
+            </ol>
+          </nav>
+
+          <h1 class="co-title">Guest Checkout</h1>
+          <p class="co-sub"><i class="bi bi-check-circle me-1"></i> No account needed – sirf details bharein aur order confirm karein.</p>
+
+          <form class="co-form" id="guestCheckoutForm" onsubmit="event.preventDefault(); alert('Demo: Order placed! (Prototype)');">
+            <!-- Contact -->
+            <section class="co-section">
+              <h2><i class="bi bi-person me-1"></i> Contact</h2>
+              <div class="mb-3">
+                <label class="form-label" for="coName">Full Name *</label>
+                <input type="text" class="form-control" id="coName" name="name" placeholder="e.g. Ayesha Khan" required autocomplete="name" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="coPhone">Phone *</label>
+                <input type="tel" class="form-control" id="coPhone" name="phone" placeholder="03XX-XXXXXXX" required autocomplete="tel" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="coEmail">Email <span class="text-secondary fw-normal">(optional)</span></label>
+                <input type="email" class="form-control" id="coEmail" name="email" placeholder="you@example.com" autocomplete="email" />
+              </div>
+            </section>
+
+            <!-- Address -->
+            <section class="co-section">
+              <h2><i class="bi bi-geo-alt me-1"></i> Delivery Address</h2>
+              <div class="mb-3">
+                <label class="form-label" for="coAddress">Address *</label>
+                <input type="text" class="form-control" id="coAddress" name="address" placeholder="House #, Street, Area" required autocomplete="street-address" />
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                  <label class="form-label" for="coCity">City *</label>
+                  <input type="text" class="form-control" id="coCity" name="city" placeholder="e.g. Lahore, Multan" required autocomplete="address-level2" />
+                </div>
+                <div class="col-12 col-sm-6">
+                  <label class="form-label" for="coPostal">Postal Code <span class="text-secondary fw-normal">(optional)</span></label>
+                  <input type="text" class="form-control" id="coPostal" name="postal" placeholder="54000" autocomplete="postal-code" />
+                </div>
+              </div>
+            </section>
+
+            <!-- Payment -->
+            <section class="co-section">
+              <h2><i class="bi bi-credit-card me-1"></i> Payment Method</h2>
+              <label class="co-pay active">
+                <input class="form-check-input mt-1" type="radio" name="payment" value="cod" checked />
+                <div>
+                  <b><i class="bi bi-cash-coin me-1"></i> Cash on Delivery</b>
+                  <span>Paisay delivery par dein – safe &amp; simple</span>
+                </div>
+              </label>
+              <label class="co-pay disabled">
+                <input class="form-check-input mt-1" type="radio" name="payment" value="mobile" disabled />
+                <div>
+                  <b><i class="bi bi-phone me-1"></i> JazzCash / EasyPaisa</b>
+                  <span>Coming soon</span>
+                </div>
+              </label>
+            </section>
+
+            <button type="submit" class="btn btn-gold w-100 py-2 co-submit">
+              <i class="bi bi-bag-check me-1"></i> Place Order · COD
+            </button>
+            <p class="co-terms mt-2 mb-0">
+              Order place karne par aap hamari exchange policy se agreement karte hain. Koi login nahi, koi hidden charge nahi.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile sticky total bar -->
+  <div class="co-mobile-bar">
+    <div>
+      <span class="co-mb-label">Total</span>
+      <span class="co-mb-price">PKR 7,348</span>
+    </div>
+    <button class="btn btn-gold" type="button" onclick="document.getElementById('guestCheckoutForm').requestSubmit()">
+      <i class="bi bi-bag-check me-1"></i> Place Order
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.querySelectorAll('.co-pay').forEach(p => {
+      p.addEventListener('click', () => {
+        if (p.classList.contains('disabled')) return;
+        document.querySelectorAll('.co-pay').forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+      });
+    });
+
+    // Desktop: summary open by default; mobile: collapsed (tap header to expand)
+    (function () {
+      const el = document.getElementById('orderSummary');
+      if (!el) return;
+      if (window.matchMedia('(min-width: 992px)').matches) {
+        el.classList.add('show');
+        document.getElementById('sumToggle')?.setAttribute('aria-expanded', 'true');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -57,11 +57,23 @@ namespace ShoppingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)")
+                        .HasDefaultValue("");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -70,11 +82,59 @@ namespace ShoppingApp.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("UserId", "ProductId")
+                    b.HasIndex("UserId", "ProductId", "Size", "Color")
                         .IsUnique()
-                        .HasDatabaseName("IX_CartItems_UserId_ProductId");
+                        .HasDatabaseName("IX_CartItems_UserId_ProductId_Size_Color");
 
                     b.ToTable("CartItems");
+                });
+
+            modelBuilder.Entity("ShoppingApp.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Categories_Name");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Summer Suit",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Winter Suit",
+                            SortOrder = 2
+                        });
                 });
 
             modelBuilder.Entity("ShoppingApp.Models.ChatbotLog", b =>
@@ -207,6 +267,18 @@ namespace ShoppingApp.Migrations
                     b.Property<string>("DeliveryAddress")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("DeliveryCharge")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("GuestEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuestName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GuestPhone")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("nvarchar(max)");
 
@@ -214,10 +286,13 @@ namespace ShoppingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -239,6 +314,12 @@ namespace ShoppingApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -247,6 +328,12 @@ namespace ShoppingApp.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
@@ -306,8 +393,14 @@ namespace ShoppingApp.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Colors")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("DeliveryCharge")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -315,15 +408,33 @@ namespace ShoppingApp.Migrations
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Fabric")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFreeDelivery")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("Pieces")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Season")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Sizes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StitchedType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
@@ -336,139 +447,240 @@ namespace ShoppingApp.Migrations
                     b.HasIndex("Category")
                         .HasDatabaseName("IX_Products_Category");
 
+                    b.HasIndex("Season")
+                        .HasDatabaseName("IX_Products_Season");
+
                     b.ToTable("Products");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Brand = "Asus",
-                            Category = "Laptops",
+                            Brand = "Amal",
+                            Category = "Summer Suit",
+                            Colors = "Sand,Charcoal",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "High-performance gaming laptop with RTX 4070, 16GB RAM, 512GB SSD.",
+                            Description = "Premium printed lawn 3-piece with dupatta. Perfect for summer.",
                             Discount = 10m,
-                            ImagePath = "/images/laptop1.jpg",
-                            Name = "Gaming Laptop Pro",
-                            Price = 189999m,
-                            Stock = 15
+                            Fabric = "Lawn",
+                            ImagePath = "/images/suit-summer-1.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Printed Lawn 3-Piece Suit",
+                            Pieces = 3,
+                            Price = 2499m,
+                            Season = "Summer",
+                            Sizes = "XS,S,M,L,XL,XXL",
+                            StitchedType = "Stitched",
+                            Stock = 40
                         },
                         new
                         {
                             Id = 2,
-                            Brand = "Dell",
-                            Category = "Laptops",
+                            Brand = "Amal",
+                            Category = "Summer Suit",
+                            Colors = "White,Olive",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Lightweight business laptop, Intel Core i7, 16GB RAM, 1TB SSD.",
-                            Discount = 5m,
-                            ImagePath = "/images/laptop2.jpg",
-                            Name = "UltraBook Slim 14",
-                            Price = 149999m,
-                            Stock = 20
+                            Description = "Hand-embroidered cotton 2-piece, breathable summer fabric.",
+                            Discount = 0m,
+                            Fabric = "Cotton",
+                            ImagePath = "/images/suit-summer-2.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Embroidered Cotton Suit",
+                            Pieces = 2,
+                            Price = 2999m,
+                            Season = "Summer",
+                            Sizes = "S,M,L,XL",
+                            StitchedType = "Semi-Stitched",
+                            Stock = 30
                         },
                         new
                         {
                             Id = 3,
-                            Brand = "Sony",
-                            Category = "Audio",
+                            Brand = "Amal",
+                            Category = "Summer Suit",
+                            Colors = "Royal Blue,Rose",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Premium sound, 30hr battery, ANC technology.",
+                            DeliveryCharge = 200m,
+                            Description = "Elegant chiffon formal with heavy embroidery. Wedding ready.",
                             Discount = 15m,
-                            ImagePath = "/images/headphones1.jpg",
-                            Name = "Wireless Noise-Cancelling Headphones",
-                            Price = 29999m,
-                            Stock = 50
+                            Fabric = "Chiffon",
+                            ImagePath = "/images/suit-summer-3.jpg",
+                            IsFreeDelivery = false,
+                            Name = "Chiffon Formal Suit",
+                            Pieces = 3,
+                            Price = 4999m,
+                            Season = "Summer",
+                            Sizes = "S,M,L,XL",
+                            StitchedType = "Stitched",
+                            Stock = 20
                         },
                         new
                         {
                             Id = 4,
-                            Brand = "Logitech",
-                            Category = "Accessories",
+                            Brand = "Amal",
+                            Category = "Winter Suit",
+                            Colors = "Charcoal,Brown",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "RGB backlit, Cherry MX switches, USB-C.",
-                            Discount = 0m,
-                            ImagePath = "/images/keyboard1.jpg",
-                            Name = "Mechanical Gaming Keyboard",
-                            Price = 12999m,
+                            Description = "Warm khaddar 3-piece for winter. Includes shawl.",
+                            Discount = 5m,
+                            Fabric = "Khaddar",
+                            ImagePath = "/images/suit-winter-1.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Khaddar Winter Suit",
+                            Pieces = 3,
+                            Price = 3499m,
+                            Season = "Winter",
+                            Sizes = "XS,S,M,L,XL,XXL",
+                            StitchedType = "Stitched",
                             Stock = 35
                         },
                         new
                         {
                             Id = 5,
-                            Brand = "Samsung",
-                            Category = "Monitors",
+                            Brand = "Amal",
+                            Category = "Winter Suit",
+                            Colors = "Black,Maroon",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "144Hz refresh rate, 1ms response, HDR400.",
+                            Description = "Premium wool suit with matching shawl. Cold weather essential.",
                             Discount = 8m,
-                            ImagePath = "/images/monitor1.jpg",
-                            Name = "4K Curved Monitor 27\"",
-                            Price = 74999m,
-                            Stock = 10
+                            Fabric = "Wool",
+                            ImagePath = "/images/suit-winter-2.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Wool Shawl Suit",
+                            Pieces = 3,
+                            Price = 5999m,
+                            Season = "Winter",
+                            Sizes = "S,M,L,XL",
+                            StitchedType = "Stitched",
+                            Stock = 15
                         },
                         new
                         {
                             Id = 6,
-                            Brand = "Razer",
-                            Category = "Accessories",
+                            Brand = "Amal",
+                            Category = "Summer Suit",
+                            Colors = "Peach,Mint,Cream",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "25,000 DPI, 70hr battery, ultra-lightweight.",
+                            Description = "3-piece unstitched lawn. Customise your own fit.",
                             Discount = 0m,
-                            ImagePath = "/images/mouse1.jpg",
-                            Name = "Wireless Gaming Mouse",
-                            Price = 9999m,
+                            Fabric = "Lawn",
+                            ImagePath = "/images/suit-summer-4.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Unstitched Lawn Suit",
+                            Pieces = 3,
+                            Price = 1999m,
+                            Season = "Summer",
+                            Sizes = "Unstitched",
+                            StitchedType = "Unstitched",
                             Stock = 60
                         },
                         new
                         {
                             Id = 7,
-                            Brand = "Samsung",
-                            Category = "Phones",
+                            Brand = "Amal",
+                            Category = "Winter Suit",
+                            Colors = "Teal,Beige",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "6.7\" AMOLED, 200MP camera, 5000mAh, Snapdragon 8 Gen 3.",
+                            Description = "Soft cambric 2-piece with printed dupatta.",
                             Discount = 5m,
-                            ImagePath = "/images/phone1.jpg",
-                            Name = "Smartphone X15 Pro",
-                            Price = 109999m,
-                            Stock = 25
+                            Fabric = "Cambric",
+                            ImagePath = "/images/suit-winter-3.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Cambric Winter Suit",
+                            Pieces = 2,
+                            Price = 2799m,
+                            Season = "Winter",
+                            Sizes = "XS,S,M,L,XL",
+                            StitchedType = "Semi-Stitched",
+                            Stock = 45
                         },
                         new
                         {
                             Id = 8,
-                            Brand = "Apple",
-                            Category = "Audio",
+                            Brand = "Amal",
+                            Category = "Winter Suit",
+                            Colors = "Gold,Navy",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "ANC, 36hr total battery, IPX5 waterproof.",
+                            DeliveryCharge = 250m,
+                            Description = "Rich jacquard weave formal 3-piece. Festive collection.",
                             Discount = 20m,
-                            ImagePath = "/images/earbuds1.jpg",
-                            Name = "True Wireless Earbuds",
-                            Price = 14999m,
-                            Stock = 80
+                            Fabric = "Jacquard",
+                            ImagePath = "/images/suit-winter-4.jpg",
+                            IsFreeDelivery = false,
+                            Name = "Jacquard Formal Suit",
+                            Pieces = 3,
+                            Price = 6499m,
+                            Season = "Winter",
+                            Sizes = "S,M,L,XL,XXL",
+                            StitchedType = "Stitched",
+                            Stock = 12
                         },
                         new
                         {
                             Id = 9,
-                            Brand = "Anker",
-                            Category = "Accessories",
+                            Brand = "Amal",
+                            Category = "Summer Suit",
+                            Colors = "Lavender,Ivory",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "HDMI 4K, 100W PD, SD/MicroSD, 3x USB-A.",
+                            Description = "Lightweight cotton net with inner slip. Summer party wear.",
                             Discount = 0m,
-                            ImagePath = "/images/hub1.jpg",
-                            Name = "USB-C Hub 7-in-1",
-                            Price = 4999m,
-                            Stock = 100
+                            Fabric = "Cotton",
+                            ImagePath = "/images/suit-summer-5.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Cotton Net Summer Suit",
+                            Pieces = 3,
+                            Price = 3999m,
+                            Season = "Summer",
+                            Sizes = "S,M,L,XL",
+                            StitchedType = "Stitched",
+                            Stock = 25
                         },
                         new
                         {
                             Id = 10,
-                            Brand = "Samsung",
-                            Category = "Storage",
+                            Brand = "Amal",
+                            Category = "Winter Suit",
+                            Colors = "Grey,Rust",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Read 1050MB/s, USB 3.2 Gen 2, shock-proof.",
+                            Description = "Unstitched khaddar 3-piece with warm shawl.",
                             Discount = 10m,
-                            ImagePath = "/images/ssd1.jpg",
-                            Name = "Portable SSD 1TB",
-                            Price = 19999m,
-                            Stock = 40
+                            Fabric = "Khaddar",
+                            ImagePath = "/images/suit-winter-5.jpg",
+                            IsFreeDelivery = true,
+                            Name = "Khaddar Unstitched Winter",
+                            Pieces = 3,
+                            Price = 2599m,
+                            Season = "Winter",
+                            Sizes = "Unstitched",
+                            StitchedType = "Unstitched",
+                            Stock = 50
                         });
+                });
+
+            modelBuilder.Entity("ShoppingApp.Models.ProductImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "SortOrder")
+                        .HasDatabaseName("IX_ProductImages_ProductId_SortOrder");
+
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("ShoppingApp.Models.Review", b =>
@@ -504,6 +716,53 @@ namespace ShoppingApp.Migrations
                         .HasDatabaseName("IX_Reviews_UserId_ProductId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("ShoppingApp.Models.SiteSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CodEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ContactEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactWhatsapp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DeliveryCharge")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("FreeDeliveryThreshold")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsFreeDelivery")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CodEnabled = true,
+                            ContactEmail = "hello@amalcollection.pk",
+                            ContactPhone = "0300-0000000",
+                            ContactWhatsapp = "",
+                            DeliveryCharge = 0m,
+                            FreeDeliveryThreshold = 0m,
+                            IsFreeDelivery = true
+                        });
                 });
 
             modelBuilder.Entity("ShoppingApp.Models.User", b =>
@@ -644,9 +903,7 @@ namespace ShoppingApp.Migrations
                 {
                     b.HasOne("ShoppingApp.Models.User", "User")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -679,6 +936,17 @@ namespace ShoppingApp.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShoppingApp.Models.ProductImage", b =>
+                {
+                    b.HasOne("ShoppingApp.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("ShoppingApp.Models.Review", b =>
@@ -722,6 +990,11 @@ namespace ShoppingApp.Migrations
             modelBuilder.Entity("ShoppingApp.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("ShoppingApp.Models.Product", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("ShoppingApp.Models.User", b =>

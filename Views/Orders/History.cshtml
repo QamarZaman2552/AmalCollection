@@ -63,7 +63,11 @@
                                  onerror="this.src='/images/placeholder.jpg'" />
                             <div class="otc-item-info">
                                 <div class="otc-item-name">@item.Product?.Name</div>
-                                <div class="otc-item-qty">Qty: @item.Quantity</div>
+                                <div class="otc-item-qty">
+                                    Qty: @item.Quantity
+                                    @if (!string.IsNullOrEmpty(item.Size)) { <span> · Size: @item.Size</span> }
+                                    @if (!string.IsNullOrEmpty(item.Color)) { <span> · Color: @item.Color</span> }
+                                </div>
                             </div>
                             <div class="otc-item-price">PKR @((item.UnitPrice * item.Quantity).ToString("N0"))</div>
                             <a href="/Products/Detail/@item.ProductId" class="btn-glass" style="font-size:0.8rem;padding:0.3rem 0.8rem;">Review</a>
@@ -73,8 +77,10 @@
 
                 <!-- Footer -->
                 <div class="otc-footer">
-                    <span>📍 @order.DeliveryAddress</span>
-                    <span>💳 @order.PaymentMethod</span>
+                    <span>@order.DeliveryAddress</span>
+                    <span>@order.PaymentMethod</span>
+                    <span>Subtotal: PKR @order.Subtotal.ToString("N0")</span>
+                    <span>@(order.DeliveryCharge == 0 ? "Delivery: Free" : $"Delivery: PKR {order.DeliveryCharge:N0}")</span>
                     <span class="otc-total">Total: PKR @order.TotalAmount.ToString("N0")</span>
                 </div>
 

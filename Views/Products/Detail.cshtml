@@ -9,6 +9,13 @@
     var avgRating      = (double)(ViewBag.AverageRating ?? 0.0);
     bool userReviewed  = (bool)(ViewBag.UserReviewed ?? false);
     bool hasPurchased  = (bool)(ViewBag.HasPurchased ?? false);
+
+    var gallery = Model.Images?.OrderBy(i => i.SortOrder).ToList() ?? new List<ProductImage>();
+    if (!gallery.Any() && !string.IsNullOrEmpty(Model.ImagePath))
+        gallery.Add(new ProductImage { Id = 0, ProductId = Model.Id, ImagePath = Model.ImagePath, SortOrder = 0 });
+
+    var sizeList = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+    var colorList = (Model.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 }
 
 <section class="product-detail-section">
@@ -16,17 +23,28 @@
     <!-- ── Product Info Grid ── -->
     <div class="product-detail-grid">
 
-        <!-- Image -->
+        <!-- Image gallery -->
         <div class="product-detail-img">
-            <img src="@(Model.ImagePath ?? "/images/placeholder.jpg")"
+            <img src="@(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg")"
                  alt="@Model.Name"
                  onerror="this.src='/images/placeholder.jpg'"
                  id="mainImage" />
+            @if (gallery.Count > 1)
+            {
+                <div class="pd-thumbs" id="pdThumbs">
+                    @foreach (var img in gallery)
+                    {
+                        <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@img.ImagePath">
+                            <img src="@img.ImagePath" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
+                        </button>
+                    }
+                </div>
+            }
         </div>
 
         <!-- Info Panel -->
         <div class="product-detail-info">
-            <div class="product-category">@Model.Category · @Model.Brand</div>
+            <div class="product-category">@Model.Category · @Model.Fabric @(Model.Pieces.HasValue ? $"· {Model.Pieces}-Piece" : "")</div>
             <h1 class="product-detail-name">@Model.Name</h1>
 
             <!-- Star summary -->
@@ -63,11 +81,16 @@
                 @(Model.Stock > 0 ? $"✓ In Stock ({Model.Stock} available)" : "✗ Out of Stock")
             </div>
 
+            <!-- Delivery -->
+            <div class="stock-status in-stock" style="margin-top:0.5rem;">
+                @(Model.IsFreeDelivery ? "Free delivery available" : $"Delivery: PKR {(Model.DeliveryCharge ?? 0).ToString("N0")}") · Cash on Delivery
+            </div>
+
             <!-- Description -->
             @if (!string.IsNullOrEmpty(Model.Description))
             {
                 <div class="pd-desc-box">
-                    <div class="pd-desc-label">📋 Description</div>
+                    <div class="pd-desc-label">Description</div>
                     <p class="product-desc">@Model.Description</p>
                 </div>
             }
@@ -76,7 +99,7 @@
             @if (Context.Session.GetString("UserRole") == "admin")
             {
                 <div class="not-buyer-notice" style="margin-bottom:1rem;">
-                    🔒 Admins cannot purchase products or add them to cart.
+                    Admins cannot purchase products or add them to cart.
                 </div>
             }
             else if (Model.Stock > 0)
@@ -84,14 +107,56 @@
                 <form method="post" action="/Cart/AddPost" class="add-cart-form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="productId" value="@Model.Id" />
+
+                    @if (sizeList.Count > 0)
+                    {
+                        <div class="form-group" style="margin-bottom:0.75rem;">
+                            <label>Size</label>
+                            <div class="pd-option-row" id="sizeOptions">
+                                @foreach (var s in sizeList)
+                                {
+                                    <label class="pd-option-chip">
+                                        <input type="radio" name="size" value="@s" @(sizeList.Count == 1 ? "checked" : "") />
+                                        <span>@s</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="size" value="" />
+                    }
+
+                    @if (colorList.Count > 0)
+                    {
+                        <div class="form-group" style="margin-bottom:0.75rem;">
+                            <label>Color</label>
+                            <div class="pd-option-row" id="colorOptions">
+                                @foreach (var c in colorList)
+                                {
+                                    <label class="pd-option-chip">
+                                        <input type="radio" name="color" value="@c" @(colorList.Count == 1 ? "checked" : "") />
+                                        <span>@c</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="color" value="" />
+                    }
+
                     <div class="qty-row">
                         <label>Qty:</label>
                         <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="qty-input" />
                     </div>
                     <div class="cart-wish-row">
-                        <button type="submit" class="btn-primary" style="flex:1;">🛒 Add to Cart</button>
-                        <button type="button" class="btn-wishlist" onclick="this.closest('form').before(this); document.getElementById('wishForm@(Model.Id)').submit();" title="Save to Wishlist">❤️</button>
+                        <button type="submit" class="btn-primary" style="flex:1;">Add to Cart</button>
+                        <button type="button" class="btn-wishlist" onclick="document.getElementById('wishForm@(Model.Id)').submit();" title="Save to Wishlist">♡</button>
                     </div>
+                    <p style="font-size:0.78rem;color:var(--text-3);margin-top:0.6rem;">No login needed to order · Cash on Delivery · 7-Day Exchange</p>
                 </form>
                 <form id="wishForm@(Model.Id)" method="post" action="/Wishlist/Toggle" style="display:none;">
                     @Html.AntiForgeryToken()
@@ -257,6 +322,31 @@
 
 @section Scripts {
 <script>
+// Gallery thumbs
+document.querySelectorAll('.pd-thumb').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var src = btn.getAttribute('data-src');
+        var main = document.getElementById('mainImage');
+        if (main && src) main.src = src;
+        document.querySelectorAll('.pd-thumb').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+    });
+});
+
+// Require size/color when options exist
+document.querySelector('.add-cart-form')?.addEventListener('submit', function (e) {
+    var sizeInputs = document.querySelectorAll('input[name="size"]');
+    var colorInputs = document.querySelectorAll('input[name="color"]');
+    if (sizeInputs.length > 0 && sizeInputs[0].type === 'radio') {
+        var size = document.querySelector('input[name="size"]:checked');
+        if (!size) { e.preventDefault(); alert('Please select a size.'); return; }
+    }
+    if (colorInputs.length > 0 && colorInputs[0].type === 'radio') {
+        var color = document.querySelector('input[name="color"]:checked');
+        if (!color) { e.preventDefault(); alert('Please select a color.'); return; }
+    }
+});
+
 const ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
 
 function setRating(val) {

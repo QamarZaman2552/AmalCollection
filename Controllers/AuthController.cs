@@ -52,7 +52,7 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     user.Email,
-                    "Welcome to BaazWix!",
+                    "Amal Collection Welcome!",
                     EmailTemplates.Welcome(user.FullName, Logo, SiteUrl)
                 );
             }
@@ -69,7 +69,7 @@ namespace ShoppingApp.Controllers
                 {
                     await _emailSender.SendAsync(
                         adminEmail,
-                        "BaazWix - New User Registered",
+                        "Amal Collection - New User Registered",
                         EmailTemplates.NewRegistration(user.FullName, user.Email, Logo, SiteUrl)
                     );
                 }
@@ -197,7 +197,7 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     email.Trim(),
-                    "BaazWix Password Reset Verification Code",
+                    "Amal Collection Password Reset Verification Code",
                     EmailTemplates.ResetOtp(userName, otp, Logo, SiteUrl)
                 );
             }
@@ -293,7 +293,7 @@ namespace ShoppingApp.Controllers
             {
                 await _emailSender.SendAsync(
                     userEmail,
-                    "BaazWix Password Reset Confirmation",
+                    "Amal Collection Password Reset Confirmation",
                     EmailTemplates.PasswordResetConfirmation(userName, Logo, SiteUrl)
                 );
             }
