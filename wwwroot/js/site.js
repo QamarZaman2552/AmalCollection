@@ -386,14 +386,12 @@ if (!document.getElementById('rippleStyle')) {
 
 // ─── Navbar scroll shadow ─────────────────────────────────
 window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.navbar');
+  const nav = document.querySelector('.navbar.ac-nav');
   if (!nav) return;
   if (window.scrollY > 10) {
-    nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.35)';
-    nav.style.background = 'rgba(10,13,20,0.96)';
+    nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.08)';
   } else {
     nav.style.boxShadow = '';
-    nav.style.background = 'rgba(10,13,20,0.85)';
   }
 }, { passive: true });
 
@@ -426,7 +424,12 @@ window.addEventListener('scroll', () => {
       toggle.addEventListener('click', function () {
         const show = input.type === 'password';
         input.type = show ? 'text' : 'password';
-        toggle.textContent = show ? '🙈' : '👁️';
+        const icon = toggle.querySelector('i');
+        if (icon) {
+          icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+        } else {
+          toggle.textContent = show ? '🙈' : '👁️';
+        }
         toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       });
     }
@@ -502,46 +505,127 @@ window.addEventListener('scroll', () => {
 })();
 
 // ─── Light/Dark Theme Toggle ───────────────────────
-var sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-var moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-
 function toggleTheme() {
   var body = document.body;
-  var icon = document.getElementById('themeIcon');
-  var label = document.getElementById('themeLabel');
-
   if (body.classList.contains('light-mode')) {
     body.classList.remove('light-mode');
-    if (icon) icon.innerHTML = moonPath;
-    if (label) label.textContent = 'Dark';
     localStorage.setItem('theme', 'dark');
   } else {
     body.classList.add('light-mode');
-    if (icon) icon.innerHTML = sunPath;
-    if (label) label.textContent = 'Light';
     localStorage.setItem('theme', 'light');
   }
 }
-
 window.addEventListener('DOMContentLoaded', function () {
   var saved = localStorage.getItem('theme');
   if (saved === 'dark') {
     document.body.classList.remove('light-mode');
-    var icon = document.getElementById('themeIcon');
-    var label = document.getElementById('themeLabel');
-    if (icon) icon.innerHTML = moonPath;
-    if (label) label.textContent = 'Dark';
   } else {
     document.body.classList.add('light-mode');
-    var icon = document.getElementById('themeIcon');
-    var label = document.getElementById('themeLabel');
-    if (icon) icon.innerHTML = sunPath;
-    if (label) label.textContent = 'Light';
   }
-
   var btn = document.getElementById('themeToggle');
   var mobileBtn = document.getElementById('mobileThemeToggle');
   if (btn) btn.addEventListener('click', toggleTheme);
   if (mobileBtn) mobileBtn.addEventListener('click', toggleTheme);
+});
+
+// ─── Prototype Hero Slider (#heroSlider) ───────────
+(function () {
+  const hero = document.getElementById('heroSlider');
+  if (!hero) return;
+  const slides = hero.querySelectorAll('.hero-slide');
+  const dots = hero.querySelectorAll('.hero-dot');
+  const num = document.getElementById('heroNum');
+  const bar = document.getElementById('heroBar');
+  if (!slides.length) return;
+  let cur = 0;
+  let timer;
+  const DURATION = 6000;
+
+  function restartBar() {
+    if (!bar) return;
+    bar.style.animation = 'none';
+    void bar.offsetWidth;
+    bar.style.animation = '';
+  }
+  function go(i) {
+    cur = (i + slides.length) % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === cur));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === cur));
+    if (num) num.textContent = String(cur + 1).padStart(2, '0');
+    restartBar();
+    resetTimer();
+  }
+  function next() { go(cur + 1); }
+  function prev() { go(cur - 1); }
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(next, DURATION);
+  }
+  hero.querySelector('#heroNext')?.addEventListener('click', next);
+  hero.querySelector('#heroPrev')?.addEventListener('click', prev);
+  dots.forEach(d => d.addEventListener('click', () => go(parseInt(d.dataset.goto))));
+  hero.addEventListener('mouseenter', () => { clearInterval(timer); hero.classList.add('paused'); });
+  hero.addEventListener('mouseleave', () => { hero.classList.remove('paused'); resetTimer(); });
+  let startX = 0;
+  hero.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  hero.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
+  }, { passive: true });
+  resetTimer();
+})();
+
+// ─── Prototype size/season filter chips ────────────
+document.addEventListener('click', function (e) {
+  const chip = e.target.closest('.size-chip');
+  if (!chip) return;
+  const group = chip.closest('.size-filter');
+  if (!group) return;
+  group.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+});
+
+// ─── Close Bootstrap collapse nav on link click ────
+document.addEventListener('DOMContentLoaded', function () {
+  const mainNav = document.getElementById('mainNav');
+  if (!mainNav || typeof bootstrap === 'undefined') return;
+  mainNav.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      const el = bootstrap.Collapse.getInstance(mainNav);
+      if (el && mainNav.classList.contains('show')) el.hide();
+    });
+  });
+});
+
+// ─── Checkout pay option active state ──────────────
+document.addEventListener('click', function (e) {
+  const pay = e.target.closest('.co-pay');
+  if (!pay || pay.classList.contains('disabled')) return;
+  document.querySelectorAll('.co-pay').forEach(x => x.classList.remove('active'));
+  pay.classList.add('active');
+});
+
+// ─── Checkout summary: open on desktop ─────────────
+document.addEventListener('DOMContentLoaded', function () {
+  const el = document.getElementById('orderSummary');
+  if (!el) return;
+  if (window.matchMedia('(min-width: 992px)').matches) {
+    el.classList.add('show');
+    document.getElementById('sumToggle')?.setAttribute('aria-expanded', 'true');
+  }
+});
+
+// ─── Product detail size/color chip select ─────────
+document.addEventListener('click', function (e) {
+  const sizeBtn = e.target.closest('.size-opt:not(.disabled)');
+  if (sizeBtn) {
+    sizeBtn.parentElement?.querySelectorAll('.size-opt').forEach(x => x.classList.remove('active'));
+    sizeBtn.classList.add('active');
+  }
+  const colorBtn = e.target.closest('.color-opt');
+  if (colorBtn) {
+    colorBtn.parentElement?.querySelectorAll('.color-opt').forEach(x => x.classList.remove('active'));
+    colorBtn.classList.add('active');
+  }
 });
 

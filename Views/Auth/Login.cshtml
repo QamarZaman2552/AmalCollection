@@ -4,13 +4,13 @@
 
 <div class="auth-page">
     <div class="auth-card">
-        <div class="auth-logo"><span>Amal Collection</span></div>
+        <div class="auth-logo"><span>Amal <em style="font-style:normal;color:var(--gold);">Collection</em></span></div>
         <h1 class="auth-title">Welcome Back</h1>
         <p class="auth-sub">Sign in to continue shopping</p>
 
         @if (ViewBag.Error != null)
         {
-            <div class="alert alert-error">⚠️ @ViewBag.Error</div>
+            <div class="alert alert-error"><i class="bi bi-exclamation-circle me-1"></i> @ViewBag.Error</div>
         }
 
         <form method="post" action="/Auth/Login" class="auth-form" autocomplete="off">
@@ -24,7 +24,7 @@
                 <label for="password">Password</label>
                 <div class="pw-field">
                     <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password" />
-                    <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="bi bi-eye"></i></button>
                 </div>
             </div>
             <div class="auth-forgot">
@@ -32,15 +32,9 @@
                     Forgot password?
                 </a>
             </div>
-            <button type="submit" class="btn-primary btn-full">Sign In →</button>
+            <button type="submit" class="btn btn-gold w-100 py-2">Sign In <i class="bi bi-arrow-right ms-1"></i></button>
         </form>
 
         <p class="auth-switch">Don't have an account? <a href="/Auth/Register?returnUrl=@System.Net.WebUtility.UrlEncode(ViewBag.ReturnUrl as string)">Register here</a></p>
-
-        @* <div class="demo-hint">
-            <strong>Demo accounts:</strong><br />
-            Customer: register a new account<br />
-            Admin: admin@shop.com / Admin@123
-        </div> *@
     </div>
 </div>

@@ -18,307 +18,426 @@
     var colorList = (Model.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 }
 
-<section class="product-detail-section">
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb pt-3" aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/?season=@Model.Season">@Model.Season</a></li>
+            <li class="breadcrumb-item"><a href="/?category=@Model.Category">@Model.Category</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
 
-    <!-- ── Product Info Grid ── -->
-    <div class="product-detail-grid">
-
-        <!-- Image gallery -->
-        <div class="product-detail-img">
-            <img src="@(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg")"
-                 alt="@Model.Name"
-                 onerror="this.src='/images/placeholder.jpg'"
-                 id="mainImage" />
-            @if (gallery.Count > 1)
-            {
-                <div class="pd-thumbs" id="pdThumbs">
-                    @foreach (var img in gallery)
-                    {
-                        <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@img.ImagePath">
-                            <img src="@img.ImagePath" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
-                        </button>
-                    }
+    <!-- ═══ Product Detail ═══ -->
+    <div class="row g-4 g-lg-5 py-4 pb-5">
+        <!-- Gallery -->
+        <div class="col-12 col-lg-6">
+            <div class="pd-gallery">
+                <div class="pd-main-img">
+                    <img id="mainImage" src="@(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg")"
+                         alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
                 </div>
-            }
+                @if (gallery.Count > 1)
+                {
+                    <div class="pd-thumbs" id="pdThumbs">
+                        @foreach (var img in gallery)
+                        {
+                            <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@img.ImagePath">
+                                <img src="@img.ImagePath" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
         </div>
 
-        <!-- Info Panel -->
-        <div class="product-detail-info">
-            <div class="product-category">@Model.Category · @Model.Fabric @(Model.Pieces.HasValue ? $"· {Model.Pieces}-Piece" : "")</div>
-            <h1 class="product-detail-name">@Model.Name</h1>
+        <!-- Info -->
+        <div class="col-12 col-lg-6">
+            <div class="pd-info">
+                <div class="pd-cat">@Model.Season · @Model.Fabric @(Model.Pieces.HasValue ? $"· {Model.Pieces}-Piece" : "")</div>
+                <h1 class="pd-name">@Model.Name</h1>
 
-            <!-- Star summary -->
-            <div class="pd-rating-summary">
-                <div class="pd-stars">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        if (i <= Math.Round(avgRating))
+                <div class="pd-rating">
+                    <span class="stars">
+                        @for (int i = 1; i <= 5; i++)
                         {
-                            <span class="pd-star filled">★</span>
+                            if (i <= Math.Round(avgRating))
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-star"></i>
+                            }
+                        }
+                    </span>
+                    <span>@avgRating.ToString("0.0") · @reviewCount @(reviewCount == 1 ? "review" : "reviews")</span>
+                </div>
+
+                <div class="pd-price-row">
+                    <span class="pd-price">PKR @Model.FinalPrice.ToString("N0")</span>
+                    @if (Model.Discount > 0)
+                    {
+                        <span class="pd-price-old">PKR @Model.Price.ToString("N0")</span>
+                        <span class="pd-save">Save @Model.Discount%</span>
+                    }
+                </div>
+                <div class="pd-stock @(Model.Stock > 0 ? "in" : "")">
+                    @if (Model.Stock > 0)
+                    {
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span style="color:var(--green);">In Stock (@Model.Stock available)</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-x-circle me-1"></i>
+                        <span style="color:var(--red);">Out of Stock</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-secondary lh-lg mb-2" style="font-size:0.94rem;">@Model.Description</p>
+                }
+
+                @if (Model.IsFreeDelivery)
+                {
+                    <p class="pd-nologin"><i class="bi bi-truck me-1"></i> Free delivery available · Cash on Delivery</p>
+                }
+                else if ((Model.DeliveryCharge ?? 0) > 0)
+                {
+                    <p class="pd-nologin"><i class="bi bi-truck me-1"></i> Delivery: PKR @Model.DeliveryCharge!.Value.ToString("N0") · Cash on Delivery</p>
+                }
+
+                <hr class="my-4" />
+
+                @if (Context.Session.GetString("UserRole") == "admin")
+                {
+                    <div class="not-buyer-notice" style="margin-bottom:1rem;">
+                        Admins cannot purchase products or add them to cart.
+                    </div>
+                }
+                else if (Model.Stock > 0)
+                {
+                    <form method="post" action="/Cart/AddPost" class="add-cart-form co-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+
+                        @if (sizeList.Count > 0)
+                        {
+                            <div class="opt-label mb-3">
+                                <span>Select Size</span>
+                                <a href="/About#size-guide" class="size-guide">Size Guide</a>
+                            </div>
+                            <div class="size-options mb-4" id="sizeOptions">
+                                @foreach (var s in sizeList)
+                                {
+                                    <button class="size-opt @(sizeList.Count == 1 ? "active" : "")" type="button" data-value="@s">@s</button>
+                                }
+                            </div>
+                            <input type="hidden" name="size" id="sizeInput" value="@(sizeList.Count == 1 ? sizeList[0] : "")" />
                         }
                         else
                         {
-                            <span class="pd-star">★</span>
+                            <input type="hidden" name="size" value="" />
                         }
-                    }
-                </div>
-                <span class="pd-rating-val">@avgRating.ToString("0.0")</span>
-                <span class="pd-rating-count">(@reviewCount @(reviewCount == 1 ? "review" : "reviews"))</span>
-            </div>
 
-            <!-- Price -->
-            <div class="product-detail-price">
-                <span class="price-final-lg">PKR @Model.FinalPrice.ToString("N0")</span>
-                @if (Model.Discount > 0)
+                        @if (colorList.Count > 0)
+                        {
+                            <div class="opt-label mb-3"><span>Select Color · <span id="colorLabelName">@colorList[0]</span></span></div>
+                            <div class="color-options mb-4" id="colorOptions">
+                                @foreach (var c in colorList)
+                                {
+                                    <button class="color-opt @(colorList.Count == 1 ? "active" : "")" type="button" data-name="@c" aria-label="@c" style="background:@GetColorHex(c)"></button>
+                                }
+                            </div>
+                            <input type="hidden" name="color" id="colorInput" value="@(colorList.Count == 1 ? colorList[0] : "")" />
+                        }
+                        else
+                        {
+                            <input type="hidden" name="color" value="" />
+                        }
+
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <span class="opt-label mb-0">Quantity</span>
+                            <div class="input-group qty-ctrl" style="width:auto;">
+                                <button class="btn" type="button" id="qtyMinus"><i class="bi bi-dash"></i></button>
+                                <input type="number" name="quantity" id="qtyInput" class="form-control text-center" value="1" min="1" max="@Model.Stock" />
+                                <button class="btn" type="button" id="qtyPlus"><i class="bi bi-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mb-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1 py-2">
+                                <i class="bi bi-bag-plus me-1"></i> Add to Cart
+                            </button>
+                            <button type="button" class="btn btn-outline-dark rounded-pill px-3 pd-wish" onclick="document.getElementById('wishForm@(Model.Id)').submit();" aria-label="Wishlist">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                        </div>
+                        <p class="pd-nologin"><i class="bi bi-check-circle me-1"></i> No login required – guest checkout available</p>
+                    </form>
+                    <form id="wishForm@(Model.Id)" method="post" action="/Wishlist/Toggle" style="display:none;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <input type="hidden" name="returnUrl" value="/Products/Detail/@Model.Id" />
+                    </form>
+                }
+                else
                 {
-                    <span class="price-original-lg">PKR @Model.Price.ToString("N0")</span>
-                    <span class="discount-pill">@Model.Discount% OFF</span>
+                    <button class="btn btn-primary w-100 py-2" disabled>Out of Stock</button>
+                }
+
+                <!-- Delivery -->
+                <div class="delivery-box mt-3">
+                    <div class="delivery-row">
+                        <i class="bi bi-truck"></i>
+                        <div><b>Local Delivery:</b> Order aaj karein, delivery agle 24–48 ghante mein.</div>
+                    </div>
+                    <div class="delivery-row">
+                        <i class="bi bi-cash-coin"></i>
+                        <div><b>Cash on Delivery</b> available – paisay delivery par dein.</div>
+                    </div>
+                    <div class="delivery-row">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <div><b>7-Day Exchange:</b> Size fit na ho to asani se exchange karein.</div>
+                    </div>
+                </div>
+
+                <!-- Trust -->
+                <div class="pd-trust row g-2">
+                    <div class="col-4"><span><i class="bi bi-patch-check me-1"></i> Genuine Product</span></div>
+                    <div class="col-4"><span><i class="bi bi-shield-lock me-1"></i> Secure Checkout</span></div>
+                    <div class="col-4"><span><i class="bi bi-whatsapp me-1"></i> WhatsApp Support</span></div>
+                </div>
+
+                <!-- Accordions -->
+                <div class="accordion pd-acc mt-4" id="pdAcc">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accDetails">
+                                Product Details
+                            </button>
+                        </h2>
+                        <div id="accDetails" class="accordion-collapse collapse show" data-bs-parent="#pdAcc">
+                            <div class="accordion-body">
+                                Fabric: @Model.Fabric · Season: @Model.Season · Category: @Model.Category
+                                @(Model.Pieces.HasValue ? $"· Pieces: {Model.Pieces}" : "")
+                                @(Model.StitchedType != null ? $"· {Model.StitchedType}" : "")
+                                · Care: Machine wash cold, do not bleach, tumble dry low.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accShip">
+                                Shipping &amp; Returns
+                            </button>
+                        </h2>
+                        <div id="accShip" class="accordion-collapse collapse" data-bs-parent="#pdAcc">
+                            <div class="accordion-body">
+                                Local delivery 24–48 hrs. Nationwide 2–4 working days.
+                                Free exchange within 7 days on unworn items with tags.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accRev">
+                                Reviews (@reviewCount)
+                            </button>
+                        </h2>
+                        <div id="accRev" class="accordion-collapse collapse" data-bs-parent="#pdAcc">
+                            <div class="accordion-body">
+                                @if (reviews.Any())
+                                {
+                                    @foreach (var r in reviews.Take(3))
+                                    {
+                                        <div class="mb-2">
+                                            <span class="stars" style="color:var(--gold);">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                                }
+                                            </span>
+                                            – "@(r.Comment ?? "Great product!")" – @(r.User?.FullName ?? "User")
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>No reviews yet. Be the first!</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Reviews Section ═══ -->
+<section class="section">
+    <div class="container">
+        <div class="reviews-section">
+            <div class="reviews-header">
+                <div>
+                    <h2 class="reviews-title"><i class="bi bi-star-fill text-warning"></i> Customer Reviews</h2>
+                    <p style="color:var(--text-3); font-size:0.85rem; margin:0;">
+                        @reviewCount @(reviewCount == 1 ? "review" : "reviews") · Average rating @avgRating.ToString("0.0") / 5.0
+                    </p>
+                </div>
+                @if (reviewCount > 0)
+                {
+                    <div class="rating-breakdown">
+                        @for (int star = 5; star >= 1; star--)
+                        {
+                            int count = reviews.Count(r => r.Rating == star);
+                            double pct = reviewCount > 0 ? (double)count / reviewCount * 100 : 0;
+                            <div class="rb-row">
+                                <span class="rb-label">@star ★</span>
+                                <div class="rb-bar-wrap">
+                                    <div class="rb-bar-fill" style="width:@pct.ToString("0")%"></div>
+                                </div>
+                                <span class="rb-count">@count</span>
+                            </div>
+                        }
+                    </div>
                 }
             </div>
 
-            <!-- Stock Status -->
-            <div class="stock-status @(Model.Stock > 0 ? "in-stock" : "out-stock")">
-                @(Model.Stock > 0 ? $"✓ In Stock ({Model.Stock} available)" : "✗ Out of Stock")
-            </div>
-
-            <!-- Delivery -->
-            <div class="stock-status in-stock" style="margin-top:0.5rem;">
-                @(Model.IsFreeDelivery ? "Free delivery available" : $"Delivery: PKR {(Model.DeliveryCharge ?? 0).ToString("N0")}") · Cash on Delivery
-            </div>
-
-            <!-- Description -->
-            @if (!string.IsNullOrEmpty(Model.Description))
+            @if (userId != null && hasPurchased && !userReviewed)
             {
-                <div class="pd-desc-box">
-                    <div class="pd-desc-label">Description</div>
-                    <p class="product-desc">@Model.Description</p>
-                </div>
-            }
-
-            <!-- Add to Cart + Wishlist -->
-            @if (Context.Session.GetString("UserRole") == "admin")
-            {
-                <div class="not-buyer-notice" style="margin-bottom:1rem;">
-                    Admins cannot purchase products or add them to cart.
-                </div>
-            }
-            else if (Model.Stock > 0)
-            {
-                <form method="post" action="/Cart/AddPost" class="add-cart-form">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="productId" value="@Model.Id" />
-
-                    @if (sizeList.Count > 0)
-                    {
-                        <div class="form-group" style="margin-bottom:0.75rem;">
-                            <label>Size</label>
-                            <div class="pd-option-row" id="sizeOptions">
-                                @foreach (var s in sizeList)
+                <div class="write-review-box">
+                    <h3 class="write-review-title">Write a Review <span class="verified-buyer-tag">Verified Buyer</span></h3>
+                    <form method="post" action="/Products/SubmitReview" id="reviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <div class="star-picker" id="starPicker">
+                            <span class="sp-label">Your Rating:</span>
+                            <div class="sp-stars" id="spStars">
+                                @for (int i = 1; i <= 5; i++)
                                 {
-                                    <label class="pd-option-chip">
-                                        <input type="radio" name="size" value="@s" @(sizeList.Count == 1 ? "checked" : "") />
-                                        <span>@s</span>
-                                    </label>
+                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)">★</button>
                                 }
                             </div>
+                            <span class="sp-hint" id="spHint">Click a star</span>
+                            <input type="hidden" name="rating" id="ratingInput" value="0" required />
                         </div>
-                    }
-                    else
-                    {
-                        <input type="hidden" name="size" value="" />
-                    }
-
-                    @if (colorList.Count > 0)
-                    {
-                        <div class="form-group" style="margin-bottom:0.75rem;">
-                            <label>Color</label>
-                            <div class="pd-option-row" id="colorOptions">
-                                @foreach (var c in colorList)
-                                {
-                                    <label class="pd-option-chip">
-                                        <input type="radio" name="color" value="@c" @(colorList.Count == 1 ? "checked" : "") />
-                                        <span>@c</span>
-                                    </label>
-                                }
-                            </div>
+                        <div class="form-group">
+                            <label for="comment">Your Review (optional)</label>
+                            <textarea id="comment" name="comment" placeholder="Share your experience with this product…" rows="4"></textarea>
                         </div>
-                    }
-                    else
-                    {
-                        <input type="hidden" name="color" value="" />
-                    }
-
-                    <div class="qty-row">
-                        <label>Qty:</label>
-                        <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="qty-input" />
-                    </div>
-                    <div class="cart-wish-row">
-                        <button type="submit" class="btn-primary" style="flex:1;">Add to Cart</button>
-                        <button type="button" class="btn-wishlist" onclick="document.getElementById('wishForm@(Model.Id)').submit();" title="Save to Wishlist">♡</button>
-                    </div>
-                    <p style="font-size:0.78rem;color:var(--text-3);margin-top:0.6rem;">No login needed to order · Cash on Delivery · 7-Day Exchange</p>
-                </form>
-                <form id="wishForm@(Model.Id)" method="post" action="/Wishlist/Toggle" style="display:none;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="productId" value="@Model.Id" />
-                    <input type="hidden" name="returnUrl" value="/Products/Detail/@Model.Id" />
-                </form>
+                        <button type="submit" class="btn-primary" id="submitReview" style="min-width:160px;">Submit Review</button>
+                    </form>
+                </div>
+            }
+            else if (userId != null && hasPurchased && userReviewed)
+            {
+                <div class="reviewed-notice">You have already reviewed this product. Thank you!</div>
+            }
+            else if (userId != null && !hasPurchased)
+            {
+                <div class="not-buyer-notice">
+                    Only verified buyers can leave a review. <a href="/Cart/Add?productId=@Model.Id&quantity=1">Buy this product</a> to share your experience.
+                </div>
             }
             else
             {
-                <button class="btn-primary btn-full" disabled>Out of Stock</button>
+                <div class="login-to-review">
+                    <a href="/Auth/Login?returnUrl=/Products/Detail/@Model.Id" class="btn-glass">Login to Write a Review</a>
+                </div>
             }
-        </div>
-    </div>
 
-    <!-- ── Reviews Section ── -->
-    <div class="reviews-section">
-
-        <!-- Header -->
-        <div class="reviews-header">
-            <div>
-                <h2 class="reviews-title">⭐ Customer Reviews</h2>
-                <p style="color:var(--text-3); font-size:0.85rem; margin:0;">
-                    @reviewCount @(reviewCount == 1 ? "review" : "reviews") · Average rating @avgRating.ToString("0.0") / 5.0
-                </p>
-            </div>
-            @if (reviewCount > 0)
+            @if (reviews.Any())
             {
-                <!-- Rating bar breakdown -->
-                <div class="rating-breakdown">
-                    @for (int star = 5; star >= 1; star--)
+                <div class="review-list">
+                    @foreach (var r in reviews)
                     {
-                        int count = reviews.Count(r => r.Rating == star);
-                        double pct = reviewCount > 0 ? (double)count / reviewCount * 100 : 0;
-                        <div class="rb-row">
-                            <span class="rb-label">@star ★</span>
-                            <div class="rb-bar-wrap">
-                                <div class="rb-bar-fill" style="width:@pct.ToString("0")%"></div>
+                        <div class="review-card">
+                            <div class="review-card-header">
+                                <div class="review-avatar">@(r.User?.FullName?[0].ToString().ToUpper() ?? "U")</div>
+                                <div>
+                                    <div class="review-author">@(r.User?.FullName ?? "User")</div>
+                                    <div class="review-date">@r.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                </div>
+                                <div class="review-stars ms-auto">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="@(i <= r.Rating ? "rs-star filled" : "rs-star")">★</span>
+                                    }
+                                </div>
                             </div>
-                            <span class="rb-count">@count</span>
+                            @if (!string.IsNullOrEmpty(r.Comment))
+                            {
+                                <p class="review-comment">@r.Comment</p>
+                            }
                         </div>
                     }
                 </div>
             }
+            else
+            {
+                <div class="no-reviews">
+                    <div style="font-size:2.5rem; margin-bottom:0.75rem;"><i class="bi bi-chat-square-text"></i></div>
+                    <p>No reviews yet. Be the first to share your experience!</p>
+                </div>
+            }
         </div>
-
-        <!-- Write a Review -->
-        @if (userId != null && hasPurchased && !userReviewed)
-        {
-            <div class="write-review-box">
-                <h3 class="write-review-title">✍️ Write a Review <span class="verified-buyer-tag">✅ Verified Buyer</span></h3>
-                <form method="post" action="/Products/SubmitReview" id="reviewForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="productId" value="@Model.Id" />
-
-                    <!-- Star Picker -->
-                    <div class="star-picker" id="starPicker">
-                        <span class="sp-label">Your Rating:</span>
-                        <div class="sp-stars" id="spStars">
-                            @for (int i = 1; i <= 5; i++)
-                            {
-                                <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)">★</button>
-                            }
-                        </div>
-                        <span class="sp-hint" id="spHint">Click a star</span>
-                        <input type="hidden" name="rating" id="ratingInput" value="0" required />
-                    </div>
-
-                    <!-- Comment -->
-                    <div class="form-group">
-                        <label for="comment">Your Review (optional)</label>
-                        <textarea id="comment" name="comment" placeholder="Share your experience with this product…" rows="4"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary" id="submitReview" style="min-width:160px;">
-                        Submit Review
-                    </button>
-                </form>
-            </div>
-        }
-        else if (userId != null && hasPurchased && userReviewed)
-        {
-            <div class="reviewed-notice">
-                ✅ You have already reviewed this product. Thank you!
-            </div>
-        }
-        else if (userId != null && !hasPurchased)
-        {
-            <div class="not-buyer-notice">
-                🔒 Only verified buyers can leave a review. <a href="/Cart/Add?productId=@Model.Id&quantity=1">Buy this product</a> to share your experience.
-            </div>
-        }
-        else
-        {
-            <div class="login-to-review">
-                <a href="/Auth/Login?returnUrl=/Products/Detail/@Model.Id" class="btn-glass">Login to Write a Review</a>
-            </div>
-        }
-
-        <!-- Review Cards -->
-        @if (reviews.Any())
-        {
-            <div class="review-list">
-                @foreach (var r in reviews)
-                {
-                    <div class="review-card">
-                        <div class="review-card-header">
-                            <div class="review-avatar">@(r.User?.FullName?[0].ToString().ToUpper() ?? "U")</div>
-                            <div>
-                                <div class="review-author">@(r.User?.FullName ?? "User")</div>
-                                <div class="review-date">@r.CreatedAt.ToString("MMM dd, yyyy")</div>
-                            </div>
-                            <div class="review-stars ms-auto">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="@(i <= r.Rating ? "rs-star filled" : "rs-star")">★</span>
-                                }
-                            </div>
-                        </div>
-                        @if (!string.IsNullOrEmpty(r.Comment))
-                        {
-                            <p class="review-comment">@r.Comment</p>
-                        }
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="no-reviews">
-                <div style="font-size:2.5rem; margin-bottom:0.75rem;">💬</div>
-                <p>No reviews yet. Be the first to share your experience!</p>
-            </div>
-        }
-
     </div>
+</section>
 
-    <!-- ── Related Products ── -->
-    @if (related != null && related.Any())
-    {
-        <div class="section">
-            <h2 class="section-title">🔗 Related Products</h2>
-            <div class="product-grid">
+<!-- ═══ Related Products ═══ -->
+@if (related != null && related.Any())
+{
+    <section class="section section-alt">
+        <div class="container">
+            <div class="section-kicker">You May Also Like</div>
+            <h2 class="section-title mb-4">Related Products</h2>
+            <div class="row g-3 g-md-4">
                 @foreach (var p in related)
                 {
-                    <a href="/Products/Detail/@p.Id" class="product-card">
-                        <div class="product-img-wrap">
-                            <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
-                            @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name">@p.Name</h3>
-                            <div class="product-pricing">
-                                <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="product-card h-100">
+                            <a href="/Products/Detail/@p.Id" class="product-media">
+                                <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
+                                <span class="badge-tag">@p.Season</span>
+                            </a>
+                            <div class="product-info">
+                                <div class="product-cat">@p.Season · @p.Category</div>
+                                <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                <div class="product-pricing">
+                                    <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 }
             </div>
         </div>
-    }
+    </section>
+}
 
-</section>
+@functions {
+    private static string GetColorHex(string color)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Black", "#1c1b19" }, { "Charcoal", "#3a3128" }, { "Navy", "#1f2733" },
+            { "Blue", "#4a5d78" }, { "Steel Blue", "#8a9bb5" }, { "White", "#ffffff" },
+            { "Ivory", "#f5f0e6" }, { "Cream", "#f0e6d2" }, { "Beige", "#d9d0c2" },
+            { "Sand", "#d9d0c2" }, { "Gold", "#b8964f" }, { "Green", "#2f6f5e" },
+            { "Olive", "#6b7a4a" }, { "Maroon", "#7a2f2f" }, { "Red", "#d64545" },
+            { "Pink", "#f0a7b8" }, { "Peach", "#d9a7a0" }, { "Lavender", "#a78bb8" },
+            { "Purple", "#7a4a6b" }, { "Grey", "#8a8a8a" }, { "Gray", "#8a8a8a" },
+            { "Brown", "#8a7d6a" }, { "Mustard", "#c9a227" }
+        };
+        return map.TryGetValue(color, out var hex) ? hex : "#cfc4b4";
+    }
+}
 
 @section Scripts {
 <script>
@@ -333,53 +452,78 @@ document.querySelectorAll('.pd-thumb').forEach(function (btn) {
     });
 });
 
+// Size select → hidden input
+document.querySelectorAll('#sizeOptions .size-opt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('#sizeOptions .size-opt').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var input = document.getElementById('sizeInput');
+        if (input) input.value = btn.dataset.value || btn.textContent.trim();
+    });
+});
+
+// Color select → hidden input + label
+document.querySelectorAll('#colorOptions .color-opt').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('#colorOptions .color-opt').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var input = document.getElementById('colorInput');
+        if (input) input.value = btn.dataset.name || '';
+        var label = document.getElementById('colorLabelName');
+        if (label) label.textContent = btn.dataset.name || '';
+    });
+});
+
+// Qty controls
+(function () {
+    var qty = document.getElementById('qtyInput');
+    if (!qty) return;
+    var minus = document.getElementById('qtyMinus');
+    var plus = document.getElementById('qtyPlus');
+    if (minus) minus.addEventListener('click', function () { qty.value = Math.max(1, parseInt(qty.value) - 1); });
+    if (plus) plus.addEventListener('click', function () { qty.value = Math.min(parseInt(qty.max) || 99, parseInt(qty.value) + 1); });
+})();
+
 // Require size/color when options exist
 document.querySelector('.add-cart-form')?.addEventListener('submit', function (e) {
-    var sizeInputs = document.querySelectorAll('input[name="size"]');
-    var colorInputs = document.querySelectorAll('input[name="color"]');
-    if (sizeInputs.length > 0 && sizeInputs[0].type === 'radio') {
-        var size = document.querySelector('input[name="size"]:checked');
+    var sizeOpts = document.querySelectorAll('#sizeOptions .size-opt');
+    var colorOpts = document.querySelectorAll('#colorOptions .color-opt');
+    if (sizeOpts.length > 0) {
+        var size = document.querySelector('#sizeOptions .size-opt.active');
         if (!size) { e.preventDefault(); alert('Please select a size.'); return; }
     }
-    if (colorInputs.length > 0 && colorInputs[0].type === 'radio') {
-        var color = document.querySelector('input[name="color"]:checked');
+    if (colorOpts.length > 0) {
+        var color = document.querySelector('#colorOptions .color-opt.active');
         if (!color) { e.preventDefault(); alert('Please select a color.'); return; }
     }
 });
 
 const ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
-
 function setRating(val) {
     document.getElementById('ratingInput').value = val;
     document.getElementById('spHint').textContent = ratingLabels[val];
-
-    const stars = document.querySelectorAll('.sp-star');
-    stars.forEach((s, idx) => {
+    document.querySelectorAll('.sp-star').forEach(function (s, idx) {
         s.classList.toggle('active', idx < val);
     });
 }
-
-// Hover effects
-document.querySelectorAll('.sp-star').forEach((star, idx) => {
-    star.addEventListener('mouseenter', () => {
-        document.querySelectorAll('.sp-star').forEach((s, i) => {
+document.querySelectorAll('.sp-star').forEach(function (star, idx) {
+    star.addEventListener('mouseenter', function () {
+        document.querySelectorAll('.sp-star').forEach(function (s, i) {
             s.classList.toggle('hover', i <= idx);
         });
         document.getElementById('spHint').textContent = ratingLabels[idx + 1];
     });
-    star.addEventListener('mouseleave', () => {
-        document.querySelectorAll('.sp-star').forEach(s => s.classList.remove('hover'));
-        const current = parseInt(document.getElementById('ratingInput').value);
+    star.addEventListener('mouseleave', function () {
+        document.querySelectorAll('.sp-star').forEach(function (s) { s.classList.remove('hover'); });
+        var current = parseInt(document.getElementById('ratingInput').value);
         document.getElementById('spHint').textContent = current > 0 ? ratingLabels[current] : 'Click a star';
     });
 });
-
-// Validate rating before submit
-document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
-    const rating = parseInt(document.getElementById('ratingInput').value);
+document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
+    var rating = parseInt(document.getElementById('ratingInput').value);
     if (!rating || rating < 1) {
         e.preventDefault();
-        document.getElementById('spHint').textContent = '⚠ Please select a rating!';
+        document.getElementById('spHint').textContent = 'Please select a rating!';
         document.getElementById('spHint').style.color = 'var(--red)';
     }
 });

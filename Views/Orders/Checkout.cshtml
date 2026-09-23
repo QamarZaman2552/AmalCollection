@@ -1,6 +1,6 @@
 @model List<ShoppingApp.Models.CartItem>
 @{
-    ViewData["Title"] = "Checkout — Delivery";
+    ViewData["Title"] = "Checkout — Guest Order";
     ViewData["BodyClass"] = "checkout-body";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
@@ -14,222 +14,211 @@
     string lastName = ViewBag.LastName as string ?? "";
     string email = ViewBag.Email as string ?? "";
     string phone = ViewBag.Phone as string ?? "";
+    bool codEnabled = ViewBag.CodEnabled as bool? != false;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
 }
 
-<div class="checkout-shell">
-    <!-- Left: delivery & contact -->
-    <div class="checkout-main">
-        <div class="checkout-brand">
-            <a href="/">Amal Collection</a>
-            <a href="/Cart" class="checkout-back">← Back to cart</a>
+<!-- ═══ Minimal checkout header ═══ -->
+<header class="co-header sticky-top">
+    <div class="co-header-inner">
+        <a href="/" class="ac-brand fs-4 text-decoration-none">Amal<em>Collection</em></a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/Wishlist" class="btn ac-icon-btn position-relative" aria-label="Wishlist"><i class="bi bi-heart"></i></a>
+            <a href="/Cart" class="btn ac-icon-btn position-relative" aria-label="Cart"><i class="bi bi-bag"></i></a>
+            <a href="/" class="co-back ms-1"><i class="bi bi-arrow-left me-1"></i> Back to shop</a>
         </div>
-
-        <nav class="checkout-breadcrumb" aria-label="Checkout progress">
-            <a href="/Cart">Cart</a>
-            <span>›</span>
-            <span class="active">Delivery</span>
-            <span>›</span>
-            <span>Confirmation</span>
-        </nav>
-
-        @if (TempData["Error"] != null)
-        {
-            <div class="checkout-alert checkout-alert-error">⚠️ @TempData["Error"]</div>
-        }
-
-        <form method="post" action="/Orders/Checkout" class="checkout-delivery-form" id="checkoutForm">
-            @Html.AntiForgeryToken()
-            <!-- Contact -->
-            <section class="checkout-section">
-                <div class="checkout-section-header">
-                    <h2>Contact</h2>
-                    @if (isGuest)
-                    {
-                        <p style="font-size:0.78rem;color:#6b7280;margin-top:0.35rem;">No login needed — we only need your details to deliver the order.</p>
-                    }
-                </div>
-                <div class="checkout-field">
-                    <label for="email">Email <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
-                    <input type="email" id="email" name="email" value="@email" @(isGuest ? "" : "readonly") placeholder="you@example.com" />
-                </div>
-                <div class="checkout-field">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" value="@phone" placeholder="03XX-XXXXXXX" required />
-                </div>
-            </section>
-
-            <!-- Shipping address -->
-            <section class="checkout-section">
-                <div class="checkout-section-header">
-                    <h2>Delivery address</h2>
-                </div>
-
-                <div class="checkout-field">
-                    <label for="country">Country / Region</label>
-                    <select id="country" name="country" required>
-                        <option value="Pakistan" selected>Pakistan</option>
-                    </select>
-                </div>
-
-                <div class="checkout-row-2">
-                    <div class="checkout-field">
-                        <label for="firstName">First name</label>
-                        <input type="text" id="firstName" name="firstName" value="@firstName" required autocomplete="given-name" />
-                    </div>
-                    <div class="checkout-field">
-                        <label for="lastName">Last name</label>
-                        <input type="text" id="lastName" name="lastName" value="@lastName" required autocomplete="family-name" />
-                    </div>
-                </div>
-
-                <div class="checkout-field">
-                    <label for="address">Address</label>
-                    <input type="text" id="address" name="address" placeholder="House #, Street, Area" required autocomplete="street-address" />
-                </div>
-
-                <div class="checkout-row-2">
-                    <div class="checkout-field">
-                        <label for="city">City</label>
-                        <input type="text" id="city" name="city" placeholder="e.g. Lahore, Multan" required autocomplete="address-level2" />
-                    </div>
-                    <div class="checkout-field">
-                        <label for="postalCode">Postal code <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
-                        <input type="text" id="postalCode" name="postalCode" placeholder="60000" autocomplete="postal-code" />
-                    </div>
-                </div>
-            </section>
-
-            <!-- Payment (compact) -->
-            <section class="checkout-payment-compact">
-                <h3>Payment method</h3>
-                @if (ViewBag.CodEnabled as bool? != false)
-                {
-                    <p style="font-size:0.8rem;color:#6b7280;margin-bottom:0.75rem;">Cash on Delivery — pay when your order arrives.</p>
-                    <div class="checkout-pay-options">
-                        <label class="checkout-pay-option">
-                            <input type="radio" name="paymentMethod" value="Cash on Delivery" checked />
-                            <span>Cash on Delivery</span>
-                        </label>
-                        <label class="checkout-pay-option coming-soon">
-                            <input type="radio" name="paymentMethod" value="Credit/Debit Card" />
-                            <span>Credit / Debit Card</span>
-                            <span class="soon-badge">Coming soon</span>
-                        </label>
-                        <label class="checkout-pay-option coming-soon">
-                            <input type="radio" name="paymentMethod" value="Bank Transfer" />
-                            <span>Bank Transfer</span>
-                            <span class="soon-badge">Coming soon</span>
-                        </label>
-                    </div>
-                    <div class="payment-soon-msg" id="paymentSoonMsg" style="display:none;">
-                        Credit/Debit Card &amp; Bank Transfer payments will be available soon. For now, please use Cash on Delivery.
-                    </div>
-                }
-                else
-                {
-                    <div class="checkout-alert checkout-alert-error">Cash on Delivery is currently disabled. Please contact support to place an order.</div>
-                    <input type="hidden" name="paymentMethod" value="Cash on Delivery" />
-                }
-            </section>
-
-            <div class="checkout-actions">
-                <a href="/Cart" class="checkout-back">← Return to cart</a>
-                <button type="submit" class="checkout-submit">Place order</button>
-            </div>
-        </form>
     </div>
+</header>
 
-    <!-- Right: order summary -->
-    <aside class="checkout-sidebar">
-        <p class="checkout-sidebar-title">Order summary · @itemCount item@(itemCount == 1 ? "" : "s")</p>
+<div class="container py-4">
+    <div class="row g-4 justify-content-center">
+        <!-- Order summary -->
+        <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
+            <aside class="co-summary">
+                <button type="button" class="co-sum-toggle" id="sumToggle" data-bs-toggle="collapse" data-bs-target="#orderSummary" aria-expanded="false" aria-controls="orderSummary">
+                    <span class="co-sum-label"><i class="bi bi-bag me-1"></i> Order summary</span>
+                    <span class="co-sum-amount">PKR @grand.ToString("N0")</span>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
 
-        @foreach (var item in Model)
-        {
-            <div class="checkout-product">
-                <div class="checkout-product-thumb">
-                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
-                         alt="@item.Product?.Name"
-                         onerror="this.src='/images/placeholder.jpg'" />
-                    <span class="checkout-qty-badge">@(item.Quantity)</span>
-                </div>
-                <div class="checkout-product-info">
-                    <div class="checkout-product-name">@item.Product?.Name</div>
-                    <div class="checkout-product-meta">
-                        @if (!string.IsNullOrEmpty(item.Size)) { <span>Size: @item.Size</span> }
-                        @if (!string.IsNullOrEmpty(item.Size) && !string.IsNullOrEmpty(item.Color)) { <span> · </span> }
-                        @if (!string.IsNullOrEmpty(item.Color)) { <span>Color: @item.Color</span> }
+                <div class="collapse" id="orderSummary">
+                    <div class="co-sum-body">
+                        @foreach (var item in Model)
+                        {
+                            <div class="co-item">
+                                <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
+                                     alt="@item.Product?.Name"
+                                     onerror="this.src='/images/placeholder.jpg'" />
+                                <div class="co-item-info">
+                                    <div class="co-item-name">@item.Product?.Name</div>
+                                    <div class="co-item-meta">
+                                        @item.Product?.Category
+                                        @if (!string.IsNullOrEmpty(item.Size)) { <span> · Size @item.Size</span> }
+                                        @if (!string.IsNullOrEmpty(item.Color)) { <span> · @item.Color</span> }
+                                    </div>
+                                    <div class="co-item-qty">Qty: @item.Quantity</div>
+                                </div>
+                                <div class="co-item-price">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+                            </div>
+                        }
+
+                        <div class="co-totals">
+                            <div class="co-total-row"><span>Subtotal</span><span>PKR @total.ToString("N0")</span></div>
+                            <div class="co-total-row">
+                                <span>Shipping</span>
+                                @if (delivery == 0)
+                                {
+                                    <span style="color:var(--green);font-weight:600;">FREE</span>
+                                }
+                                else
+                                {
+                                    <span>PKR @delivery.ToString("N0")</span>
+                                }
+                            </div>
+                            <div class="co-total-row grand"><span>Total</span><span>PKR @grand.ToString("N0")</span></div>
+                        </div>
+
+                        <div class="co-assure">
+                            <div><i class="bi bi-check-circle me-1"></i> No login required</div>
+                            <div><i class="bi bi-check-circle me-1"></i> 7-day exchange</div>
+                            <div><i class="bi bi-check-circle me-1"></i> @(codEnabled ? "COD available" : "Contact support for payment")</div>
+                        </div>
                     </div>
                 </div>
-                <div class="checkout-product-price">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
-            </div>
-        }
+            </aside>
+        </div>
 
-        <div class="checkout-totals">
-            <div class="checkout-total-row">
-                <span>Subtotal</span>
-                <span>PKR @total.ToString("N0")</span>
-            </div>
-            <div class="checkout-total-row">
-                <span>Shipping</span>
-                @if (delivery == 0)
+        <!-- Left: form -->
+        <div class="col-12 col-lg-7 order-2 order-lg-1">
+            <div class="co-main">
+                <nav aria-label="Checkout progress" class="mb-3">
+                    <ol class="breadcrumb small mb-0" style="--bs-breadcrumb-divider: '›';">
+                        <li class="breadcrumb-item"><a href="/Cart">Cart</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Details</li>
+                        <li class="breadcrumb-item text-muted">Confirm</li>
+                    </ol>
+                </nav>
+
+                <h1 class="co-title">Guest Checkout</h1>
+                <p class="co-sub"><i class="bi bi-check-circle me-1"></i> No account needed – sirf details bharein aur order confirm karein.</p>
+
+                @if (TempData["Error"] != null)
                 {
-                    <span class="free">FREE</span>
+                    <div class="checkout-alert checkout-alert-error">⚠️ @TempData["Error"]</div>
                 }
-                else
-                {
-                    <span>PKR @delivery.ToString("N0")</span>
-                }
-            </div>
-            <div class="checkout-total-row grand">
-                <span>Total</span>
-                <span>PKR @grand.ToString("N0")</span>
+
+                <form method="post" action="/Orders/Checkout" class="co-form" id="guestCheckoutForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Contact -->
+                    <section class="co-section">
+                        <h2><i class="bi bi-person me-1"></i> Contact</h2>
+                        @if (isGuest)
+                        {
+                            <p style="font-size:0.78rem;color:var(--text-3);margin-top:0.35rem;">No login needed — we only need your details to deliver the order.</p>
+                        }
+                        <div class="mb-3">
+                            <label class="form-label" for="firstName">First Name *</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" value="@firstName" placeholder="e.g. Ayesha" required autocomplete="given-name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="lastName">Last Name *</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" value="@lastName" placeholder="e.g. Khan" required autocomplete="family-name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="phone">Phone *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="@phone" placeholder="03XX-XXXXXXX" required autocomplete="tel" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="email">Email <span class="text-secondary fw-normal">(optional)</span></label>
+                            <input type="email" class="form-control" id="email" name="email" value="@email" @(isGuest ? "" : "readonly") placeholder="you@example.com" autocomplete="email" />
+                        </div>
+                    </section>
+
+                    <!-- Address -->
+                    <section class="co-section">
+                        <h2><i class="bi bi-geo-alt me-1"></i> Delivery Address</h2>
+                        <div class="mb-3">
+                            <label class="form-label" for="country">Country / Region</label>
+                            <select id="country" name="country" class="form-control" required>
+                                <option value="Pakistan" selected>Pakistan</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="address">Address *</label>
+                            <input type="text" class="form-control" id="address" name="address" placeholder="House #, Street, Area" required autocomplete="street-address" />
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label" for="city">City *</label>
+                                <input type="text" class="form-control" id="city" name="city" placeholder="e.g. Lahore, Multan" required autocomplete="address-level2" />
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label" for="postalCode">Postal Code <span class="text-secondary fw-normal">(optional)</span></label>
+                                <input type="text" class="form-control" id="postalCode" name="postalCode" placeholder="54000" autocomplete="postal-code" />
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Payment -->
+                    <section class="co-section">
+                        <h2><i class="bi bi-credit-card me-1"></i> Payment Method</h2>
+                        @if (codEnabled)
+                        {
+                            <label class="co-pay active">
+                                <input class="form-check-input mt-1" type="radio" name="paymentMethod" value="Cash on Delivery" checked />
+                                <div>
+                                    <b><i class="bi bi-cash-coin me-1"></i> Cash on Delivery</b>
+                                    <span>Paisay delivery par dein – safe &amp; simple</span>
+                                </div>
+                            </label>
+                            <label class="co-pay disabled">
+                                <input class="form-check-input mt-1" type="radio" name="paymentMethod" value="Credit/Debit Card" disabled />
+                                <div>
+                                    <b><i class="bi bi-credit-card me-1"></i> Credit / Debit Card</b>
+                                    <span>Coming soon</span>
+                                </div>
+                            </label>
+                            <label class="co-pay disabled">
+                                <input class="form-check-input mt-1" type="radio" name="paymentMethod" value="Bank Transfer" disabled />
+                                <div>
+                                    <b><i class="bi bi-phone me-1"></i> JazzCash / EasyPaisa</b>
+                                    <span>Coming soon</span>
+                                </div>
+                            </label>
+                        }
+                        else
+                        {
+                            <div class="checkout-alert checkout-alert-error">Cash on Delivery is currently disabled. Please contact support to place an order.</div>
+                            <input type="hidden" name="paymentMethod" value="Cash on Delivery" />
+                        }
+                    </section>
+
+                    <button type="submit" class="btn btn-gold w-100 py-2 co-submit">
+                        <i class="bi bi-bag-check me-1"></i> Place Order · @(codEnabled ? "COD" : "Confirm")
+                    </button>
+                    <p class="co-terms mt-2 mb-0">
+                        Order place karne par aap hamari exchange policy se agreement karte hain. Koi login nahi, koi hidden charge nahi.
+                    </p>
+                    <p class="co-terms mt-2 mb-0">
+                        <a href="/Cart" class="co-back"><i class="bi bi-arrow-left me-1"></i> Return to cart</a>
+                    </p>
+                </form>
             </div>
         </div>
-    </aside>
+    </div>
 </div>
 
-<!-- Mobile summary drawer toggle -->
-<button class="checkout-summary-toggle" id="summaryToggle">
-    <span class="toggle-label">Order Summary · @itemCount item@(itemCount == 1 ? "" : "s")</span>
-    <span class="toggle-price">PKR @grand.ToString("N0") ▾</span>
-</button>
-<div class="checkout-drawer-overlay" id="drawerOverlay"></div>
-
-@section Scripts {
-    <script>
-        // Payment coming-soon
-        document.querySelectorAll('.checkout-pay-option.coming-soon input').forEach(function (input) {
-            input.addEventListener('click', function (e) {
-                e.preventDefault();
-                input.checked = false;
-                var cod = document.querySelector('input[name="paymentMethod"][value="Cash on Delivery"]');
-                if (cod) cod.checked = true;
-                var msg = document.getElementById('paymentSoonMsg');
-                if (msg) {
-                    msg.style.display = 'block';
-                    clearTimeout(window.__paySoonTimer);
-                    window.__paySoonTimer = setTimeout(function () { msg.style.display = 'none'; }, 4000);
-                }
-            });
-        });
-
-        // Mobile summary drawer
-        var toggle = document.getElementById('summaryToggle');
-        var sidebar = document.querySelector('.checkout-sidebar');
-        var overlay = document.getElementById('drawerOverlay');
-        if (toggle && sidebar && overlay) {
-            toggle.addEventListener('click', function () {
-                sidebar.classList.add('open');
-                overlay.classList.add('open');
-            });
-            overlay.addEventListener('click', function () {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('open');
-            });
-        }
-    </script>
-}
+<!-- Mobile sticky total bar -->
+<div class="co-mobile-bar">
+    <div>
+        <span class="co-mb-label">Total</span>
+        <span class="co-mb-price">PKR @grand.ToString("N0")</span>
+    </div>
+    <button class="btn btn-gold" type="button" onclick="document.getElementById('guestCheckoutForm').requestSubmit()">
+        <i class="bi bi-bag-check me-1"></i> Place Order
+    </button>
+</div>

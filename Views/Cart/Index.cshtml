@@ -7,81 +7,89 @@
 }
 
 <section class="section">
-    <h1 class="section-title">Your Cart</h1>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-error">@TempData["Error"]</div>
-    }
-
-    @if (!Model.Any())
-    {
-        <div class="empty-state">
-            <div class="empty-icon">Your cart is empty</div>
-            <p>Add some beautiful suits to get started.</p>
-            <a href="/" class="btn-primary">Start Shopping</a>
-        </div>
-    }
-    else
-    {
-        <div class="cart-layout">
-            <div class="cart-items">
-                @foreach (var item in Model)
-                {
-                    <div class="cart-item">
-                        <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
-                        <div class="cart-item-info">
-                            <h3>@item.Product?.Name</h3>
-                            <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Fabric</div>
-                            @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
-                            {
-                                <div class="cart-item-cat">
-                                    @if (!string.IsNullOrEmpty(item.Size)) { <span>Size: @item.Size</span> }
-                                    @if (!string.IsNullOrEmpty(item.Size) && !string.IsNullOrEmpty(item.Color)) { <span> · </span> }
-                                    @if (!string.IsNullOrEmpty(item.Color)) { <span>Color: @item.Color</span> }
-                                </div>
-                            }
-                            <div class="cart-item-price">PKR @item.Product?.FinalPrice.ToString("N0") each</div>
-                        </div>
-                        <div class="cart-item-actions">
-                            <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="cartItemId" value="@item.Id" />
-                                <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.submit()" />
-                            </form>
-                            <div class="cart-item-subtotal">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
-                            <form method="post" action="/Cart/Remove">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="cartItemId" value="@item.Id" />
-                                <button type="submit" class="btn-remove" aria-label="Remove">✕</button>
-                            </form>
-                        </div>
-                    </div>
-                }
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+            <div>
+                <div class="section-kicker">Your Bag</div>
+                <h1 class="section-title">Shopping Cart</h1>
             </div>
+            <a href="/" class="link-more">Continue Shopping <i class="bi bi-arrow-right"></i></a>
+        </div>
 
-            <div class="cart-summary">
-                <h2>Order Summary</h2>
-                <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
-                <div class="summary-row">
-                    <span>Delivery</span>
-                    @if (delivery == 0)
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">@TempData["Error"]</div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon" style="font-size:2.5rem;color:var(--gold);"><i class="bi bi-bag-x"></i></div>
+                <p>Add some beautiful suits to get started.</p>
+                <a href="/" class="btn btn-gold">Start Shopping</a>
+            </div>
+        }
+        else
+        {
+            <div class="cart-layout">
+                <div class="cart-items">
+                    @foreach (var item in Model)
                     {
-                        <span class="text-green">Free</span>
-                    }
-                    else
-                    {
-                        <span>PKR @delivery.ToString("N0")</span>
+                        <div class="cart-item">
+                            <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
+                            <div class="cart-item-info">
+                                <h3>@item.Product?.Name</h3>
+                                <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Fabric</div>
+                                @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
+                                {
+                                    <div class="cart-item-cat">
+                                        @if (!string.IsNullOrEmpty(item.Size)) { <span>Size: @item.Size</span> }
+                                        @if (!string.IsNullOrEmpty(item.Size) && !string.IsNullOrEmpty(item.Color)) { <span> · </span> }
+                                        @if (!string.IsNullOrEmpty(item.Color)) { <span>Color: @item.Color</span> }
+                                    </div>
+                                }
+                                <div class="cart-item-price">PKR @item.Product?.FinalPrice.ToString("N0") each</div>
+                            </div>
+                            <div class="cart-item-actions">
+                                <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartItemId" value="@item.Id" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.submit()" />
+                                </form>
+                                <div class="cart-item-subtotal">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
+                                <form method="post" action="/Cart/Remove">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartItemId" value="@item.Id" />
+                                    <button type="submit" class="btn-remove" aria-label="Remove"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                            </div>
+                        </div>
                     }
                 </div>
-                <div class="summary-total"><span>Cart total</span><span>PKR @grand.ToString("N0")</span></div>
-                <a href="/Orders/Checkout" class="btn-primary btn-full">Proceed to Checkout</a>
-                <a href="/" class="btn-glass btn-full" style="margin-top:0.5rem;">Continue Shopping</a>
+
+                <div class="cart-summary">
+                    <h2>Order Summary</h2>
+                    <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
+                    <div class="summary-row">
+                        <span>Delivery</span>
+                        @if (delivery == 0)
+                        {
+                            <span class="text-green">Free</span>
+                        }
+                        else
+                        {
+                            <span>PKR @delivery.ToString("N0")</span>
+                        }
+                    </div>
+                    <div class="summary-total"><span>Cart total</span><span>PKR @grand.ToString("N0")</span></div>
+                    <a href="/Orders/Checkout" class="btn btn-gold w-100 py-2">Proceed to Checkout</a>
+                    <a href="/" class="btn btn-outline-dark w-100 py-2 mt-2">Continue Shopping</a>
+                </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </section>
