@@ -36,8 +36,8 @@
                 c.style.pointerEvents = 'auto';
             } else {
                 const depth = cards.length - 1 - i;
-                const rot = depth % 2 === 1 ? -4 : 4;
-                c.style.transform     = 'scale(' + (1 + depth * 0.045) + ') rotate(' + rot + 'deg)';
+                const rot = depth % 2 === 1 ? -8 : 8;
+                c.style.transform     = 'scale(' + (1 + depth * 0.055) + ') rotate(' + rot + 'deg)';
                 c.style.opacity       = depth > 2 ? '0' : '1';
                 c.style.zIndex        = String(50 - depth);
                 c.style.pointerEvents = 'none';
@@ -61,7 +61,9 @@
             done = true;
             card.removeEventListener('transitionend', complete);
             card.classList.remove(cls, 'is-flying');
-            card.style.cssText = '';
+            card.style.transform = '';
+            card.style.opacity = '';
+            card.style.transition = '';
             currentIndex = (currentIndex + 1) % total;
             updateDots(currentIndex);
             refreshStack();

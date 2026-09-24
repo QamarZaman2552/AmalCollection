@@ -4,12 +4,12 @@
 }
 
 <section class="section">
-    <h1 class="section-title">📋 My Orders</h1>
+    <h1 class="section-title"><i class="bi bi-journal-text me-2"></i>My Orders</h1>
 
     @if (!Model.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">📋</div>
+            <div class="empty-icon"><i class="bi bi-journal-x"></i></div>
             <p>You haven't placed any orders yet.</p>
             <a href="/" class="btn-primary">Start Shopping</a>
         </div>
@@ -33,22 +33,22 @@
                 <!-- Tracking Timeline -->
                 <div class="otc-timeline">
                     <div class="otc-step @(step >= 0 ? "done" : "")">
-                        <div class="otc-step-dot">✓</div>
+                        <div class="otc-step-dot"><i class="bi bi-check-lg"></i></div>
                         <div class="otc-step-label">Order Placed</div>
                     </div>
                     <div class="otc-line @(step >= 1 ? "done" : "")"></div>
                     <div class="otc-step @(step >= 1 ? "done" : "")">
-                        <div class="otc-step-dot">@(step >= 1 ? "✓" : "2")</div>
+                        <div class="otc-step-dot">@(step >= 1 ? Html.Raw("<i class=\"bi bi-check-lg\"></i>") : "2")</div>
                         <div class="otc-step-label">Confirmed</div>
                     </div>
                     <div class="otc-line @(step >= 2 ? "done" : "")"></div>
                     <div class="otc-step @(step >= 2 ? "done" : "")">
-                        <div class="otc-step-dot">@(step >= 2 ? "✓" : "🚚")</div>
+                        <div class="otc-step-dot">@(step >= 2 ? Html.Raw("<i class=\"bi bi-check-lg\"></i>") : Html.Raw("<i class=\"bi bi-truck\"></i>"))</div>
                         <div class="otc-step-label">Shipped</div>
                     </div>
                     <div class="otc-line @(step >= 3 ? "done" : "")"></div>
                     <div class="otc-step @(step >= 3 ? "done" : "")">
-                        <div class="otc-step-dot">@(step >= 3 ? "✓" : "🏠")</div>
+                        <div class="otc-step-dot">@(step >= 3 ? Html.Raw("<i class=\"bi bi-check-lg\"></i>") : Html.Raw("<i class=\"bi bi-house\"></i>"))</div>
                         <div class="otc-step-label">Delivered</div>
                     </div>
                 </div>

@@ -25,7 +25,7 @@
   --font-head:    'Playfair Display', Georgia, serif;
   --font:         'Inter', system-ui, sans-serif;
   --transition:   0.25s ease;
-  --nav-h:        68px;
+  --nav-h:        76px;
   --max-w:        1240px;
 }
 
@@ -35,14 +35,12 @@ body {
   color: var(--text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: clip;
 }
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: clip;
 }
 img, video { max-width: 100%; height: auto; }
 
@@ -67,6 +65,9 @@ a { text-decoration: none; }
 
 /* ─── Navbar (Bootstrap) ───────────────────────────── */
 .ac-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
   background: rgba(250, 248, 245, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -82,12 +83,15 @@ a { text-decoration: none; }
 }
 .ac-brand {
   font-family: var(--font-head);
-  font-size: 1.45rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 900;
   letter-spacing: 0.02em;
+  line-height: 1.35;
   color: var(--text);
+  display: inline-block;
+  padding: 4px 0;
 }
-.ac-brand em { font-style: normal; color: var(--gold); }
+.ac-brand em { font-style: normal; color: var(--gold); font-weight: 900; }
 
 .ac-toggler {
   border: 1px solid var(--border) !important;
@@ -166,7 +170,8 @@ a { text-decoration: none; }
   color: var(--text);
   display: grid;
   place-items: center;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 .ac-icon-btn:hover { background: var(--bg-2); color: var(--text); }
 .ac-badge {
@@ -427,8 +432,20 @@ a { text-decoration: none; }
   text-transform: uppercase;
   display: block;
 }
-.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-actions .btn { padding: 11px 24px; font-size: 0.8rem; }
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 100%;
+}
+.hero-actions .btn {
+  padding: 11px 24px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  text-align: center;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
 
 .hero-arrow {
   position: absolute;
@@ -520,6 +537,8 @@ a { text-decoration: none; }
   gap: 0.6rem;
   margin-bottom: 0.5rem;
 }
+.text-center > .section-title,
+.text-center .section-title { justify-content: center; text-align: center; margin-left: auto; margin-right: auto; }
 .section-sub {
   color: var(--text-2);
   font-size: 0.95rem;
@@ -2183,14 +2202,15 @@ a { text-decoration: none; }
   }
   .hero-arrow { display: none; }
   .hero-progress { display: none; }
-  .hero-actions { gap: 8px; }
+  .hero-actions { gap: 8px; justify-content: center; }
   .hero-actions .btn {
-    flex: 1;
-    min-width: 130px;
-    padding: 10px 12px;
+    flex: 0 0 auto;
+    max-width: 100%;
+    padding: 10px 16px;
     text-align: center;
     white-space: nowrap;
     font-size: 0.75rem;
+    letter-spacing: 0.03em;
   }
   .hero-bottom { bottom: 14px; gap: 12px; }
 
@@ -2210,7 +2230,20 @@ a { text-decoration: none; }
   .hero { height: 400px; }
   .hero-panel { padding-bottom: 52px; }
   .hero-title { font-size: 1.5rem; }
-  .hero-actions .btn { min-width: 0; font-size: 0.72rem; letter-spacing: 0.03em; }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    white-space: normal;
+    padding: 11px 14px;
+  }
   .announce { font-size: 0.68rem; letter-spacing: 0.04em; }
   .pd-thumbs { gap: 8px; }
   .size-opt { min-width: 44px; min-height: 44px; }
@@ -2504,7 +2537,7 @@ a { text-decoration: none; }
     padding-bottom: 8px;
     row-gap: 6px;
   }
-  .ac-brand { font-size: 1.25rem; }
+  .ac-brand { font-size: 1.4rem; }
   .ac-mobile-search { padding-bottom: 10px; }
   .ac-mobile-search .form-control { min-height: 44px; }
   .ac-nav-links .nav-link {
@@ -2528,6 +2561,7 @@ a { text-decoration: none; }
   .co-header { padding: 10px 12px; }
   .co-header-inner { justify-content: space-between; }
   .co-back { font-size: 0.78rem; white-space: nowrap; }
+}
 
 /* ── Admin Layout ───────────────────────────────────── */
 .admin-layout { display: flex; min-height: 100vh; }
@@ -2618,7 +2652,7 @@ a { text-decoration: none; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.75rem 1.5rem;
   background: var(--card); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: 0; z-index: 1030;
 }
 .admin-page-title { font-size: 1.1rem; font-weight: 700; margin: 0; }
 .admin-topbar-left { display: flex; align-items: center; gap: 1rem; }

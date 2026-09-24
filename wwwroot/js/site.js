@@ -313,8 +313,6 @@ if (!document.getElementById('rippleStyle')) {
         const icon = toggle.querySelector('i');
         if (icon) {
           icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
-        } else {
-          toggle.textContent = show ? 'ðŸ™ˆ' : 'ðŸ‘ï¸';
         }
         toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       });

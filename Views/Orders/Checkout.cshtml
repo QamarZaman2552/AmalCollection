@@ -107,7 +107,7 @@
 
                 @if (TempData["Error"] != null)
                 {
-                    <div class="checkout-alert checkout-alert-error">⚠️ @TempData["Error"]</div>
+                    <div class="checkout-alert checkout-alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i>@TempData["Error"]</div>
                 }
 
                 <form method="post" action="/Orders/Checkout" class="co-form" id="guestCheckoutForm">

@@ -57,7 +57,7 @@ body.light-mode {
 
 /* Light mode specific overrides */
 body.light-mode body { background: #faf8f5; color: #1c1b19; }
-body.light-mode .navbar.ac-nav { background: rgba(250, 248, 245, 0.94) !important; border-bottom-color: #e6e0d6; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; }
+body.light-mode .navbar.ac-nav { background: rgba(250, 248, 245, 0.94) !important; border-bottom-color: #e6e0d6; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; position: sticky; top: 0; z-index: 1030; }
 body.light-mode .brand { background: none !important; -webkit-text-fill-color: #1c1b19 !important; background-clip: unset !important; animation: none !important; }
 body.light-mode .brand:hover { opacity: 0.7; }
 body.light-mode .nav-search { background: #faf8f5; border-color: #e6e0d6; }
@@ -156,8 +156,8 @@ body.light-mode .confirmation-box p { color: #6f6a62; }
 body.light-mode .step { background: #faf8f5; border-color: #e6e0d6; color: #6f6a62; }
 body.light-mode .payment-option { background: #ffffff; border-color: #e6e0d6; color: #1c1b19; }
 body.light-mode .payment-option:has(input:checked) { border-color: #1c1b19; background: rgba(28, 27, 25,0.04); }
-body.light-mode .alert-error { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.2); }
-body.light-mode .alert-success { background: rgba(34,197,94,0.06); border-color: rgba(34,197,94,0.2); }
+body.light-mode .alert-error { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.2); color: #b91c1c; }
+body.light-mode .alert-success { background: rgba(34,197,94,0.06); border-color: rgba(34,197,94,0.2); color: #15803d; }
 body.light-mode .mobile-menu { background: rgba(250,251,253,0.98); border-left-color: #e6e0d6; }
 body.light-mode .mobile-menu a { color: #1c1b19; border-bottom-color: #e6e0d6; font-weight: 700; }
 body.light-mode .mobile-menu a:hover { color: #b8964f; background: rgba(184,150,79,0.08); }
@@ -289,7 +289,7 @@ select option:checked {
 
 /* ─── Navbar ─────────────────────────────────────────── */
 .navbar {
-  position: sticky; top: 0; z-index: 100;
+  position: sticky; top: 0; z-index: 1030;
   background: rgba(10,13,20,0.85);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
@@ -473,7 +473,9 @@ body.light-mode .brand span.gold { color: #b8964f; -webkit-text-fill-color: #b89
 /*.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; a }*/
 .hero-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
+    max-width: 100%;
 }
 
 .gradient-text {
@@ -757,6 +759,24 @@ body.light-mode .brand span.gold { color: #b8964f; -webkit-text-fill-color: #b89
 }
 .form-group textarea { resize: vertical; min-height: 80px; }
 
+/* ─── Product select (Hero Slide linked product) ─────── */
+.product-select {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.35rem 0.5rem;
+  line-height: 1.7;
+}
+.product-select option {
+  padding: 0.35rem 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 640px) {
+  .product-select { max-height: 180px; font-size: 0.85rem; }
+  .product-select option { white-space: normal; }
+}
+
 /* ─── Password field: show/hide + strength ──────── */
 .pw-field { position: relative; display: flex; align-items: center; }
 .pw-field input { padding-right: 2.75rem; }
@@ -785,6 +805,10 @@ body.light-mode .brand span.gold { color: #b8964f; -webkit-text-fill-color: #b89
 .pw-match { font-size: 0.78rem; font-weight: 600; margin-top: 0.4rem; }
 .pw-match.ok { color: #86efac; }
 .pw-match.no { color: #fca5a5; }
+body.light-mode .pw-reqs li.valid { color: #15803d; }
+body.light-mode .pw-reqs li.valid::before { color: #16a34a; }
+body.light-mode .pw-match.ok { color: #15803d; }
+body.light-mode .pw-match.no { color: #b91c1c; }
 
 .alert { padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.9rem; }
 .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
@@ -855,10 +879,10 @@ body.light-mode .brand span.gold { color: #b8964f; -webkit-text-fill-color: #b89
 .order-id { font-weight: 700; font-size: 1.1rem; }
 .order-date { font-size: 0.82rem; color: var(--text-3); margin-left: 0.75rem; }
 .order-status { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
-.status-pending   { background: rgba(249,115,22,0.15); color: var(--orange); }
-.status-confirmed { background: rgba(138,155,181,0.15); color: var(--accent-3); }
-.status-shipped   { background: rgba(6,182,212,0.15);  color: #22d3ee; }
-.status-delivered { background: rgba(34,197,94,0.15);  color: var(--green); }
+.status-pending   { background: rgba(249,115,22,0.15); color: #c2410c; }
+.status-confirmed { background: rgba(184,150,79,0.15); color: #8a6d2f; }
+.status-shipped   { background: rgba(6,182,212,0.15);  color: #0e7490; }
+.status-delivered { background: rgba(34,197,94,0.15);  color: #15803d; }
 .order-items-list { display: flex; flex-direction: column; gap: 0.4rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
 .order-item-row { display: flex; gap: 1rem; font-size: 0.88rem; color: var(--text-2); }
 .order-item-row span:last-child { margin-left: auto; font-weight: 600; color: var(--text); }

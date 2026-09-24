@@ -10,11 +10,11 @@
 
         @if (TempData["Success"] != null)
         {
-            <div class="alert alert-success">✅ @TempData["Success"]</div>
+            <div class="alert alert-success"><i class="bi bi-check-circle-fill me-1"></i>@TempData["Success"]</div>
         }
         @if (ViewBag.Error != null)
         {
-            <div class="alert alert-error">⚠️ @ViewBag.Error</div>
+            <div class="alert alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i>@ViewBag.Error</div>
         }
 
         <form method="post" action="/Auth/VerifyOtp" class="auth-form">
@@ -35,7 +35,7 @@
         </p>
 
         <div class="spam-note" style="margin-top:1.25rem;padding:0.85rem 1rem;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-3);line-height:1.5;">
-            📬 <strong>Didn't receive the email?</strong> Please check your <strong>Spam / Junk</strong> folder and the <strong>Promotions</strong> tab — emails from Amal Collection may sometimes land there. If you find it, mark it as <strong>"Not Spam"</strong> so future emails go to your inbox. If it's still not there, try <a href="/Auth/ForgotPassword">resending the code</a>.
+            <i class="bi bi-envelope-paper me-1"></i><strong>Didn't receive the email?</strong> Please check your <strong>Spam / Junk</strong> folder and the <strong>Promotions</strong> tab — emails from Amal Collection may sometimes land there. If you find it, mark it as <strong>"Not Spam"</strong> so future emails go to your inbox. If it's still not there, try <a href="/Auth/ForgotPassword">resending the code</a>.
         </div>
     </div>
 </div>

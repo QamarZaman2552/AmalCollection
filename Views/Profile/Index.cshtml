@@ -15,12 +15,12 @@
         <div class="profile-avatar-big">@initials</div>
         <div class="profile-hero-info">
             <h1 class="profile-name">@Model.FullName</h1>
-            <div class="profile-email">✉️ @Model.Email</div>
+            <div class="profile-email"><i class="bi bi-envelope me-1"></i>@Model.Email</div>
             @if (!string.IsNullOrEmpty(Model.Phone))
             {
-                <div class="profile-phone">📱 @Model.Phone</div>
+                <div class="profile-phone"><i class="bi bi-phone me-1"></i>@Model.Phone</div>
             }
-            <div class="profile-since">🗓️ Member since @Model.CreatedAt.ToString("dd MMMM yyyy")</div>
+            <div class="profile-since"><i class="bi bi-calendar3 me-1"></i>Member since @Model.CreatedAt.ToString("dd MMMM yyyy")</div>
         </div>
     </div>
 
@@ -29,22 +29,22 @@
     {
         <div class="profile-stats">
             <div class="pstat-card">
-                <div class="pstat-icon">📦</div>
+                <div class="pstat-icon"><i class="bi bi-box-seam"></i></div>
                 <div class="pstat-num">@totalOrders</div>
                 <div class="pstat-label">Total Orders</div>
             </div>
             <div class="pstat-card">
-                <div class="pstat-icon">💰</div>
+                <div class="pstat-icon"><i class="bi bi-cash-coin"></i></div>
                 <div class="pstat-num">PKR @totalSpent.ToString("N0")</div>
                 <div class="pstat-label">Total Spent</div>
             </div>
             <div class="pstat-card">
-                <div class="pstat-icon">❤️</div>
+                <div class="pstat-icon"><i class="bi bi-heart-fill"></i></div>
                 <div class="pstat-num">@wishlistCount</div>
                 <div class="pstat-label">Wishlist Items</div>
             </div>
             <div class="pstat-card">
-                <div class="pstat-icon">⭐</div>
+                <div class="pstat-icon"><i class="bi bi-star-fill"></i></div>
                 <div class="pstat-num">@reviewCount</div>
                 <div class="pstat-label">Reviews Written</div>
             </div>
@@ -55,11 +55,11 @@
     <div class="profile-quick-links">
         @if (Context.Session.GetString("UserRole") != "admin")
         {
-            <a href="/Orders/History" class="pquick-link">📋 My Orders</a>
-            <a href="/Wishlist"       class="pquick-link">❤️ Wishlist</a>
-            <a href="/Cart"           class="pquick-link">🛒 Cart</a>
+            <a href="/Orders/History" class="pquick-link"><i class="bi bi-journal-text me-1"></i>My Orders</a>
+            <a href="/Wishlist"       class="pquick-link"><i class="bi bi-heart me-1"></i>Wishlist</a>
+            <a href="/Cart"           class="pquick-link"><i class="bi bi-cart3 me-1"></i>Cart</a>
         }
-        <a href="/Auth/Logout"    class="pquick-link pquick-danger">🚪 Logout</a>
+        <a href="/Auth/Logout"    class="pquick-link pquick-danger"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
     </div>
 
     <!-- ── Edit Profile ── -->
@@ -67,14 +67,14 @@
 
         <!-- Edit Profile -->
         <div class="profile-form-card">
-            <h2 class="profile-form-title">✏️ Edit Profile</h2>
+            <h2 class="profile-form-title"><i class="bi bi-pencil-square me-1"></i>Edit Profile</h2>
             @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success">✅ @TempData["Success"]</div>
+                <div class="alert alert-success"><i class="bi bi-check-circle-fill me-1"></i>@TempData["Success"]</div>
             }
             @if (TempData["Error"] != null)
             {
-                <div class="alert alert-error">⚠️ @TempData["Error"]</div>
+                <div class="alert alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i>@TempData["Error"]</div>
             }
             <form method="post" action="/Profile/Update" class="auth-form">
                 @Html.AntiForgeryToken()
@@ -96,7 +96,7 @@
 
         <!-- Change Password (OTP verification) -->
         <div class="profile-form-card">
-            <h2 class="profile-form-title">🔒 Change Password</h2>
+            <h2 class="profile-form-title"><i class="bi bi-lock me-1"></i>Change Password</h2>
             <p style="font-size:0.8rem;color:var(--text-2);margin-bottom:1rem;">
                 A 6-digit verification code will be sent to <strong>@Model.Email</strong> before changing your password.
             </p>
@@ -115,7 +115,7 @@
                         <label for="cpNewPassword">New Password</label>
                         <div class="pw-field">
                             <input type="password" id="cpNewPassword" name="newPassword" placeholder="Enter a strong password" required autocomplete="new-password" />
-                            <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                            <button type="button" class="pw-toggle" aria-label="Show password"><i class="bi bi-eye"></i></button>
                         </div>
                         <div class="pw-strength" aria-live="polite">
                             <div class="pw-strength-bar"><span></span></div>
@@ -133,7 +133,7 @@
                         <label for="cpConfirmPassword">Confirm New Password</label>
                         <div class="pw-field">
                             <input type="password" id="cpConfirmPassword" name="confirmPassword" placeholder="Repeat new password" required autocomplete="new-password" data-match="cpNewPassword" />
-                            <button type="button" class="pw-toggle" aria-label="Show password">👁️</button>
+                            <button type="button" class="pw-toggle" aria-label="Show password"><i class="bi bi-eye"></i></button>
                         </div>
                         <div class="pw-match"></div>
                     </div>

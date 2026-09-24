@@ -146,10 +146,6 @@
             </div>
 
             <div class="promo-section">
-                <p class="promo-section__hint">
-                    <i class="bi bi-hand-index-thumb"></i> Drag &amp; fling left or right — infinite loop
-                </p>
-
                 <div class="promo-deck" id="promoDeck">
                     <div class="promo-deck__ghost promo-deck__ghost--2"></div>
                     <div class="promo-deck__ghost promo-deck__ghost--1"></div>
@@ -158,9 +154,7 @@
                     @for (int i = promoCards.Count - 1; i >= 0; i--)
                     {
                         var card = promoCards[i];
-                        var bg = string.IsNullOrWhiteSpace(card.BackgroundColor) ? "#7B4F52" : card.BackgroundColor;
-                        <div class="promo-card" data-index="@i"
-                             style="background-color: @bg; --promo-bg: @bg;">
+                        <div class="promo-card" data-index="@i">
 
                             <img class="promo-card__img"
                                  src="@(string.IsNullOrEmpty(card.ImagePath) ? "/images/placeholder.jpg" : card.ImagePath)"
@@ -336,31 +330,31 @@
                     @if (!string.IsNullOrEmpty(selectedSeason))
                     {
                         <a href="@BuildFilterUrl(season: "__CLEAR__")" class="active-filter-pill">
-                            Season: @selectedSeason <span class="pill-remove">✕</span>
+                            Season: @selectedSeason <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     @if (!string.IsNullOrEmpty(selectedCat))
                     {
                         <a href="@BuildFilterUrl(cat: "__CLEAR__")" class="active-filter-pill">
-                            Category: @selectedCat <span class="pill-remove">✕</span>
+                            Category: @selectedCat <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     @if (!string.IsNullOrEmpty(selectedFabric))
                     {
                         <a href="@BuildFilterUrl(fabric: "__CLEAR__")" class="active-filter-pill">
-                            Fabric: @selectedFabric <span class="pill-remove">✕</span>
+                            Fabric: @selectedFabric <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     @if (!string.IsNullOrEmpty(selectedSize))
                     {
                         <a href="@BuildFilterUrl(size: "__CLEAR__")" class="active-filter-pill">
-                            Size: @selectedSize <span class="pill-remove">✕</span>
+                            Size: @selectedSize <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     @if (!string.IsNullOrEmpty(selectedSort))
                     {
                         <a href="@BuildFilterUrl(sort: "__CLEAR__")" class="active-filter-pill">
-                            Sort: @(sortOptions.FirstOrDefault(o => o.Value == selectedSort).Label ?? selectedSort) <span class="pill-remove">✕</span>
+                            Sort: @(sortOptions.FirstOrDefault(o => o.Value == selectedSort).Label ?? selectedSort) <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     <a href="/" class="active-filter-clear">Clear All</a>
@@ -373,7 +367,7 @@
         <aside class="filter-drawer" id="filterDrawer" aria-label="Product Filters" role="dialog">
             <div class="filter-drawer-header">
                 <div class="filter-drawer-title"><i class="bi bi-sliders2 me-2 text-gold"></i>Filter &amp; Refine</div>
-                <button class="filter-drawer-close" id="filterDrawerClose" aria-label="Close filters">✕</button>
+                <button class="filter-drawer-close" id="filterDrawerClose" aria-label="Close filters"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="filter-drawer-body">
                 <form method="get" action="/" id="filterForm">

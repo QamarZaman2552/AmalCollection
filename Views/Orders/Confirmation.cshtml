@@ -4,7 +4,7 @@
 
 <section class="section">
     <div class="confirmation-box">
-        <div class="confirm-icon">🎉</div>
+        <div class="confirm-icon"><i class="bi bi-emoji-smile-fill"></i></div>
         @if (ViewBag.OrderId == null)
         {
             <h1>Order status unknown</h1>
@@ -16,10 +16,10 @@
             <p>Thank you for your purchase. Your order <strong>#@ViewBag.OrderId</strong> has been received and is being processed.</p>
         }
         <div class="confirm-steps">
-            <div class="step active">✅ Order Placed</div>
-            <div class="step">📦 Processing</div>
-            <div class="step">🚚 Shipping</div>
-            <div class="step">🏠 Delivered</div>
+            <div class="step active"><i class="bi bi-check-circle-fill me-1"></i>Order Placed</div>
+            <div class="step"><i class="bi bi-box-seam me-1"></i>Processing</div>
+            <div class="step"><i class="bi bi-truck me-1"></i>Shipping</div>
+            <div class="step"><i class="bi bi-house me-1"></i>Delivered</div>
         </div>
         <div class="confirm-actions">
             @if (ViewBag.IsGuest as bool? != true)

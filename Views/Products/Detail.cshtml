@@ -297,7 +297,7 @@
                             int count = reviews.Count(r => r.Rating == star);
                             double pct = reviewCount > 0 ? (double)count / reviewCount * 100 : 0;
                             <div class="rb-row">
-                                <span class="rb-label">@star ★</span>
+                                <span class="rb-label">@star <i class="bi bi-star-fill"></i></span>
                                 <div class="rb-bar-wrap">
                                     <div class="rb-bar-fill" style="width:@pct.ToString("0")%"></div>
                                 </div>
@@ -320,7 +320,7 @@
                             <div class="sp-stars" id="spStars">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)">★</button>
+                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)"><i class="bi bi-star-fill"></i></button>
                                 }
                             </div>
                             <span class="sp-hint" id="spHint">Click a star</span>
@@ -366,7 +366,7 @@
                                 <div class="review-stars ms-auto">
                                     @for (int i = 1; i <= 5; i++)
                                     {
-                                        <span class="@(i <= r.Rating ? "rs-star filled" : "rs-star")">★</span>
+                                        <span class="@(i <= r.Rating ? "rs-star filled" : "rs-star")"><i class="bi bi-star-fill"></i></span>
                                     }
                                 </div>
                             </div>

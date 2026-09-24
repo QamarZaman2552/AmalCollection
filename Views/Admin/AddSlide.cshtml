@@ -42,11 +42,11 @@
             </div>
             <div class="form-group">
                 <label><i class="bi bi-link-45deg"></i> Linked Product <small>(Shop Now button adds this to cart)</small></label>
-                <select name="ProductId" id="productSelect" onchange="autoFillPrice(this)">
+                <select name="ProductId" id="productSelect" class="product-select" size="6" onchange="autoFillPrice(this)">
                     <option value="">— No product linked (use Link URL instead) —</option>
                     @foreach (var p in products)
                     {
-                        <option value="@p.Id" data-price="@p.FinalPrice">@p.Name (@p.Category) — PKR @p.FinalPrice.ToString("N0")</option>
+                        <option value="@p.Id" data-price="@p.FinalPrice">@p.Name — PKR @p.FinalPrice.ToString("N0")</option>
                     }
                 </select>
             </div>

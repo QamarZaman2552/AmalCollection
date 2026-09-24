@@ -82,9 +82,9 @@
     text-transform: uppercase;
     padding: 0.35rem 1.2rem;
     border-radius: 50px;
-    border: 1px solid rgba(138, 155, 181, 0.4);
-    background: rgba(200,205,216, 0.1);
-    color: var(--accent-2);
+    border: 1px solid rgba(184,150,79,0.35);
+    background: rgba(184,150,79,0.1);
+    color: var(--gold, #b8964f);
     margin-bottom: 1.2rem;
 }
 
@@ -101,7 +101,7 @@
     position: absolute;
     top: -60px; right: -60px;
     width: 320px; height: 320px;
-    background: radial-gradient(circle, rgba(200,205,216,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(184,150,79,0.12) 0%, transparent 70%);
     pointer-events: none;
 }
 .about-hero::after {
@@ -109,25 +109,25 @@
     position: absolute;
     bottom: -40px; left: -40px;
     width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(138,155,181,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(184,150,79,0.08) 0%, transparent 70%);
     pointer-events: none;
 }
 
 /* ─── Essential Cards ────────────────────────────────── */
 .essential-card {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-    background: rgba(255,255,255,0.03) !important;
+    background: var(--card) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
 }
 .essential-card:hover {
     transform: translateY(-8px);
-    border-color: var(--accent) !important;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important;
+    border-color: var(--gold, #b8964f) !important;
+    box-shadow: var(--shadow) !important;
 }
 .essential-icon {
     font-size: 3rem;
-    filter: drop-shadow(0 0 10px rgba(200,205,216, 0.3));
+    color: var(--gold, #b8964f);
 }
 
 /* ─── Premium FAQ ────────────────────────────────────── */
@@ -144,8 +144,8 @@
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .faq-item.active {
-    border-color: var(--accent);
-    box-shadow: 0 4px 24px rgba(200,205,216,0.12);
+    border-color: var(--gold, #b8964f);
+    box-shadow: 0 4px 20px rgba(184,150,79,0.15);
 }
 .faq-question {
     width: 100%;
@@ -163,7 +163,7 @@
     cursor: pointer;
     transition: background 0.2s ease;
 }
-.faq-question:hover { background: rgba(255,255,255,0.03); }
+.faq-question:hover { background: rgba(184,150,79,0.06); }
 .faq-icon { font-size: 1.2rem; flex-shrink: 0; width: 2rem; text-align: center; }
 .faq-chevron {
     margin-left: auto;
@@ -188,8 +188,8 @@
 /* ─── Contact Us Page ────────────────────────────────── */
 .contact-wrapper {
     min-height: 80vh;
-    background: radial-gradient(circle at top right, rgba(200,205,216,0.08), transparent 40%),
-                radial-gradient(circle at bottom left, rgba(138,155,181,0.08), transparent 40%);
+    background: radial-gradient(circle at top right, rgba(184,150,79,0.08), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(184,150,79,0.06), transparent 40%);
 }
 .contact-card {
     background: var(--bg-2) !important;
@@ -199,17 +199,17 @@
     box-shadow: var(--shadow-lg);
 }
 .contact-info {
-    background: linear-gradient(135deg, var(--bg-3) 0%, #0a0d14 100%);
+    background: linear-gradient(135deg, var(--bg-3) 0%, var(--bg-2) 100%);
     color: var(--text);
     border-right: 1px solid var(--border);
 }
 .icon-circle {
-    background: rgba(200,205,216,0.15);
+    background: var(--gold-soft, rgba(184,150,79,0.15));
     width: 48px; height: 48px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.25rem; flex-shrink: 0;
-    color: var(--accent-2);
+    color: var(--gold, #b8964f);
 }
 .social-links a {
     width: 44px; height: 44px; border-radius: 50%;
@@ -227,28 +227,46 @@
     font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 0.2rem 0.65rem;
-    background: rgba(138,155,181,0.15);
-    border: 1px solid rgba(138,155,181,0.4);
-    color: var(--accent-2);
+    background: rgba(184,150,79,0.12);
+    border: 1px solid rgba(184,150,79,0.35);
+    color: var(--gold, #b8964f);
     border-radius: 50px;
     margin-left: 0.75rem;
     vertical-align: middle;
 }
-.msg-stats-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-.msg-stat-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; min-width: 130px; transition: border-color var(--transition); }
+.msg-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.msg-stat-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 0.75rem;
+    aspect-ratio: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: border-color var(--transition);
+}
 .msg-stat-card:hover { border-color: var(--accent); }
-.msg-stat-num  { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1; }
-.msg-stat-label { font-size: 0.78rem; color: var(--text-3); margin-top: 0.2rem; font-weight: 500; }
+.msg-stat-num  { font-size: clamp(1.5rem, 5vw, 1.8rem); font-weight: 800; color: var(--text); line-height: 1; }
+.msg-stat-label { font-size: clamp(0.68rem, 2.2vw, 0.78rem); color: var(--text-3); margin-top: 0.35rem; font-weight: 500; line-height: 1.3; }
 .msg-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .msg-card { display: flex; gap: 1.2rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem 1.5rem; transition: border-color var(--transition), transform var(--transition); }
-.msg-card:hover { border-color: rgba(138,155,181,0.4); transform: translateX(4px); }
-.msg-unread { border-left: 3px solid var(--accent-2) !important; }
+.msg-card:hover { border-color: rgba(184,150,79,0.4); transform: translateX(4px); }
+.msg-unread { border-left: 3px solid var(--gold, #b8964f) !important; }
 .msg-read   { opacity: 0.75; }
 .msg-avatar { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--accent), var(--accent-3)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: white; }
 .msg-card-body { flex: 1; min-width: 0; }
 .msg-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem; flex-wrap: wrap; gap: 0.5rem; }
 .msg-sender-name { font-weight: 700; font-size: 0.95rem; }
-.msg-new-pill { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.15rem 0.55rem; border-radius: 50px; background: rgba(138,155,181,0.15); border: 1px solid rgba(138,155,181,0.4); color: var(--accent-2); margin-left: 0.5rem; }
+.msg-new-pill { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.15rem 0.55rem; border-radius: 50px; background: rgba(184,150,79,0.12); border: 1px solid rgba(184,150,79,0.35); color: var(--gold, #b8964f); margin-left: 0.5rem; }
 .msg-date { font-size: 0.78rem; color: var(--text-3); white-space: nowrap; }
 .msg-email { font-size: 0.8rem; color: var(--accent-3); text-decoration: none; transition: color var(--transition); }
 .msg-email:hover { color: var(--accent-2); }
@@ -348,7 +366,7 @@
 .profile-hero::before {
     content: ''; position: absolute; top: -60px; right: -60px;
     width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(200,205,216,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(184,150,79,0.1) 0%, transparent 70%);
     pointer-events: none;
 }
 .profile-avatar-big {
@@ -356,7 +374,7 @@
     background: linear-gradient(135deg, var(--accent), var(--accent-3));
     display: flex; align-items: center; justify-content: center;
     font-weight: 800; font-size: 1.8rem; color: white;
-    box-shadow: 0 0 24px rgba(200,205,216,0.4);
+    box-shadow: 0 0 20px rgba(184,150,79,0.35);
 }
 .profile-hero-info { display: flex; flex-direction: column; gap: 0.3rem; }
 .profile-name  { font-size: 1.6rem; font-weight: 800; margin: 0; }
@@ -386,7 +404,7 @@
     font-size: 0.88rem; font-weight: 500; color: var(--text-2);
     transition: border-color var(--transition), color var(--transition), background var(--transition);
 }
-.pquick-link:hover { border-color: var(--accent-2); color: var(--accent-2); background: rgba(138,155,181,0.06); }
+.pquick-link:hover { border-color: var(--gold, #b8964f); color: var(--gold, #b8964f); background: rgba(184,150,79,0.08); }
 .pquick-danger:hover { border-color: var(--red) !important; color: var(--red) !important; background: rgba(239,68,68,0.06) !important; }
 
 .profile-forms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
@@ -408,7 +426,7 @@
     border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem;
     transition: border-color var(--transition);
 }
-.order-track-card:hover { border-color: rgba(138,155,181,0.3); }
+.order-track-card:hover { border-color: rgba(184,150,79,0.35); }
 .otc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
 .otc-id   { font-weight: 700; font-size: 1.05rem; }
 .otc-date { font-size: 0.8rem; color: var(--text-3); margin-left: 0.75rem; }
@@ -431,7 +449,7 @@
     background: linear-gradient(135deg, var(--accent), var(--accent-3));
     border-color: var(--accent);
     color: white; font-size: 0.9rem;
-    box-shadow: 0 0 16px rgba(200,205,216,0.4);
+    box-shadow: 0 0 12px rgba(184,150,79,0.35);
 }
 .otc-step-label { font-size: 0.72rem; color: var(--text-3); font-weight: 500; white-space: nowrap; }
 .otc-step.done .otc-step-label { color: var(--accent-2); }

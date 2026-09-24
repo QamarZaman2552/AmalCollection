@@ -16,18 +16,6 @@
     color: #1a1a1a;
 }
 
-.promo-section__hint {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.promo-section__hint i { color: #b8964f; }
-
 /* Deck container */
 .promo-deck {
     position: relative;
@@ -47,12 +35,12 @@
 }
 .promo-deck__ghost--2 {
     top: -10px; left: 8px;
-    transform: rotate(-4deg);
+    transform: rotate(-7deg);
     z-index: 1;
 }
 .promo-deck__ghost--1 {
     top: -5px; left: 4px;
-    transform: rotate(-2deg);
+    transform: rotate(-3.5deg);
     z-index: 2;
 }
 
@@ -66,7 +54,6 @@
     border-radius: 20px;
     overflow: hidden;
     display: block;
-    background-color: #7B4F52;
     box-shadow: 0 10px 40px rgba(0,0,0,0.35);
     isolation: isolate;
     z-index: 10;
@@ -81,13 +68,13 @@
 /* Pre-JS fallback: behind card peeks as a rim on all 4 sides */
 .promo-card:not(:last-child) {
     z-index: 3;
-    transform: scale(1.05) rotate(-4deg);
+    transform: scale(1.08) rotate(-8deg);
     pointer-events: none;
     transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
-/* Behind cards show solid color only — no text/image bleed */
-.promo-card.is-back > * {
+/* Behind cards show image only — no text bleed */
+.promo-card.is-back > .promo-card__info {
     visibility: hidden;
 }
 
@@ -113,19 +100,14 @@
     justify-content: center;
     align-items: flex-end;
     padding: clamp(12px, 5%, 28px) clamp(14px, 6%, 32px);
-    text-align: center;
+    text-align: right;
     color: #fff;
-    background: var(--promo-bg, #7B4F52);
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        transparent 36%,
-        color-mix(in srgb, var(--promo-bg, #7B4F52) 55%, transparent) 50%,
-        color-mix(in srgb, var(--promo-bg, #7B4F52) 92%, transparent) 66%,
-        var(--promo-bg, #7B4F52) 80%
-    );
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 2px 12px rgba(0, 0, 0, 0.4);
     gap: 4px;
     pointer-events: none;
+}
+.promo-card__info > * {
+    max-width: 54%;
 }
 
 .promo-card__brand {
@@ -220,16 +202,12 @@
 /* ── Responsive ── */
 @media (max-width: 600px) {
     .promo-card__info {
-        align-items: center;
-        padding: clamp(10px, 4%, 24px);
-        background: var(--promo-bg, #7B4F52);
-        background: linear-gradient(
-            180deg,
-            transparent 0%,
-            transparent 28%,
-            color-mix(in srgb, var(--promo-bg, #7B4F52) 70%, transparent) 48%,
-            var(--promo-bg, #7B4F52) 72%
-        );
+        align-items: flex-end;
+        text-align: right;
+        padding: clamp(10px, 4%, 24px) clamp(12px, 5%, 22px);
+    }
+    .promo-card__info > * {
+        max-width: 60%;
     }
 }
 @media (max-width: 360px) {
