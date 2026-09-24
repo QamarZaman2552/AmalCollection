@@ -69,7 +69,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Database
 var connectionString = builder.Configuration.GetConnectionString("dbcs")
-    ?? "Server=localhost;Database=BaazWixDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;";
+    ?? "Server=localhost;Database=AmalCollectionDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString,
