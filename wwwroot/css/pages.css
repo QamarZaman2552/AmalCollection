@@ -301,8 +301,7 @@
 .wishlist-badge {
     display: none;
     align-items: center; justify-content: center;
-    background: #ef4444; color: white; font-size: 0.7rem;
-    width: 18px; height: 18px; border-radius: 50%;
+    background: none; color: var(--red); font-size: 0.72rem; font-weight: 700;
     position: absolute; top: -8px; right: -10px;
 }
 .nav-profile-link {

@@ -1,53 +1,50 @@
 @model List<ShoppingApp.Models.Product>
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Admin – Products";
+    ViewData["SidebarActive"] = "products";
 }
 
-<section class="section">
-    <div class="admin-header">
-        <h1 class="section-title">⚙️ Product Management</h1>
-        <div class="admin-header-actions">
-            <a href="/Admin/Analytics"  class="btn-glass">📊 Analytics</a>
-            <a href="/Admin/Orders"     class="btn-glass">📦 Orders</a>
-            <a href="/Admin/HeroSlides" class="btn-glass">🖼️ Hero Slides</a>
-            <a href="/Admin/ChatLogs"   class="btn-glass">📜 Chat Logs</a>
-            <a href="/Admin/Add"        class="btn-primary">+ Add Product</a>
-        </div>
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-box"></i> Product Management</h1>
+    <div class="admin-header-actions">
+        <a href="/Admin/Analytics"  class="btn-glass"><i class="bi bi-graph-up"></i> Analytics</a>
+        <a href="/Admin/Orders"      class="btn-glass"><i class="bi bi-truck"></i> Orders</a>
+        <a href="/Admin/HeroSlides"  class="btn-glass"><i class="bi bi-image"></i> Hero Slides</a>
+        <a href="/Admin/ChatLogs"    class="btn-glass"><i class="bi bi-journal-text"></i> Chat Logs</a>
+        <a href="/Admin/Add"         class="btn-primary">+ Add Product</a>
     </div>
+</div>
 
-    @if (TempData["Success"] != null)
-    { <div class="alert alert-success">✅ @TempData["Success"]</div> }
-
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead>
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Image</th><th>Name</th><th>Category</th><th>Brand</th>
+                <th>Price (PKR)</th><th>Discount</th><th>Stock</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
                 <tr>
-                    <th>Image</th><th>Name</th><th>Category</th><th>Brand</th>
-                    <th>Price (PKR)</th><th>Discount</th><th>Stock</th><th>Actions</th>
+                    <td><img src="@(p.ImagePath ?? "/images/placeholder.jpg")" class="admin-thumb" onerror="this.src='/images/placeholder.jpg'" /></td>
+                    <td><strong>@p.Name</strong></td>
+                    <td>@p.Category</td>
+                    <td>@p.Brand</td>
+                    <td>@p.Price.ToString("N0")</td>
+                    <td>@p.Discount%</td>
+                    <td class="@(p.Stock < 5 ? "stock-low" : "")">@p.Stock</td>
+                    <td class="admin-actions">
+                        <a href="/Admin/Edit/@p.Id" class="btn-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="/Admin/Delete/@p.Id" style="display:inline"
+                              onsubmit="return confirm('Delete @p.Name?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in Model)
-                {
-                    <tr>
-                        <td><img src="@(p.ImagePath ?? "/images/placeholder.jpg")" class="admin-thumb" onerror="this.src='/images/placeholder.jpg'" /></td>
-                        <td><strong>@p.Name</strong></td>
-                        <td>@p.Category</td>
-                        <td>@p.Brand</td>
-                        <td>@p.Price.ToString("N0")</td>
-                        <td>@p.Discount%</td>
-                        <td class="@(p.Stock < 5 ? "stock-low" : "")">@p.Stock</td>
-                        <td class="admin-actions">
-                            <a href="/Admin/Edit/@p.Id" class="btn-edit">✏ Edit</a>
-                            <form method="post" action="/Admin/Delete/@p.Id" style="display:inline"
-                                  onsubmit="return confirm('Delete @p.Name?')">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-remove">🗑 Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
+            }
+        </tbody>
+    </table>
+</div>

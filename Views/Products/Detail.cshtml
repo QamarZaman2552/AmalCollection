@@ -193,15 +193,15 @@
                 <div class="delivery-box mt-3">
                     <div class="delivery-row">
                         <i class="bi bi-truck"></i>
-                        <div><b>Local Delivery:</b> Order aaj karein, delivery agle 24–48 ghante mein.</div>
+                        <div><b>Fast Delivery:</b> Same-city in 24–48 hrs · Nationwide in 2–4 business days.</div>
                     </div>
                     <div class="delivery-row">
                         <i class="bi bi-cash-coin"></i>
-                        <div><b>Cash on Delivery</b> available – paisay delivery par dein.</div>
+                        <div><b>Cash on Delivery:</b> Available nationwide — pay at your doorstep upon arrival.</div>
                     </div>
                     <div class="delivery-row">
                         <i class="bi bi-arrow-repeat"></i>
-                        <div><b>7-Day Exchange:</b> Size fit na ho to asani se exchange karein.</div>
+                        <div><b>7-Day Exchange:</b> Easy size &amp; style exchange guaranteed on unworn suits.</div>
                     </div>
                 </div>
 
@@ -401,11 +401,13 @@
                 {
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
-                            <a href="/Products/Detail/@p.Id" class="product-media">
-                                <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            <div class="product-media">
+                                <a href="/Products/Detail/@p.Id" class="product-media-link">
+                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                                 <span class="badge-tag">@p.Season</span>
-                            </a>
+                            </div>
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>

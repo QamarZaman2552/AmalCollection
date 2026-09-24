@@ -9,6 +9,7 @@
     var fabrics     = ViewBag.Fabrics as List<string> ?? new List<string>();
     var sizes       = ViewBag.Sizes as List<string> ?? new List<string>();
     var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
+    var promoCards = ViewBag.PromotionalCards as List<ShoppingApp.Models.PromotionalCard> ?? new List<ShoppingApp.Models.PromotionalCard>();
     string selectedCat    = ViewBag.SelectedCategory ?? "";
     string selectedSeason = ViewBag.SelectedSeason ?? "";
     string selectedFabric = ViewBag.SelectedFabric ?? "";
@@ -16,6 +17,39 @@
     string selectedSort   = ViewBag.SelectedSort ?? "";
     bool hasFilters = !string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedSeason)
         || !string.IsNullOrEmpty(selectedFabric) || !string.IsNullOrEmpty(selectedSize) || !string.IsNullOrEmpty(selectedSort);
+
+    int activeFilterCount = 0;
+    if (!string.IsNullOrEmpty(selectedCat)) activeFilterCount++;
+    if (!string.IsNullOrEmpty(selectedSeason)) activeFilterCount++;
+    if (!string.IsNullOrEmpty(selectedFabric)) activeFilterCount++;
+    if (!string.IsNullOrEmpty(selectedSize)) activeFilterCount++;
+    if (!string.IsNullOrEmpty(selectedSort)) activeFilterCount++;
+
+    var sortOptions = new (string Value, string Label)[]
+    {
+        ("", "Sort: Newest"),
+        ("price_asc", "Price: Low to High"),
+        ("price_desc", "Price: High to Low")
+    };
+
+    string BuildFilterUrl(string? cat = null, string? season = null, string? fabric = null, string? size = null, string? sort = null)
+    {
+        var p = new List<string>();
+        var c = cat != null ? (cat == "__CLEAR__" ? "" : cat) : selectedCat;
+        var s = season != null ? (season == "__CLEAR__" ? "" : season) : selectedSeason;
+        var f = fabric != null ? (fabric == "__CLEAR__" ? "" : fabric) : selectedFabric;
+        var sz = size != null ? (size == "__CLEAR__" ? "" : size) : selectedSize;
+        var so = sort != null ? (sort == "__CLEAR__" ? "" : sort) : selectedSort;
+
+        if (!string.IsNullOrEmpty(c)) p.Add("category=" + Uri.EscapeDataString(c));
+        if (!string.IsNullOrEmpty(s)) p.Add("season=" + Uri.EscapeDataString(s));
+        if (!string.IsNullOrEmpty(f)) p.Add("fabric=" + Uri.EscapeDataString(f));
+        if (!string.IsNullOrEmpty(sz)) p.Add("size=" + Uri.EscapeDataString(sz));
+        if (!string.IsNullOrEmpty(so)) p.Add("sort=" + Uri.EscapeDataString(so));
+
+        return p.Count > 0 ? "/?" + string.Join("&", p) + "#products" : "/#products";
+    }
+
     var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
     var wa = settings?.ContactWhatsapp;
     var waDigits = string.IsNullOrWhiteSpace(wa) ? "" : new string(wa.Where(char.IsDigit).ToArray());
@@ -97,43 +131,79 @@
     </div>
 </section>
 
-<!-- ═══ Shop by Season ═══ -->
-<section class="section" id="summer">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
-            <div>
-                <div class="section-kicker">Shop By Season</div>
-                <h2 class="section-title">Summer &amp; Winter Suits</h2>
+<!-- ═══ Promo Swipe Deck (Zarr-style) ═══ -->
+@if (promoCards.Any())
+{
+    <link rel="stylesheet" href="~/css/promo-card.css" />
+    <section class="section" id="promo">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="section-kicker">Featured Deals</div>
+                    <h2 class="section-title">Swipe the Deck</h2>
+                </div>
+                <a href="#products" class="link-more">View All <i class="bi bi-arrow-right"></i></a>
             </div>
-            <a href="#products" class="link-more">View All <i class="bi bi-arrow-right"></i></a>
-        </div>
 
-        <div class="row g-4">
-            <div class="col-12 col-md-6">
-                <a href="/?season=Summer" class="season-card d-block h-100 text-decoration-none">
-                    <div class="season-img" style="background-image:url('/images/suit-hero-summer.jpg')"></div>
-                    <div class="season-body">
-                        <div class="season-tag">Hot Weather</div>
-                        <h3 class="season-title">Summer Suits</h3>
-                        <p class="season-desc">Lawn, cotton &amp; chiffon – lightweight 2 &amp; 3 piece suits</p>
-                        <span class="season-cta">Shop Summer <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
-            </div>
-            <div class="col-12 col-md-6" id="winter">
-                <a href="/?season=Winter" class="season-card d-block h-100 text-decoration-none">
-                    <div class="season-img" style="background-image:url('/images/suit-hero-winter.jpg')"></div>
-                    <div class="season-body">
-                        <div class="season-tag">Cold Weather</div>
-                        <h3 class="season-title">Winter Suits</h3>
-                        <p class="season-desc">Khaddar, wool &amp; heavy cotton – full sleeves, warm fits</p>
-                        <span class="season-cta">Shop Winter <i class="bi bi-arrow-right"></i></span>
-                    </div>
-                </a>
+            <div class="promo-section">
+                <p class="promo-section__hint">
+                    <i class="bi bi-hand-index-thumb"></i> Drag &amp; fling left or right — infinite loop
+                </p>
+
+                <div class="promo-deck" id="promoDeck">
+                    <div class="promo-deck__ghost promo-deck__ghost--2"></div>
+                    <div class="promo-deck__ghost promo-deck__ghost--1"></div>
+
+                    @* Cards rendered so last child = top of stack (guide order) *@
+                    @for (int i = promoCards.Count - 1; i >= 0; i--)
+                    {
+                        var card = promoCards[i];
+                        var bg = string.IsNullOrWhiteSpace(card.BackgroundColor) ? "#7B4F52" : card.BackgroundColor;
+                        <div class="promo-card" data-index="@i"
+                             style="background-color: @bg; --promo-bg: @bg;">
+
+                            <img class="promo-card__img"
+                                 src="@(string.IsNullOrEmpty(card.ImagePath) ? "/images/placeholder.jpg" : card.ImagePath)"
+                                 alt="@card.BrandName"
+                                 draggable="false" />
+
+                            <div class="promo-card__info">
+                                <div class="promo-card__brand">@card.BrandName</div>
+                                <div class="promo-card__discount">
+                                    @card.DiscountPercent%
+                                    <span>OFF</span>
+                                </div>
+                                <div class="promo-card__now">Now: Rs.@card.CurrentPrice.ToString("N0")</div>
+                                <div class="promo-card__was">Was: Rs.@card.OriginalPrice.ToString("N0")</div>
+                                @if (!string.IsNullOrEmpty(card.AvailableOnText))
+                                {
+                                    <div class="promo-card__avail">@card.AvailableOnText</div>
+                                }
+                                @if (!string.IsNullOrEmpty(card.LogoPath))
+                                {
+                                    <img class="promo-card__logo" src="@card.LogoPath"
+                                         alt="@card.PlatformName" draggable="false" />
+                                }
+                                @if (!string.IsNullOrEmpty(card.PlatformName))
+                                {
+                                    <div class="promo-card__platform">@card.PlatformName</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="promo-dots" id="promoDots">
+                    @for (int i = 0; i < promoCards.Count; i++)
+                    {
+                        <div class="promo-dot @(i == 0 ? "active" : "")"></div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+    <script src="~/js/promo-swipe.js"></script>
+}
 
 <!-- ═══ Promo Banners ═══ -->
 <section class="section section-alt">
@@ -154,7 +224,7 @@
                     <div>
                         <div class="promo-tag">Easy Ordering</div>
                         <h3 class="promo-title">No Login<br />COD Available</h3>
-                        <p class="promo-desc">Sirf naam, phone aur address – 2 minute mein order.</p>
+                        <p class="promo-desc">Just your name, phone &amp; address — order in under 2 minutes.</p>
                         <a href="#products" class="btn btn-gold btn-sm">Start Shopping</a>
                     </div>
                 </div>
@@ -204,81 +274,206 @@
             if (!string.IsNullOrEmpty(selectedSize)) { fBase.Add("size=" + Uri.EscapeDataString(selectedSize)); }
             if (!string.IsNullOrEmpty(selectedSort)) { fBase.Add("sort=" + Uri.EscapeDataString(selectedSort)); }
 
-            var sortOptions = new (string Value, string Label)[]
-            {
-                ("", "Sort: Newest"),
-                ("price_asc", "Price: Low to High"),
-                ("price_desc", "Price: High to Low")
-            };
         }
 
-        @if (seasons.Any())
-        {
-            <div class="size-filter mb-2">
-                <span class="size-filter-label">Season:</span>
-                <a href="/?@string.Join("&", sSeasonBase)" class="size-chip @(!string.IsNullOrEmpty(selectedSeason) ? "" : "active")">All</a>
-                @foreach (var s in seasons)
-                {
-                    var parts = new List<string> { "season=" + Uri.EscapeDataString(s) };
-                    if (!string.IsNullOrEmpty(selectedCat)) { parts.Add("category=" + Uri.EscapeDataString(selectedCat)); }
-                    parts.AddRange(qsBase);
-                    <a href="/?@string.Join("&", parts)" class="size-chip @(selectedSeason == s ? "active" : "")">@s</a>
-                }
-            </div>
-        }
-        @if (sizes.Any())
-        {
-            <div class="size-filter mb-2">
-                <span class="size-filter-label">Size:</span>
-                <a href="/?@string.Join("&", sSizeBase)" class="size-chip @(!string.IsNullOrEmpty(selectedSize) ? "" : "active")">All</a>
-                @foreach (var s in sizes)
-                {
-                    var parts = new List<string>(sSizeBase);
-                    parts.Insert(0, "size=" + Uri.EscapeDataString(s));
-                    <a href="/?@string.Join("&", parts)" class="size-chip @(selectedSize == s ? "active" : "")">@s</a>
-                }
-            </div>
-        }
-        <div class="size-filter mb-4 flex-wrap">
-            <span class="size-filter-label">Category:</span>
-            <a href="/?@string.Join("&", cBase)" class="size-chip @(!string.IsNullOrEmpty(selectedCat) ? "" : "active")">All</a>
-            @foreach (var c in categories)
-            {
-                var parts = new List<string> { "category=" + Uri.EscapeDataString(c) };
-                parts.AddRange(cBase);
-                <a href="/?@string.Join("&", parts)" class="size-chip @(selectedCat == c ? "active" : "")">@c</a>
-            }
-            @if (fabrics.Any())
-            {
-                <span class="size-filter-label ms-2">Fabric:</span>
-                <a href="/?@string.Join("&", fBase)" class="size-chip @(!string.IsNullOrEmpty(selectedFabric) ? "" : "active")">All</a>
-                @foreach (var f in fabrics)
-                {
-                    var parts = new List<string> { "fabric=" + Uri.EscapeDataString(f) };
-                    parts.AddRange(fBase);
-                    <a href="/?@string.Join("&", parts)" class="size-chip @(selectedFabric == f ? "active" : "")">@f</a>
-                }
-            }
-            <form method="get" action="/" style="display:inline;">
-                @if (!string.IsNullOrEmpty(selectedCat)) { <input type="hidden" name="category" value="@selectedCat" /> }
-                @if (!string.IsNullOrEmpty(selectedSeason)) { <input type="hidden" name="season" value="@selectedSeason" /> }
-                @if (!string.IsNullOrEmpty(selectedFabric)) { <input type="hidden" name="fabric" value="@selectedFabric" /> }
-                @if (!string.IsNullOrEmpty(selectedSize)) { <input type="hidden" name="size" value="@selectedSize" /> }
-                <select name="sort" onchange="this.form.submit()" class="size-chip" style="min-width:auto;cursor:pointer;">
-                    @foreach (var opt in sortOptions)
+        <!-- ── Luxury Filter Toolbar ── -->
+        <div class="luxury-filter-toolbar">
+            <!-- Top bar: Filter trigger + Quick chips + Sort -->
+            <div class="filter-toolbar-top">
+                <!-- Filter Trigger Button -->
+                <button class="btn-filter-trigger" id="filterDrawerToggle" aria-expanded="false" aria-controls="filterDrawer" type="button">
+                    <i class="bi bi-sliders2"></i>
+                    Filter &amp; Refine
+                    @if (activeFilterCount > 0)
                     {
-                        if (opt.Value == selectedSort)
-                        {
-                            <option value="@opt.Value" selected>@opt.Label</option>
-                        }
-                        else
-                        {
-                            <option value="@opt.Value">@opt.Label</option>
-                        }
+                        <span class="filter-badge" id="filterBadge">@activeFilterCount</span>
                     }
-                </select>
-            </form>
+                </button>
+
+                <!-- Quick Discovery Chips (Season + Category) -->
+                <div class="quick-filter-scroll">
+                    <a href="/#products" class="quick-chip @(!hasFilters ? "active" : "")">All</a>
+                    @foreach (var s in seasons)
+                    {
+                        var sUrl = "/?season=" + Uri.EscapeDataString(s) + "#products";
+                        <a href="@sUrl" class="quick-chip @(selectedSeason == s && string.IsNullOrEmpty(selectedCat) ? "active" : "")">@s</a>
+                    }
+                    @foreach (var c in categories.Take(4))
+                    {
+                        var cUrl = "/?category=" + Uri.EscapeDataString(c) + "#products";
+                        <a href="@cUrl" class="quick-chip @(selectedCat == c && string.IsNullOrEmpty(selectedSeason) ? "active" : "")">@c</a>
+                    }
+                </div>
+
+                <!-- Sort + Count -->
+                <div class="sort-count-wrap">
+                    <span class="product-count-text d-none d-md-inline"><strong>@Model.Count</strong> suit@(Model.Count == 1 ? "" : "s")</span>
+                    <div class="sort-dropdown-wrap">
+                        <i class="bi bi-sort-down sort-icon"></i>
+                        <form method="get" action="/" id="sortForm" style="display:inline;">
+                            @if (!string.IsNullOrEmpty(selectedCat)) { <input type="hidden" name="category" value="@selectedCat" /> }
+                            @if (!string.IsNullOrEmpty(selectedSeason)) { <input type="hidden" name="season" value="@selectedSeason" /> }
+                            @if (!string.IsNullOrEmpty(selectedFabric)) { <input type="hidden" name="fabric" value="@selectedFabric" /> }
+                            @if (!string.IsNullOrEmpty(selectedSize)) { <input type="hidden" name="size" value="@selectedSize" /> }
+                            <select name="sort" class="sort-select" onchange="this.form.submit()">
+                                @foreach (var opt in sortOptions)
+                                {
+                                    if (opt.Value == selectedSort)
+                                    { <option value="@opt.Value" selected>@opt.Label</option> }
+                                    else
+                                    { <option value="@opt.Value">@opt.Label</option> }
+                                }
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Filter Pills -->
+            @if (hasFilters)
+            {
+                <div class="active-filters-bar" id="activeFiltersBar">
+                    @if (!string.IsNullOrEmpty(selectedSeason))
+                    {
+                        <a href="@BuildFilterUrl(season: "__CLEAR__")" class="active-filter-pill">
+                            Season: @selectedSeason <span class="pill-remove">✕</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(selectedCat))
+                    {
+                        <a href="@BuildFilterUrl(cat: "__CLEAR__")" class="active-filter-pill">
+                            Category: @selectedCat <span class="pill-remove">✕</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(selectedFabric))
+                    {
+                        <a href="@BuildFilterUrl(fabric: "__CLEAR__")" class="active-filter-pill">
+                            Fabric: @selectedFabric <span class="pill-remove">✕</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(selectedSize))
+                    {
+                        <a href="@BuildFilterUrl(size: "__CLEAR__")" class="active-filter-pill">
+                            Size: @selectedSize <span class="pill-remove">✕</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(selectedSort))
+                    {
+                        <a href="@BuildFilterUrl(sort: "__CLEAR__")" class="active-filter-pill">
+                            Sort: @(sortOptions.FirstOrDefault(o => o.Value == selectedSort).Label ?? selectedSort) <span class="pill-remove">✕</span>
+                        </a>
+                    }
+                    <a href="/" class="active-filter-clear">Clear All</a>
+                </div>
+            }
         </div>
+
+        <!-- ── Filter Drawer (Offcanvas) ── -->
+        <div class="filter-drawer-backdrop" id="filterBackdrop"></div>
+        <aside class="filter-drawer" id="filterDrawer" aria-label="Product Filters" role="dialog">
+            <div class="filter-drawer-header">
+                <div class="filter-drawer-title"><i class="bi bi-sliders2 me-2 text-gold"></i>Filter &amp; Refine</div>
+                <button class="filter-drawer-close" id="filterDrawerClose" aria-label="Close filters">✕</button>
+            </div>
+            <div class="filter-drawer-body">
+                <form method="get" action="/" id="filterForm">
+                    <!-- Season -->
+                    @if (seasons.Any())
+                    {
+                        <div class="filter-group">
+                            <div class="filter-group-label">Season</div>
+                            <div class="filter-chip-row">
+                                <label class="filter-chip-item @(string.IsNullOrEmpty(selectedSeason) ? "checked" : "")">
+                                    <input type="radio" name="season" value="" @(string.IsNullOrEmpty(selectedSeason) ? "checked" : "") /> All
+                                </label>
+                                @foreach (var s in seasons)
+                                {
+                                    <label class="filter-chip-item @(selectedSeason == s ? "checked" : "")">
+                                        <input type="radio" name="season" value="@s" @(selectedSeason == s ? "checked" : "") /> @s
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Category -->
+                    @if (categories.Any())
+                    {
+                        <div class="filter-group">
+                            <div class="filter-group-label">Category</div>
+                            <div class="filter-chip-row">
+                                <label class="filter-chip-item @(string.IsNullOrEmpty(selectedCat) ? "checked" : "")">
+                                    <input type="radio" name="category" value="" @(string.IsNullOrEmpty(selectedCat) ? "checked" : "") /> All
+                                </label>
+                                @foreach (var c in categories)
+                                {
+                                    <label class="filter-chip-item @(selectedCat == c ? "checked" : "")">
+                                        <input type="radio" name="category" value="@c" @(selectedCat == c ? "checked" : "") /> @c
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Fabric -->
+                    @if (fabrics.Any())
+                    {
+                        <div class="filter-group">
+                            <div class="filter-group-label">Fabric</div>
+                            <div class="filter-chip-row">
+                                <label class="filter-chip-item @(string.IsNullOrEmpty(selectedFabric) ? "checked" : "")">
+                                    <input type="radio" name="fabric" value="" @(string.IsNullOrEmpty(selectedFabric) ? "checked" : "") /> All
+                                </label>
+                                @foreach (var f in fabrics)
+                                {
+                                    <label class="filter-chip-item @(selectedFabric == f ? "checked" : "")">
+                                        <input type="radio" name="fabric" value="@f" @(selectedFabric == f ? "checked" : "") /> @f
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Size -->
+                    @if (sizes.Any())
+                    {
+                        <div class="filter-group">
+                            <div class="filter-group-label">Size</div>
+                            <div class="filter-chip-row">
+                                <label class="filter-chip-item @(string.IsNullOrEmpty(selectedSize) ? "checked" : "")">
+                                    <input type="radio" name="size" value="" @(string.IsNullOrEmpty(selectedSize) ? "checked" : "") /> All
+                                </label>
+                                @foreach (var s in sizes)
+                                {
+                                    <label class="filter-chip-item @(selectedSize == s ? "checked" : "")">
+                                        <input type="radio" name="size" value="@s" @(selectedSize == s ? "checked" : "") /> @s
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Sort -->
+                    <div class="filter-group">
+                        <div class="filter-group-label">Sort By</div>
+                        <div class="filter-chip-row">
+                            @foreach (var opt in sortOptions)
+                            {
+                                <label class="filter-chip-item @(selectedSort == opt.Value ? "checked" : "")">
+                                    <input type="radio" name="sort" value="@opt.Value" @(selectedSort == opt.Value ? "checked" : "") /> @opt.Label
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="filter-drawer-footer">
+                <a href="/" class="btn-filter-reset">Reset All</a>
+                <button class="btn-filter-apply" onclick="document.getElementById('filterForm').submit()">
+                    Apply Filters
+                </button>
+            </div>
+        </aside>
 
         @if (!Model.Any())
         {
@@ -296,9 +491,11 @@
                     var pColors = (p.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(4).ToList();
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
-                            <a href="/Products/Detail/@p.Id" class="product-media">
-                                <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
-                                     alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            <div class="product-media">
+                                <a href="/Products/Detail/@p.Id" class="product-media-link">
+                                    <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                                         alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                </a>
                                 @if (p.Discount > 0)
                                 {
                                     <span class="badge-discount">-@p.Discount%</span>
@@ -311,17 +508,7 @@
                                 {
                                     <span class="badge-tag">@p.Season</span>
                                 }
-                            </a>
-                            @if (p.Stock > 0)
-                            {
-                                <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
-                            }
-                            <form method="post" action="/Wishlist/Toggle" style="position:absolute;top:10px;right:10px;z-index:3;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@p.Id" />
-                                <input type="hidden" name="returnUrl" value="/" />
-                                <button type="submit" class="wish-btn" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
-                            </form>
+                            </div>
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
@@ -344,6 +531,18 @@
                                     }
                                 </div>
                             </div>
+                            <div class="product-actions">
+                                <form method="post" action="/Wishlist/Toggle" class="wish-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <input type="hidden" name="returnUrl" value="/" />
+                                    <button type="submit" class="wish-btn" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
+                                </form>
+                                @if (p.Stock > 0)
+                                {
+                                    <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                }
+                            </div>
                         </div>
                     </div>
                 }
@@ -358,28 +557,28 @@
         <div class="mb-4">
             <div class="section-kicker">No Account Needed</div>
             <h2 class="section-title">How to Order</h2>
-            <p class="section-sub">Bina login ke 3 steps mein order place karein.</p>
+            <p class="section-sub">Place your order in 3 simple steps — no login required.</p>
         </div>
         <div class="row g-4">
             <div class="col-12 col-md-4">
                 <div class="step-card h-100 text-center">
                     <div class="step-num">1</div>
-                    <h3 class="step-title">Suit Pasand Karein</h3>
-                    <p class="step-desc">Size, color aur quantity select karke "Add to Cart" dabayein.</p>
+                    <h3 class="step-title">Choose Your Suit</h3>
+                    <p class="step-desc">Browse our collection, select your size, color &amp; quantity, then tap "Add to Cart".</p>
                 </div>
             </div>
             <div class="col-12 col-md-4">
                 <div class="step-card h-100 text-center">
                     <div class="step-num">2</div>
-                    <h3 class="step-title">Address Bharein</h3>
-                    <p class="step-desc">Sirf naam, phone aur delivery address – koi account nahi chahiye.</p>
+                    <h3 class="step-title">Enter Your Details</h3>
+                    <p class="step-desc">Just your name, phone number &amp; delivery address — no account required.</p>
                 </div>
             </div>
             <div class="col-12 col-md-4">
                 <div class="step-card h-100 text-center">
                     <div class="step-num">3</div>
-                    <h3 class="step-title">COD Se Payment</h3>
-                    <p class="step-desc">Order deliver hone par cash dein. 7-day exchange bhi available.</p>
+                    <h3 class="step-title">Pay on Delivery</h3>
+                    <p class="step-desc">Pay cash when your order arrives. 7-day hassle-free exchange included.</p>
                 </div>
             </div>
         </div>
@@ -413,7 +612,7 @@
                     <div class="trust-icon"><i class="bi bi-arrow-repeat"></i></div>
                     <div>
                         <div class="trust-title">7-Day Exchange</div>
-                        <div class="trust-desc">Size fit na ho? Badal lein</div>
+                        <div class="trust-desc">Wrong size? Easy exchange guaranteed</div>
                     </div>
                 </div>
             </div>
@@ -444,11 +643,13 @@
                 {
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
-                            <a href="/Products/Detail/@p.Id" class="product-media">
-                                <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
-                                     alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            <div class="product-media">
+                                <a href="/Products/Detail/@p.Id" class="product-media-link">
+                                    <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                                         alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                </a>
                                 <span class="badge-tag">@p.Season</span>
-                            </a>
+                            </div>
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
@@ -481,7 +682,7 @@
                     <div class="testi-stars">
                         <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                     </div>
-                    <p class="testi-text">"Lawn suit ki quality expectations se bohat achi nikli. Bina login ke order kiya aur delivery do din mein mil gayi."</p>
+                    <p class="testi-text">"The lawn suit quality far exceeded my expectations. I ordered as a guest and delivery arrived in just two days!"</p>
                     <div class="testi-author">
                         <div class="testi-avatar">S</div>
                         <div><div class="testi-name">Sana Khan</div><div class="testi-city">Lahore</div></div>
@@ -493,7 +694,7 @@
                     <div class="testi-stars">
                         <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                     </div>
-                    <p class="testi-text">"Khaddar winter suit garam hai aur fitting bilkul size ke hisab se. COD option ne asaan bana diya."</p>
+                    <p class="testi-text">"The khaddar winter suit is wonderfully warm and the fit was true to size. The COD option made the whole experience effortless."</p>
                     <div class="testi-author">
                         <div class="testi-avatar">A</div>
                         <div><div class="testi-name">Ayesha Raza</div><div class="testi-city">Karachi</div></div>
@@ -505,7 +706,7 @@
                     <div class="testi-stars">
                         <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
                     </div>
-                    <p class="testi-text">"Exchange process simple tha – size exchange without any drama. Ab har season yahin se shopping karti hoon."</p>
+                    <p class="testi-text">"The exchange process was refreshingly smooth — no drama, no hassle. Now I shop here every season without hesitation."</p>
                     <div class="testi-author">
                         <div class="testi-avatar">F</div>
                         <div><div class="testi-name">Fatima Ali</div><div class="testi-city">Islamabad</div></div>
@@ -521,9 +722,9 @@
     <div class="container text-center">
         <div class="section-kicker">Stay In Touch</div>
         <h2 class="section-title">Get 10% Off Your First Order</h2>
-        <p class="section-sub">New drops, sales aur WhatsApp updates – seedha inbox mein.</p>
-        <form class="news-form mx-auto mt-4" onsubmit="event.preventDefault(); alert('Shukriya! Aap subscribe ho gaye hain.');">
-            <input class="form-control" type="email" placeholder="Enter your email address" required />
+        <p class="section-sub">New arrivals, exclusive sales &amp; WhatsApp updates — delivered straight to your inbox.</p>
+        <form class="news-form mx-auto mt-4" onsubmit="event.preventDefault(); alert('Thank you! You have successfully subscribed.');">
+            <input class="form-control" type="email" id="newsletterEmail" name="email" placeholder="Enter your email address" required autocomplete="email" />
             <button type="submit" class="btn btn-gold">Subscribe</button>
         </form>
         @if (!string.IsNullOrWhiteSpace(waDigits))

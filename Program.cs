@@ -353,6 +353,20 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("Installed Amal Collection hero slides (replaced {Count} old active slides)", activeSlides.Count);
         }
 
+        // Seed homepage promo swipe deck if empty
+        if (!await db.PromotionalCards.AnyAsync())
+        {
+            db.PromotionalCards.AddRange(
+                new ShoppingApp.Models.PromotionalCard { BrandName = "AMAL LAWN", DiscountPercent = 20, CurrentPrice = 1999, OriginalPrice = 2499, AvailableOnText = "AVAILABLE ON", PlatformName = "AMAL", ImagePath = "/images/suit-summer-1.jpg", BackgroundColor = "#7B4F52", SortOrder = 0, IsActive = true },
+                new ShoppingApp.Models.PromotionalCard { BrandName = "KHADDAR EDIT", DiscountPercent = 15, CurrentPrice = 2999, OriginalPrice = 3499, AvailableOnText = "AVAILABLE ON", PlatformName = "AMAL", ImagePath = "/images/suit-winter-1.jpg", BackgroundColor = "#4A5D78", SortOrder = 1, IsActive = true },
+                new ShoppingApp.Models.PromotionalCard { BrandName = "CHIFFON FORMALS", DiscountPercent = 25, CurrentPrice = 3749, OriginalPrice = 4999, AvailableOnText = "AVAILABLE ON", PlatformName = "AMAL", ImagePath = "/images/suit-summer-3.jpg", BackgroundColor = "#5C4A6B", SortOrder = 2, IsActive = true },
+                new ShoppingApp.Models.PromotionalCard { BrandName = "JACQUARD FESTIVE", DiscountPercent = 20, CurrentPrice = 5199, OriginalPrice = 6499, AvailableOnText = "AVAILABLE ON", PlatformName = "AMAL", ImagePath = "/images/suit-winter-4.jpg", BackgroundColor = "#6B5A3A", SortOrder = 3, IsActive = true },
+                new ShoppingApp.Models.PromotionalCard { BrandName = "UNSTITCHED LAWN", DiscountPercent = 10, CurrentPrice = 1799, OriginalPrice = 1999, AvailableOnText = "AVAILABLE ON", PlatformName = "AMAL", ImagePath = "/images/suit-summer-5.jpg", BackgroundColor = "#3D6B5A", SortOrder = 4, IsActive = true }
+            );
+            await db.SaveChangesAsync();
+            logger.LogInformation("Seeded default PromotionalCards for swipe deck");
+        }
+
         var canConnect = await db.Database.CanConnectAsync();
         logger.LogInformation("Database connectivity: {Status}", canConnect ? "OK" : "FAILED");
         logger.LogInformation("Application starting in {Environment} mode", app.Environment.EnvironmentName);

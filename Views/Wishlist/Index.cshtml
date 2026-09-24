@@ -29,9 +29,11 @@
                     var p = item.Product!;
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
-                            <a href="/Products/Detail/@p.Id" class="product-media">
-                                <img src="@(p.ImagePath ?? "/images/placeholder.jpg")"
-                                     alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                            <div class="product-media">
+                                <a href="/Products/Detail/@p.Id" class="product-media-link">
+                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")"
+                                         alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                </a>
                                 @if (p.Discount > 0)
                                 {
                                     <span class="badge-discount">-@p.Discount%</span>
@@ -40,7 +42,7 @@
                                 {
                                     <span class="badge-tag" style="background:var(--red);color:#fff;">Out of Stock</span>
                                 }
-                            </a>
+                            </div>
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>

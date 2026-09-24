@@ -1,30 +1,30 @@
 @model List<ShoppingApp.Models.ChatbotLog>
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Chatbot Logs";
+    ViewData["SidebarActive"] = "chatlogs";
 }
 
-<section class="section">
-    <div class="admin-header">
-        <h1 class="section-title">📜 Chatbot Logs</h1>
-        <a href="/Admin/Products" class="btn-glass">← Back</a>
-    </div>
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead>
-                <tr><th>ID</th><th>User ID</th><th>Query</th><th>Response</th><th>Timestamp</th></tr>
-            </thead>
-            <tbody>
-                @foreach (var log in Model)
-                {
-                    <tr>
-                        <td>@log.Id</td>
-                        <td>@(log.UserId?.ToString() ?? "Guest")</td>
-                        <td>@log.Query</td>
-                        <td class="log-response">@log.Response</td>
-                        <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-journal-text"></i> Chatbot Logs</h1>
+    <a href="/Admin/Products" class="btn-glass">← Back</a>
+</div>
+<div class="admin-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr><th>ID</th><th>User ID</th><th>Query</th><th>Response</th><th>Timestamp</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model)
+            {
+                <tr>
+                    <td>@log.Id</td>
+                    <td>@(log.UserId?.ToString() ?? "Guest")</td>
+                    <td>@log.Query</td>
+                    <td class="log-response">@log.Response</td>
+                    <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

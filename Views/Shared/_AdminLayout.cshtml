@@ -1,0 +1,201 @@
+@using ShoppingApp.Data
+@inject AppDbContext _db
+@{
+    var siteSettings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+    var waNum = siteSettings?.ContactWhatsapp;
+    var waDigits = string.IsNullOrWhiteSpace(waNum) ? "" : new string(waNum.Where(char.IsDigit).ToArray());
+    if (waDigits.Length > 0 && waDigits.StartsWith("0") && !waDigits.StartsWith("92"))
+        waDigits = "92" + waDigits[1..];
+    var isAdmin = Context.Session.GetString("UserRole") == "admin";
+    var userId = Context.Session.GetInt32("UserId");
+    var userName = Context.Session.GetString("UserName");
+    var unreadMsgs = isAdmin ? _db.ContactMessages.Count(m => !m.IsRead) : 0;
+    var sidebarActive = ViewData["SidebarActive"] as string ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="Amal Collection – Admin Panel" />
+    <title>@ViewData["Title"] – Amal Collection</title>
+    <script>
+        (function () {
+            var t = localStorage.getItem('theme');
+            if (t !== 'dark') {
+                function applyLight() { document.body.classList.add('light-mode'); }
+                if (document.body) { applyLight(); }
+                else { document.addEventListener('DOMContentLoaded', applyLight); }
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/prototype.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@ViewData["BodyClass"]">
+    <div class="admin-layout">
+        <!-- ─── Sidebar ──────────────────────────────────── -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="admin-sidebar-header">
+                <a href="/" class="admin-brand">Amal<em>Collection</em></a>
+                <button class="admin-sidebar-close" id="sidebarClose" aria-label="Close menu">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <nav class="admin-sidebar-nav">
+                <ul class="admin-nav-list">
+                    <li class="admin-nav-section">Management</li>
+                    <li>
+                        <a href="/Admin/Products" class="@(sidebarActive == "products" ? "active" : "")" data-active="products">
+                            <i class="bi bi-box"></i>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/Add" class="@(sidebarActive == "add" ? "active" : "")" data-active="add">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Add Product</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/Categories" class="@(sidebarActive == "categories" ? "active" : "")" data-active="categories">
+                            <i class="bi bi-folder"></i>
+                            <span>Categories</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/HeroSlides" class="@(sidebarActive == "slides" ? "active" : "")" data-active="slides">
+                            <i class="bi bi-image"></i>
+                            <span>Hero Slides</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/PromoCards" class="@(sidebarActive == "promo" ? "active" : "")" data-active="promo">
+                            <i class="bi bi-tags"></i>
+                            <span>Promo Cards</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav-section">Management</li>
+                    <li>
+                        <a href="/Admin/Orders" class="@(sidebarActive == "orders" ? "active" : "")" data-active="orders">
+                            <i class="bi bi-truck"></i>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/Users" class="@(sidebarActive == "users" ? "active" : "")" data-active="users">
+                            <i class="bi bi-people"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/Messages" class="@(sidebarActive == "messages" ? "active" : "")" data-active="messages">
+                            <i class="bi bi-envelope"></i>
+                            <span>Messages</span>
+                            @if (unreadMsgs > 0)
+                            {
+                                <span class="admin-badge">@unreadMsgs</span>
+                            }
+                        </a>
+                    </li>
+                    <li class="admin-nav-section">Tools</li>
+                    <li>
+                        <a href="/Admin/Analytics" class="@(sidebarActive == "analytics" ? "active" : "")" data-active="analytics">
+                            <i class="bi bi-graph-up"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/ChatLogs" class="@(sidebarActive == "chatlogs" ? "active" : "")" data-active="chatlogs">
+                            <i class="bi bi-chat-left"></i>
+                            <span>Chat Logs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Admin/Settings" class="@(sidebarActive == "settings" ? "active" : "")" data-active="settings">
+                            <i class="bi bi-gear"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <div class="admin-user-info">
+                    <div class="admin-avatar-sm">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="admin-user-text">
+                        <div class="admin-user-name">@userName</div>
+                        <div class="admin-user-role">Administrator</div>
+                    </div>
+                </div>
+                <a href="/Auth/Logout" class="admin-logout-link" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ─── Sidebar Overlay (mobile) ──────────────────── -->
+        <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ─── Main Area ────────────────────────────────── -->
+        <div class="admin-main-wrap">
+            <!-- Topbar -->
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-menu-btn" id="sidebarOpen" aria-label="Open menu">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h1 class="admin-page-title">@ViewData["Title"]</h1>
+                </div>
+                <div class="admin-topbar-right">
+                    @if (isAdmin)
+                    {
+                        <a href="/" class="admin-site-link"><i class="bi bi-house-door"></i> Site</a>
+                        <a href="/Admin/Settings" class="admin-icon-btn" title="Settings"><i class="bi bi-gear"></i></a>
+                    }
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="admin-content">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-error">
+                        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+                    </div>
+                }
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            function blockPinch(e) { if (e.touches && e.touches.length > 1) e.preventDefault(); }
+            document.addEventListener('touchstart', blockPinch, { passive: false });
+            document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+            document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
+        })();
+        var sidebar = document.getElementById('adminSidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        document.getElementById('sidebarOpen').addEventListener('click', function () { sidebar.classList.add('open'); overlay.classList.add('open'); });
+        document.getElementById('sidebarClose').addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+        overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

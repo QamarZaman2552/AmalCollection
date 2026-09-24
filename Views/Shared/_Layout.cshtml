@@ -7,7 +7,11 @@
     if (waDigits.Length > 0 && waDigits.StartsWith("0") && !waDigits.StartsWith("92"))
         waDigits = "92" + waDigits[1..];
     var contactPhone = siteSettings?.ContactPhone;
+    if (string.IsNullOrWhiteSpace(contactPhone) || contactPhone.Contains("0000000"))
+        contactPhone = "0321-6068091";
     var contactEmail = siteSettings?.ContactEmail;
+    if (string.IsNullOrWhiteSpace(contactEmail))
+        contactEmail = "hello@amalcollection.pk";
     var isAdmin = Context.Session.GetString("UserRole") == "admin";
     var userId = Context.Session.GetInt32("UserId");
     var unreadMsgs = isAdmin ? _db.ContactMessages.Count(m => !m.IsRead) : 0;
@@ -16,7 +20,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="Amal Collection – elegant summer & winter ladies suits with cash on delivery across Pakistan." />
     <title>@ViewData["Title"] – Amal Collection</title>
     <script>
@@ -33,7 +37,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/prototype.css" asp-append-version="true" />
@@ -82,24 +86,69 @@
 
             <div class="collapse navbar-collapse order-2 order-lg-1" id="mainNav">
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 ac-nav-links">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/?season=Summer">Summer</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/?season=Winter">Winter</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/About">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/Contact">Contact</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <span>Home</span>
+                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/?season=Summer">
+                            <span>Summer</span>
+                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/?season=Winter">
+                            <span>Winter</span>
+                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/About">
+                            <span>About Us</span>
+                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Contact">
+                            <span>Contact</span>
+                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                        </a>
+                    </li>
                     @if (userId != null && !isAdmin)
                     {
-                        <li class="nav-item"><a class="nav-link" href="/Orders/History">My Orders</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Orders/History">
+                                <span>My Orders</span>
+                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            </a>
+                        </li>
                     }
                     @if (isAdmin)
                     {
-                        <li class="nav-item"><a class="nav-link" href="/Admin/Products">Admin</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Admin/Messages">Messages @(unreadMsgs > 0 ? $"({unreadMsgs})" : "")</a></li>
+                        <li class="nav-section d-lg-none">Account</li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/Products">
+                                <span>Admin</span>
+                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Admin/Messages">
+                                <span>Messages</span>
+                                @if (unreadMsgs > 0)
+                                {
+                                    <span class="nav-msg-badge">@unreadMsgs</span>
+                                }
+                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none ms-auto" aria-hidden="true"></i>
+                            </a>
+                        </li>
                     }
                 </ul>
 
                 <form class="d-none d-lg-flex ac-search mb-2 mb-lg-0" action="/Products/Search" method="get">
-                    <input class="form-control" type="search" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
+                    <input class="form-control" type="search" id="navSearch" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
                     <button class="btn ac-search-btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                 </form>
             </div>
@@ -108,7 +157,7 @@
         <div class="ac-mobile-search d-lg-none">
             <div class="container">
                 <form class="d-flex ac-search" action="/Products/Search" method="get">
-                    <input class="form-control" type="search" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
+                    <input class="form-control" type="search" id="mobileNavSearch" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
                     <button class="btn ac-search-btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                 </form>
             </div>
@@ -118,11 +167,11 @@
     <!-- ─── Toast Notifications ──────────────────────────── -->
     @if (TempData["Success"] != null)
     {
-        <div class="toast toast-success" id="toast-success">✅ @TempData["Success"]</div>
+        <div class="toast toast-success" id="toast-success"><i class="bi bi-check-circle-fill"></i> @TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="toast toast-error" id="toast-error">❌ @TempData["Error"]</div>
+        <div class="toast toast-error" id="toast-error"><i class="bi bi-x-circle"></i> @TempData["Error"]</div>
     }
 
     <!-- ─── Main Content ─────────────────────────────────── -->
@@ -206,28 +255,28 @@
         </a>
     }
 
-    <div class="chatbot-bubble" id="chatBubble" title="Chat with Amal Collection">
-        <span class="chatbot-icon">Chat</span>
+    <div class="chatbot-bubble" id="chatBubble" title="Chat with Amal Assistant" aria-label="Chat with Amal Assistant">
+        <span class="chatbot-icon"><i class="bi bi-chat-dots-fill"></i></span>
         <span class="chatbot-ping"></span>
     </div>
 
     <div class="chatbot-window" id="chatWindow">
         <div class="chatbot-header">
-            <div class="chatbot-avatar">AC</div>
+            <div class="chatbot-avatar"><i class="bi bi-stars"></i></div>
             <div>
-                <div class="chatbot-name">Amal Collection Assistant</div>
-                <div class="chatbot-status">● Online</div>
+                <div class="chatbot-name">Amal Stylist Assistant</div>
+                <div class="chatbot-status">● Online · AI Powered</div>
             </div>
-            <button class="chatbot-close" id="chatClose">✕</button>
+            <button class="chatbot-close" id="chatClose" aria-label="Close Chat">✕</button>
         </div>
         <div class="chatbot-messages" id="chatMessages">
             <div class="chat-msg bot">
-                <div class="chat-bubble">Hello! I'm your Amal Collection assistant. Ask me about suits, sizes, fabrics, shipping, or anything else!</div>
+                <div class="chat-bubble">Hello! I'm your Amal Collection assistant. How may I help you with suits, fabric details, sizing, or ordering today?</div>
             </div>
         </div>
         <div class="chatbot-input-area">
-            <input type="text" id="chatInput" placeholder="Type your message…" maxlength="300" />
-            <button id="chatSend">➤</button>
+            <input type="text" id="chatInput" name="chatMessage" placeholder="Ask about suits, sizing, fabrics…" maxlength="300" />
+            <button id="chatSend" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
         </div>
     </div>
 
@@ -235,18 +284,14 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
+        // Lock pinch zoom only — do NOT block normal touch scroll
         (function () {
-            const KEY = 'amal_scroll_' + window.location.pathname;
-            window.addEventListener('beforeunload', function () {
-                sessionStorage.setItem(KEY, window.scrollY.toString());
-            });
-            window.addEventListener('load', function () {
-                var pos = parseInt(sessionStorage.getItem(KEY), 10);
-                if (!isNaN(pos) && pos > 0) {
-                    window.scrollTo(0, pos);
-                    sessionStorage.removeItem(KEY);
-                }
-            });
+            function blockPinch(e) {
+                if (e.touches && e.touches.length > 1) e.preventDefault();
+            }
+            document.addEventListener('touchstart', blockPinch, { passive: false });
+            document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+            document.addEventListener('gesturechange', function (e) { e.preventDefault(); });
         })();
     </script>
 

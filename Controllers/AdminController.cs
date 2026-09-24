@@ -530,6 +530,135 @@ namespace ShoppingApp.Controllers
             return RedirectToAction("HeroSlides");
         }
 
+        // ─── Promo Cards (Zarr-style swipe deck) ─────────────
+        public IActionResult PromoCards()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var cards = _db.PromotionalCards.OrderBy(c => c.SortOrder).ThenBy(c => c.Id).ToList();
+            return View(cards);
+        }
+
+        [HttpGet]
+        public IActionResult AddPromo()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            return View(new PromotionalCard { IsActive = true, BackgroundColor = "#7B4F52" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPromo(PromotionalCard card, IFormFile? imageFile, IFormFile? logoFile)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                card.ImagePath = await _imageService.UploadAsync(imageFile, "promo-img");
+            }
+            else if (string.IsNullOrWhiteSpace(card.ImagePath))
+            {
+                TempData["Error"] = "Please upload a product image.";
+                return View(card);
+            }
+
+            if (logoFile != null && logoFile.Length > 0)
+            {
+                card.LogoPath = await _imageService.UploadAsync(logoFile, "promo-logo");
+            }
+
+            if (string.IsNullOrWhiteSpace(card.BackgroundColor)) card.BackgroundColor = "#7B4F52";
+
+            _db.PromotionalCards.Add(card);
+            _db.SaveChanges();
+            TempData["Success"] = "Promo card added!";
+            return RedirectToAction("PromoCards");
+        }
+
+        [HttpGet]
+        public IActionResult EditPromo(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == id);
+            if (card == null) return NotFound();
+            return View(card);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPromo(PromotionalCard updated, IFormFile? imageFile, IFormFile? logoFile)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == updated.Id);
+            if (card == null) return NotFound();
+
+            card.BrandName = updated.BrandName;
+            card.DiscountPercent = updated.DiscountPercent;
+            card.CurrentPrice = updated.CurrentPrice;
+            card.OriginalPrice = updated.OriginalPrice;
+            card.AvailableOnText = updated.AvailableOnText;
+            card.PlatformName = updated.PlatformName;
+            card.SortOrder = updated.SortOrder;
+            card.IsActive = updated.IsActive;
+            card.BackgroundColor = string.IsNullOrWhiteSpace(updated.BackgroundColor) ? "#7B4F52" : updated.BackgroundColor;
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                card.ImagePath = await _imageService.UploadAsync(imageFile, "promo-img");
+            }
+            if (logoFile != null && logoFile.Length > 0)
+            {
+                card.LogoPath = await _imageService.UploadAsync(logoFile, "promo-logo");
+            }
+
+            _db.SaveChanges();
+            TempData["Success"] = "Promo card updated!";
+            return RedirectToAction("PromoCards");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePromo(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == id);
+            if (card != null) { _db.PromotionalCards.Remove(card); _db.SaveChanges(); }
+            TempData["Success"] = "Promo card deleted.";
+            return RedirectToAction("PromoCards");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult TogglePromo(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == id);
+            if (card != null)
+            {
+                card.IsActive = !card.IsActive;
+                _db.SaveChanges();
+            }
+            return RedirectToAction("PromoCards");
+        }
+
+        // Reorder: move card up (lower SortOrder) or down within the list
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MovePromo(int id, string dir)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var ordered = _db.PromotionalCards.OrderBy(c => c.SortOrder).ThenBy(c => c.Id).ToList();
+            var idx = ordered.FindIndex(c => c.Id == id);
+            if (idx < 0) return RedirectToAction("PromoCards");
+
+            int swapIdx = dir == "up" ? idx - 1 : idx + 1;
+            if (swapIdx < 0 || swapIdx >= ordered.Count) return RedirectToAction("PromoCards");
+
+            for (int i = 0; i < ordered.Count; i++) ordered[i].SortOrder = i;
+            (ordered[idx].SortOrder, ordered[swapIdx].SortOrder) = (ordered[swapIdx].SortOrder, ordered[idx].SortOrder);
+            _db.SaveChanges();
+            return RedirectToAction("PromoCards");
+        }
+
         // ─── Users Management (Active/Inactive) ─────────────────
         public IActionResult Users()
         {

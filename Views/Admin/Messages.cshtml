@@ -1,102 +1,93 @@
 @model IEnumerable<ShoppingApp.Models.ContactMessage>
 @{
     ViewData["Title"] = "Contact Messages";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["SidebarActive"] = "messages";
     int unread = Model.Count(m => !m.IsRead);
 }
 
-<section class="section">
+<div class="admin-header">
+    <div>
+        <h1 class="section-title" style="margin-bottom: 0.25rem;">
+            <i class="bi bi-envelope"></i> Contact Messages
+            @if (unread > 0)
+            {
+                <span class="msg-unread-badge">@unread new</span>
+            }
+        </h1>
+        <p style="color: var(--text-3); font-size: 0.85rem; margin: 0;">Inbox of customer enquiries submitted via the Contact form.</p>
+    </div>
+    <a href="/Admin/Products" class="btn-glass">← Back to Dashboard</a>
+</div>
 
-    <!-- ── Header ── -->
-    <div class="admin-header">
-        <div>
-            <h1 class="section-title" style="margin-bottom: 0.25rem;">
-                ✉️ Contact Messages
-                @if (unread > 0)
-                {
-                    <span class="msg-unread-badge">@unread new</span>
-                }
-            </h1>
-            <p style="color: var(--text-3); font-size: 0.85rem; margin: 0;">Inbox of customer enquiries submitted via the Contact form.</p>
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+        <p>No messages yet. When customers contact you, they'll appear here.</p>
+    </div>
+}
+else
+{
+    <!-- ── Stats Row ── -->
+    <div class="msg-stats-row">
+        <div class="msg-stat-card">
+            <div class="msg-stat-num">@Model.Count()</div>
+            <div class="msg-stat-label">Total Messages</div>
         </div>
-        <a href="/Admin/Products" class="btn-glass">← Back to Dashboard</a>
+        <div class="msg-stat-card">
+            <div class="msg-stat-num" style="color: var(--accent-2);">@unread</div>
+            <div class="msg-stat-label">Unread</div>
+        </div>
+        <div class="msg-stat-card">
+            <div class="msg-stat-num" style="color: var(--green);">@Model.Count(m => m.IsRead)</div>
+            <div class="msg-stat-label">Read</div>
+        </div>
     </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">✅ @TempData["Success"]</div>
-    }
-
-    @if (!Model.Any())
-    {
-        <div class="empty-state">
-            <div class="empty-icon">📭</div>
-            <p>No messages yet. When customers contact you, they'll appear here.</p>
-        </div>
-    }
-    else
-    {
-        <!-- ── Stats Row ── -->
-        <div class="msg-stats-row">
-            <div class="msg-stat-card">
-                <div class="msg-stat-num">@Model.Count()</div>
-                <div class="msg-stat-label">Total Messages</div>
-            </div>
-            <div class="msg-stat-card">
-                <div class="msg-stat-num" style="color: var(--accent-2);">@unread</div>
-                <div class="msg-stat-label">Unread</div>
-            </div>
-            <div class="msg-stat-card">
-                <div class="msg-stat-num" style="color: var(--green);">@Model.Count(m => m.IsRead)</div>
-                <div class="msg-stat-label">Read</div>
-            </div>
-        </div>
-
-        <!-- ── Messages List ── -->
-        <div class="msg-list">
-            @foreach (var msg in Model.OrderByDescending(m => m.CreatedAt))
-            {
-                <div class="msg-card @(msg.IsRead ? "msg-read" : "msg-unread")">
-                    <div class="msg-card-left">
-                        <div class="msg-avatar">@msg.Name[0].ToString().ToUpper()</div>
-                    </div>
-                    <div class="msg-card-body">
-                        <div class="msg-card-header">
-                            <div>
-                                <span class="msg-sender-name">@msg.Name</span>
-                                @if (!msg.IsRead)
-                                {
-                                    <span class="msg-new-pill">NEW</span>
-                                }
-                            </div>
-                            <span class="msg-date">@msg.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
-                        </div>
-                        <a href="mailto:@msg.Email" class="msg-email">@msg.Email</a>
-                        <p class="msg-body">@msg.Message</p>
-                        <div class="msg-actions">
+    <!-- ── Messages List ── -->
+    <div class="msg-list">
+        @foreach (var msg in Model.OrderByDescending(m => m.CreatedAt))
+        {
+            <div class="msg-card @(msg.IsRead ? "msg-read" : "msg-unread")">
+                <div class="msg-card-left">
+                    <div class="msg-avatar">@msg.Name[0].ToString().ToUpper()</div>
+                </div>
+                <div class="msg-card-body">
+                    <div class="msg-card-header">
+                        <div>
+                            <span class="msg-sender-name">@msg.Name</span>
                             @if (!msg.IsRead)
                             {
-                                <form action="/Admin/MarkMessageRead" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="id" value="@msg.Id" />
-                                    <button type="submit" class="btn-msg-read">✓ Mark as Read</button>
-                                </form>
+                                <span class="msg-new-pill">NEW</span>
                             }
-                            else
-                            {
-                                <span class="msg-read-label">✓ Read</span>
-                            }
-                            <form action="/Admin/DeleteMessage" method="post" class="d-inline"
-                                  onsubmit="return confirm('Delete this message from @msg.Name?')">
+                        </div>
+                        <span class="msg-date">@msg.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
+                    </div>
+                    <a href="mailto:@msg.Email" class="msg-email">@msg.Email</a>
+                    <p class="msg-body">@msg.Message</p>
+                    <div class="msg-actions">
+                        @if (!msg.IsRead)
+                        {
+                            <form action="/Admin/MarkMessageRead" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@msg.Id" />
-                                <button type="submit" class="btn-msg-delete">🗑 Delete</button>
+                                <button type="submit" class="btn-msg-read"><i class="bi bi-check2"></i> Mark as Read</button>
                             </form>
-                        </div>
+                        }
+                        else
+                        {
+                            <span class="msg-read-label"><i class="bi bi-check2"></i> Read</span>
+                        }
+                        <form action="/Admin/DeleteMessage" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this message from @msg.Name?')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@msg.Id" />
+                            <button type="submit" class="btn-msg-delete"><i class="bi bi-trash3"></i> Delete</button>
+                        </form>
                     </div>
                 </div>
-            }
-        </div>
-    }
-
-</section>
+            </div>
+        }
+    </div>
+}

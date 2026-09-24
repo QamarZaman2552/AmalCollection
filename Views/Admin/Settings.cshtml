@@ -1,66 +1,61 @@
 @model ShoppingApp.Models.SiteSettings
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Admin – Site Settings";
+    ViewData["SidebarActive"] = "settings";
 }
 
-<section class="section">
-    <div class="admin-header">
-        <h1 class="section-title">⚙️ Site Settings</h1>
-        <div class="admin-header-actions">
-            <a href="/Admin/Products" class="btn-glass">Products</a>
-            <a href="/Admin/Categories" class="btn-glass">Categories</a>
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-gear"></i> Site Settings</h1>
+    <div class="admin-header-actions">
+        <a href="/Admin/Products" class="btn-glass">Products</a>
+        <a href="/Admin/Categories" class="btn-glass">Categories</a>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="post" action="/Admin/Settings" class="admin-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <h3 style="margin:0.5rem 0 1rem;font-size:1rem;">Delivery</h3>
+        <div class="form-grid-2">
+            <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                <input type="hidden" name="IsFreeDelivery" value="false" />
+                <input type="checkbox" name="IsFreeDelivery" value="true" checked="@Model.IsFreeDelivery" style="width:auto;" id="freeDel" />
+                <label for="freeDel" style="margin:0;">Free delivery by default (site-wide)</label>
+            </div>
+            <div class="form-group">
+                <label>Default delivery charge (PKR)</label>
+                <input type="number" name="DeliveryCharge" value="@Model.DeliveryCharge" min="0" step="1" />
+            </div>
+            <div class="form-group">
+                <label>Free delivery above (PKR) — 0 = no threshold</label>
+                <input type="number" name="FreeDeliveryThreshold" value="@Model.FreeDeliveryThreshold" min="0" step="1" />
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+                <input type="hidden" name="CodEnabled" value="false" />
+                <input type="checkbox" name="CodEnabled" value="true" checked="@Model.CodEnabled" style="width:auto;" id="codEn" />
+                <label for="codEn" style="margin:0;">Cash on Delivery enabled</label>
+            </div>
         </div>
-    </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">✅ @TempData["Success"]</div>
-    }
-
-    <div class="form-card">
-        <form method="post" action="/Admin/Settings" class="admin-form">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="Id" value="@Model.Id" />
-
-            <h3 style="margin:0.5rem 0 1rem;font-size:1rem;">Delivery</h3>
-            <div class="form-grid-2">
-                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
-                    <input type="hidden" name="IsFreeDelivery" value="false" />
-                    <input type="checkbox" name="IsFreeDelivery" value="true" checked="@Model.IsFreeDelivery" style="width:auto;" id="freeDel" />
-                    <label for="freeDel" style="margin:0;">Free delivery by default (site-wide)</label>
-                </div>
-                <div class="form-group">
-                    <label>Default delivery charge (PKR)</label>
-                    <input type="number" name="DeliveryCharge" value="@Model.DeliveryCharge" min="0" step="1" />
-                </div>
-                <div class="form-group">
-                    <label>Free delivery above (PKR) — 0 = no threshold</label>
-                    <input type="number" name="FreeDeliveryThreshold" value="@Model.FreeDeliveryThreshold" min="0" step="1" />
-                </div>
-                <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
-                    <input type="hidden" name="CodEnabled" value="false" />
-                    <input type="checkbox" name="CodEnabled" value="true" checked="@Model.CodEnabled" style="width:auto;" id="codEn" />
-                    <label for="codEn" style="margin:0;">Cash on Delivery enabled</label>
-                </div>
+        <h3 style="margin:1.2rem 0 1rem;font-size:1rem;">Contact</h3>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="text" name="ContactPhone" value="@Model.ContactPhone" placeholder="03XX-XXXXXXX" />
             </div>
-
-            <h3 style="margin:1.2rem 0 1rem;font-size:1rem;">Contact</h3>
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" name="ContactPhone" value="@Model.ContactPhone" placeholder="03XX-XXXXXXX" />
-                </div>
-                <div class="form-group">
-                    <label>WhatsApp</label>
-                    <input type="text" name="ContactWhatsapp" value="@Model.ContactWhatsapp" placeholder="03XX-XXXXXXX" />
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="ContactEmail" value="@Model.ContactEmail" />
-                </div>
+            <div class="form-group">
+                <label>WhatsApp</label>
+                <input type="text" name="ContactWhatsapp" value="@Model.ContactWhatsapp" placeholder="03XX-XXXXXXX" />
             </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="ContactEmail" value="@Model.ContactEmail" />
+            </div>
+        </div>
 
-            <button type="submit" class="btn-primary">Save Settings</button>
-        </form>
-    </div>
-</section>
+        <button type="submit" class="btn-primary">Save Settings</button>
+    </form>
+</div>

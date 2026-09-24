@@ -24,13 +24,16 @@ namespace ShoppingApp.Controllers
             if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
             if (!string.IsNullOrEmpty(season))  query = query.Where(p => p.Season != null && p.Season.ToLower() == season.ToLower());
             if (!string.IsNullOrEmpty(fabric))  query = query.Where(p => p.Fabric != null && p.Fabric.ToLower() == fabric.ToLower());
-            if (!string.IsNullOrEmpty(size))
-            {
-                var s = size.Trim();
-                query = query.Where(p => p.Sizes != null &&
-                    p.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                        .Any(x => x.ToLower() == s.ToLower()));
-            }
+             if (!string.IsNullOrEmpty(size))
+             {
+                 var s = size.Trim();
+                 query = query.Where(p => p.Sizes != null && (
+                     p.Sizes == s ||
+                     p.Sizes.StartsWith(s + ",") ||
+                     p.Sizes.EndsWith("," + s) ||
+                     p.Sizes.Contains("," + s + ",")
+                 ));
+             }
 
             // Sort by price
             query = sort switch
@@ -48,6 +51,12 @@ namespace ShoppingApp.Controllers
             ViewBag.HeroSlides = _db.HeroSlides
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.SortOrder)
+                .ToList();
+
+            ViewBag.PromotionalCards = _db.PromotionalCards
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.SortOrder)
+                .ThenBy(c => c.Id)
                 .ToList();
 
             ViewBag.Categories = GetFilterValues(p => p.Category);

@@ -1,0 +1,107 @@
+@model List<ShoppingApp.Models.PromotionalCard>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin – Promo Cards";
+    ViewData["SidebarActive"] = "promo";
+}
+
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-tags"></i> Promo Cards</h1>
+    <div class="admin-header-actions">
+        <a href="/Admin/Analytics" class="btn-glass"><i class="bi bi-graph-up"></i> Analytics</a>
+        <a href="/Admin/Orders" class="btn-glass"><i class="bi bi-box"></i> Orders</a>
+        <a href="/Admin/Products" class="btn-glass"><i class="bi bi-gear"></i> Products</a>
+        <a href="/Admin/AddPromo" class="btn-primary">+ Add Promo</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-tags"></i></div>
+        <p>No promo cards yet. Add cards to power the homepage swipe deck.</p>
+        <a href="/Admin/AddPromo" class="btn-primary">+ Add First Promo</a>
+    </div>
+}
+else
+{
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Brand</th>
+                    <th>Discount</th>
+                    <th>Now</th>
+                    <th>Was</th>
+                    <th>Platform</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Reorder</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(c.ImagePath))
+                            {
+                                <img src="@c.ImagePath" onerror="this.src='/images/placeholder.jpg'"
+                                     style="width:72px;height:72px;object-fit:cover;background:#fff;border:1px solid var(--border);border-radius:8px;" />
+                            }
+                            else
+                            {
+                                <div style="width:72px;height:72px;background:var(--bg-3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;"><i class="bi bi-image"></i></div>
+                            }
+                        </td>
+                        <td><strong>@c.BrandName</strong></td>
+                        <td style="color:var(--gold);font-weight:700;">@c.DiscountPercent%</td>
+                        <td>Rs. @c.CurrentPrice.ToString("N0")</td>
+                        <td style="text-decoration:line-through;color:var(--text-3);">Rs. @c.OriginalPrice.ToString("N0")</td>
+                        <td style="font-size:0.8rem;color:var(--text-3);">@c.PlatformName</td>
+                        <td style="text-align:center;">@c.SortOrder</td>
+                        <td>
+                            <form method="post" action="/Admin/TogglePromo/@c.Id" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                @if (c.IsActive)
+                                {
+                                    <button type="submit" class="btn-status-active"><i class="bi bi-check2"></i> Active</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn-status-inactive"><i class="bi bi-pause-fill"></i> Inactive</button>
+                                }
+                            </form>
+                        </td>
+                        <td class="admin-actions" style="gap:4px;">
+                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=up" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="dir" value="up" />
+                                <button type="submit" class="btn-edit" title="Move up" aria-label="Move up" style="width:28px;height:28px;"><i class="bi bi-arrow-up"></i></button>
+                            </form>
+                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=down" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="dir" value="down" />
+                                <button type="submit" class="btn-edit" title="Move down" aria-label="Move down" style="width:28px;height:28px;"><i class="bi bi-arrow-down"></i></button>
+                            </form>
+                        </td>
+                        <td class="admin-actions">
+                            <a href="/Admin/EditPromo/@c.Id" class="btn-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
+                            <form method="post" action="/Admin/DeletePromo/@c.Id" style="display:inline"
+                                  onsubmit="return confirm('Delete promo card @c.BrandName?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <p style="margin-top:1rem;font-size:0.83rem;color:var(--text-3);">
+        <i class="bi bi-lightbulb"></i> Tip: Cards appear in stack order (top = first). Use arrow buttons to reorder. Toggle Active to show/hide without deleting. Frontend shows a horizontal swipe deck — drag 80px+ left/right to advance (infinite loop).
+    </p>
+}

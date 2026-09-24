@@ -1,87 +1,87 @@
 @model ShoppingApp.Models.HeroSlide
 @using ShoppingApp.Models
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Admin – Add Hero Slide";
+    ViewData["SidebarActive"] = "slides";
     var products = ViewBag.Products as List<Product> ?? new List<Product>();
 }
 
-<section class="section">
-    <div class="admin-header">
-        <h1 class="section-title">🖼️ Add Hero Slide</h1>
-        <a href="/Admin/HeroSlides" class="btn-glass">← Back to Slides</a>
-    </div>
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-image"></i> Add Hero Slide</h1>
+    <a href="/Admin/HeroSlides" class="btn-glass">← Back to Slides</a>
+</div>
 
-    <div class="form-card">
-        <form method="post" action="/Admin/AddSlide" enctype="multipart/form-data" class="admin-form">
-            @Html.AntiForgeryToken()
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Tagline <small>(small text above title)</small></label>
-                    <input name="Tagline" placeholder="e.g. FRESH FABRICS FOR EVERY SEASON" required />
-                </div>
-                <div class="form-group">
-                    <label>Title <small>(big bold name)</small></label>
-                    <input name="Title" placeholder="e.g. SUMMER LAWN SUITS" required />
-                </div>
-                <div class="form-group">
-                    <label>Category Label</label>
-                    <input name="CategoryLabel" placeholder="e.g. SUMMER COLLECTION" required />
-                </div>
-                <div class="form-group">
-                    <label>Hashtag <small>(optional)</small></label>
-                    <input name="Hashtag" placeholder="e.g. #StayCool" />
-                </div>
-                <div class="form-group">
-                    <label>Link URL <small>(Shop Now button)</small></label>
-                    <input name="LinkUrl" placeholder="e.g. /?season=Summer" />
-                </div>
-                <div class="form-group">
-                    <label>Sort Order <small>(0 = first)</small></label>
-                    <input name="SortOrder" type="number" value="0" min="0" />
-                </div>
-                <div class="form-group">
-                    <label>🔗 Linked Product <small>(Shop Now button adds this to cart)</small></label>
-                    <select name="ProductId" id="productSelect" onchange="autoFillPrice(this)">
-                        <option value="">— No product linked (use Link URL instead) —</option>
-                        @foreach (var p in products)
-                        {
-                            <option value="@p.Id" data-price="@p.FinalPrice">@p.Name (@p.Category) — PKR @p.FinalPrice.ToString("N0")</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>💰 Display Price on Slide <small>(optional, leave 0 to hide)</small></label>
-                    <input name="DisplayPrice" id="displayPrice" type="number" step="0.01" min="0" placeholder="e.g. 29999" />
-                </div>
-            </div>
-
+<div class="form-card">
+    <form method="post" action="/Admin/AddSlide" enctype="multipart/form-data" class="admin-form">
+        @Html.AntiForgeryToken()
+        <div class="form-grid-2">
             <div class="form-group">
-                <label>Hero Background Image <small>(recommended: 1440×500px, JPG/PNG/WebP)</small></label>
-                <div class="slide-upload-zone" id="uploadZone">
-                    <div class="upload-icon">📸</div>
-                    <div class="upload-text">Click to select or drag & drop image</div>
-                    <div class="upload-hint">1440×500px recommended · JPG / PNG / WebP</div>
-                    <input type="file" name="imageFile" id="imageFile" accept="image/*" style="display:none" />
-                </div>
-                <div id="imgPreviewWrap" style="display:none;margin-top:0.75rem;">
-                    <img id="imgPreview" style="max-height:160px;border-radius:8px;border:1px solid var(--border);width:100%;object-fit:cover;" />
-                    <p id="imgPreviewName" style="font-size:0.8rem;color:var(--text-3);margin-top:0.4rem;"></p>
-                </div>
+                <label>Tagline <small>(small text above title)</small></label>
+                <input name="Tagline" placeholder="e.g. FRESH FABRICS FOR EVERY SEASON" required />
             </div>
+            <div class="form-group">
+                <label>Title <small>(big bold name)</small></label>
+                <input name="Title" placeholder="e.g. SUMMER LAWN SUITS" required />
+            </div>
+            <div class="form-group">
+                <label>Category Label</label>
+                <input name="CategoryLabel" placeholder="e.g. SUMMER COLLECTION" required />
+            </div>
+            <div class="form-group">
+                <label>Hashtag <small>(optional)</small></label>
+                <input name="Hashtag" placeholder="e.g. #StayCool" />
+            </div>
+            <div class="form-group">
+                <label>Link URL <small>(Shop Now button)</small></label>
+                <input name="LinkUrl" placeholder="e.g. /?season=Summer" />
+            </div>
+            <div class="form-group">
+                <label>Sort Order <small>(0 = first)</small></label>
+                <input name="SortOrder" type="number" value="0" min="0" />
+            </div>
+            <div class="form-group">
+                <label><i class="bi bi-link-45deg"></i> Linked Product <small>(Shop Now button adds this to cart)</small></label>
+                <select name="ProductId" id="productSelect" onchange="autoFillPrice(this)">
+                    <option value="">— No product linked (use Link URL instead) —</option>
+                    @foreach (var p in products)
+                    {
+                        <option value="@p.Id" data-price="@p.FinalPrice">@p.Name (@p.Category) — PKR @p.FinalPrice.ToString("N0")</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="bi bi-cash-stack"></i> Display Price on Slide <small>(optional, leave 0 to hide)</small></label>
+                <input name="DisplayPrice" id="displayPrice" type="number" step="0.01" min="0" placeholder="e.g. 29999" />
+            </div>
+        </div>
 
-            <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
-                <input type="hidden" name="IsActive" value="false" />
-                <input type="checkbox" name="IsActive" id="isActive" value="true" checked style="width:18px;height:18px;accent-color:var(--accent);" />
-                <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage)</label>
+        <div class="form-group">
+            <label>Hero Background Image <small>(recommended: 1440×500px, JPG/PNG/WebP)</small></label>
+            <div class="slide-upload-zone" id="uploadZone">
+                <div class="upload-icon"><i class="bi bi-camera"></i></div>
+                <div class="upload-text">Click to select or drag & drop image</div>
+                <div class="upload-hint">1440×500px recommended · JPG / PNG / WebP</div>
+                <input type="file" name="imageFile" id="imageFile" accept="image/*" style="display:none" />
             </div>
+            <div id="imgPreviewWrap" style="display:none;margin-top:0.75rem;">
+                <img id="imgPreview" style="max-height:160px;border-radius:8px;border:1px solid var(--border);width:100%;object-fit:cover;" />
+                <p id="imgPreviewName" style="font-size:0.8rem;color:var(--text-3);margin-top:0.4rem;"></p>
+            </div>
+        </div>
 
-            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
-                <button type="submit" class="btn-primary">💾 Save Slide</button>
-                <a href="/Admin/HeroSlides" class="btn-glass">Cancel</a>
-            </div>
-        </form>
-    </div>
-</section>
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+            <input type="hidden" name="IsActive" value="false" />
+            <input type="checkbox" name="IsActive" id="isActive" value="true" checked style="width:18px;height:18px;accent-color:var(--accent);" />
+            <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage)</label>
+        </div>
+
+        <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+            <button type="submit" class="btn-primary"><i class="bi bi-floppy"></i> Save Slide</button>
+            <a href="/Admin/HeroSlides" class="btn-glass">Cancel</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
 <script>
@@ -122,7 +122,7 @@
             preview.src = e.target.result;
             preName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
             preWrap.style.display = 'block';
-            zone.querySelector('.upload-text').textContent = '✅ Image selected – click to change';
+            zone.querySelector('.upload-text').textContent = 'Image selected – click to change';
         };
         reader.readAsDataURL(file);
     }

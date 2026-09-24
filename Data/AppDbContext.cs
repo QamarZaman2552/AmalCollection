@@ -18,6 +18,7 @@ namespace ShoppingApp.Data
         public DbSet<ChatbotLog> ChatbotLogs { get; set; }
         public DbSet<BrowseHistory> BrowseHistories { get; set; }
         public DbSet<HeroSlide> HeroSlides { get; set; } = null!;
+        public DbSet<PromotionalCard> PromotionalCards { get; set; } = null!;
         public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
         public DbSet<Review> Reviews { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
@@ -107,6 +108,10 @@ namespace ShoppingApp.Data
             modelBuilder.Entity<HeroSlide>()
                 .HasIndex(h => new { h.SortOrder, h.IsActive })
                 .HasDatabaseName("IX_HeroSlides_SortOrder_IsActive");
+
+            modelBuilder.Entity<PromotionalCard>()
+                .HasIndex(c => new { c.SortOrder, c.IsActive })
+                .HasDatabaseName("IX_PromotionalCards_SortOrder_IsActive");
 
             modelBuilder.Entity<PasswordResetToken>()
                 .HasIndex(t => new { t.UserId, t.Token })

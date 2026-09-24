@@ -1,5 +1,7 @@
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Admin – Analytics";
+    ViewData["SidebarActive"] = "analytics";
 
     var monthlyLabels = (ViewBag.MonthlyLabels as List<string> ?? new List<string>());
     var monthlySales  = (ViewBag.MonthlySales  as List<decimal> ?? new List<decimal>());
@@ -23,72 +25,70 @@
     string woJson  = System.Text.Json.JsonSerializer.Serialize(weeklyOrders);
 }
 
-<section class="section">
-    <div class="admin-header">
-        <h1 class="section-title">📊 Shop Analytics</h1>
-        <div class="admin-header-actions">
-            <a href="/Admin/Orders"   class="btn-glass">📦 Orders</a>
-            <a href="/Admin/ChatLogs" class="btn-glass">📜 Chat Logs</a>
-            <a href="/Admin/Products" class="btn-glass">⚙️ Products</a>
-        </div>
+<div class="admin-header">
+    <h1 class="section-title"><i class="bi bi-graph-up"></i> Shop Analytics</h1>
+    <div class="admin-header-actions">
+        <a href="/Admin/Orders"   class="btn-glass"><i class="bi bi-truck"></i> Orders</a>
+        <a href="/Admin/ChatLogs" class="btn-glass"><i class="bi bi-journal-text"></i> Chat Logs</a>
+        <a href="/Admin/Products" class="btn-glass"><i class="bi bi-gear"></i> Products</a>
     </div>
+</div>
 
-    <!-- ── Summary Cards ─────────────────────────────────────── -->
-    <div class="analytics-stats">
-        <div class="analytics-stat-card">
-            <div class="asc-icon">💰</div>
-            <div class="asc-num">PKR @totalRevenue.ToString("N0")</div>
-            <div class="asc-label">Total Revenue</div>
-        </div>
-        <div class="analytics-stat-card">
-            <div class="asc-icon">🛒</div>
-            <div class="asc-num">@totalOrders</div>
-            <div class="asc-label">Total Orders</div>
-        </div>
-        <div class="analytics-stat-card">
-            <div class="asc-icon">⏳</div>
-            <div class="asc-num">@pendingOrders</div>
-            <div class="asc-label">Pending Orders</div>
-        </div>
-        <div class="analytics-stat-card">
-            <div class="asc-icon">🚚</div>
-            <div class="asc-num">@deliveredOrders</div>
-            <div class="asc-label">Delivered Orders</div>
-        </div>
+<!-- ── Summary Cards ─────────────────────────────────── -->
+<div class="analytics-stats">
+    <div class="analytics-stat-card">
+        <div class="asc-icon"><i class="bi bi-cash-stack"></i></div>
+        <div class="asc-num">PKR @totalRevenue.ToString("N0")</div>
+        <div class="asc-label">Total Revenue</div>
     </div>
+    <div class="analytics-stat-card">
+        <div class="asc-icon"><i class="bi bi-cart"></i></div>
+        <div class="asc-num">@totalOrders</div>
+        <div class="asc-label">Total Orders</div>
+    </div>
+    <div class="analytics-stat-card">
+        <div class="asc-icon"><i class="bi bi-hourglass-bottom"></i></div>
+        <div class="asc-num">@pendingOrders</div>
+        <div class="asc-label">Pending Orders</div>
+    </div>
+    <div class="analytics-stat-card">
+        <div class="asc-icon"><i class="bi bi-truck"></i></div>
+        <div class="asc-num">@deliveredOrders</div>
+        <div class="asc-label">Delivered Orders</div>
+    </div>
+</div>
 
-    <!-- ── Monthly Sales Chart ────────────────────────────────── -->
-    <div class="analytics-chart-card">
-        <h2 class="analytics-chart-title">📅 Monthly Sales (Last 12 Months)</h2>
-        <div class="analytics-chart-wrap">
-            <canvas id="monthlyChart"></canvas>
-        </div>
+<!-- ── Monthly Sales Chart ────────────────────────────────── -->
+<div class="analytics-chart-card">
+    <h2 class="analytics-chart-title"><i class="bi bi-calendar3"></i> Monthly Sales (Last 12 Months)</h2>
+    <div class="analytics-chart-wrap">
+        <canvas id="monthlyChart"></canvas>
     </div>
+</div>
 
-    <!-- ── Monthly Orders Chart ───────────────────────────────── -->
-    <div class="analytics-chart-card">
-        <h2 class="analytics-chart-title">📦 Monthly Order Count (Last 12 Months)</h2>
-        <div class="analytics-chart-wrap">
-            <canvas id="monthlyOrdersChart"></canvas>
-        </div>
+<!-- ── Monthly Orders Chart ───────────────────────────────── -->
+<div class="analytics-chart-card">
+    <h2 class="analytics-chart-title"><i class="bi bi-box"></i> Monthly Order Count (Last 12 Months)</h2>
+    <div class="analytics-chart-wrap">
+        <canvas id="monthlyOrdersChart"></canvas>
     </div>
+</div>
 
-    <!-- ── Weekly Sales Chart ─────────────────────────────────── -->
-    <div class="analytics-chart-card">
-        <h2 class="analytics-chart-title">🗓️ Weekly Sales (Last 8 Weeks)</h2>
-        <div class="analytics-chart-wrap">
-            <canvas id="weeklyChart"></canvas>
-        </div>
+<!-- ── Weekly Sales Chart ─────────────────────────────────── -->
+<div class="analytics-chart-card">
+    <h2 class="analytics-chart-title"><i class="bi bi-calendar-week"></i> Weekly Sales (Last 8 Weeks)</h2>
+    <div class="analytics-chart-wrap">
+        <canvas id="weeklyChart"></canvas>
     </div>
+</div>
 
-    <!-- ── Weekly Orders Chart ────────────────────────────────── -->
-    <div class="analytics-chart-card">
-        <h2 class="analytics-chart-title">📊 Weekly Order Count (Last 8 Weeks)</h2>
-        <div class="analytics-chart-wrap">
-            <canvas id="weeklyOrdersChart"></canvas>
-        </div>
+<!-- ── Weekly Orders Chart ────────────────────────────────── -->
+<div class="analytics-chart-card">
+    <h2 class="analytics-chart-title"><i class="bi bi-box"></i> Weekly Order Count (Last 8 Weeks)</h2>
+    <div class="analytics-chart-wrap">
+        <canvas id="weeklyOrdersChart"></canvas>
     </div>
-</section>
+</div>
 
 @section Scripts {
 <script src="~/lib/chartjs/chart.umd.min.js" asp-append-version="true"></script>

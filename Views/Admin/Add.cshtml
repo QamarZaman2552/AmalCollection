@@ -1,125 +1,136 @@
 @model ShoppingApp.Models.Product
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Add Product";
+    ViewData["SidebarActive"] = "add";
     var categories = ViewBag.Categories as List<ShoppingApp.Models.Category> ?? new List<ShoppingApp.Models.Category>();
     var allSizes = new[] { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
 }
 
-<section class="section">
-    <h1 class="section-title">+ Add New Product</h1>
-    <div class="form-card">
-        <form method="post" action="/Admin/Add" enctype="multipart/form-data" class="admin-form">
-            @Html.AntiForgeryToken()
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Product Name *</label>
-                    <input type="text" name="Name" required placeholder="e.g. Printed Lawn 3-Piece Suit" />
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select name="Category">
-                        <option value="">Select category</option>
-                        @foreach (var c in categories.Where(x => x.IsActive))
-                        {
-                            <option value="@c.Name">@c.Name</option>
-                        }
-                    </select>
-                    <div style="margin-top:0.4rem;">
-                        <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Season</label>
-                    <select name="Season">
-                        <option value="">—</option>
-                        <option value="Summer">Summer</option>
-                        <option value="Winter">Winter</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fabric</label>
-                    <select name="Fabric">
-                        <option value="">—</option>
-                        <option>Lawn</option>
-                        <option>Cotton</option>
-                        <option>Chiffon</option>
-                        <option>Khaddar</option>
-                        <option>Wool</option>
-                        <option>Cambric</option>
-                        <option>Jacquard</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Stitched / Unstitched</label>
-                    <select name="StitchedType">
-                        <option value="">—</option>
-                        <option value="Stitched">Stitched</option>
-                        <option value="Semi-Stitched">Semi-Stitched</option>
-                        <option value="Unstitched">Unstitched</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Pieces (2 / 3)</label>
-                    <input type="number" name="Pieces" min="1" max="5" placeholder="e.g. 3" />
-                </div>
-                <div class="form-group">
-                    <label>Price (PKR) *</label>
-                    <input type="number" name="Price" required min="0" step="0.01" placeholder="e.g. 2499" />
-                </div>
-                <div class="form-group">
-                    <label>Discount (%)</label>
-                    <input type="number" name="Discount" min="0" max="100" value="0" />
-                </div>
-                <div class="form-group">
-                    <label>Stock *</label>
-                    <input type="number" name="Stock" required min="0" value="0" />
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" name="Brand" value="Amal" placeholder="e.g. Amal" />
-                </div>
-                <div class="form-group">
-                    <label>Colors (comma separated)</label>
-                    <input type="text" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
-                </div>
-                <div class="form-group">
-                    <label>Sizes (comma separated)</label>
-                    <input type="text" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
-                    <datalist id="sizesList">
-                        @foreach (var s in allSizes)
-                        {
-                            <option value="@s" />
-                        }
-                    </datalist>
-                </div>
-                <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center;">
-                    <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
-                        <input type="hidden" name="IsFreeDelivery" value="false" />
-                        <input type="checkbox" name="IsFreeDelivery" value="true" checked style="width:auto;" />
-                        Free delivery
-                    </label>
-                    <div id="deliveryChargeWrap" style="display:none; flex:1;">
-                        <label>Delivery charge (PKR)</label>
-                        <input type="number" name="DeliveryCharge" min="0" step="1" placeholder="e.g. 200" />
-                    </div>
+<h1 class="section-title"><i class="bi bi-plus-circle"></i> Add New Product</h1>
+<div class="form-card">
+    <form method="post" action="/Admin/Add" enctype="multipart/form-data" class="admin-form">
+        @Html.AntiForgeryToken()
+
+        <div class="form-grid-2">
+            <div class="form-section-title"><i class="bi bi-info-circle"></i> Basic Information</div>
+            <div class="form-group">
+                <label>Product Name *</label>
+                <input type="text" name="Name" required placeholder="e.g. Printed Lawn 3-Piece Suit" />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select name="Category">
+                    <option value="">Select category</option>
+                    @foreach (var c in categories.Where(x => x.IsActive))
+                    {
+                        <option value="@c.Name">@c.Name</option>
+                    }
+                </select>
+                <div style="margin-top:0.4rem;">
+                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
                 </div>
             </div>
             <div class="form-group">
+                <label>Season</label>
+                <select name="Season">
+                    <option value="">—</option>
+                    <option value="Summer">Summer</option>
+                    <option value="Winter">Winter</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fabric</label>
+                <select name="Fabric">
+                    <option value="">—</option>
+                    <option>Lawn</option>
+                    <option>Cotton</option>
+                    <option>Chiffon</option>
+                    <option>Khaddar</option>
+                    <option>Wool</option>
+                    <option>Cambric</option>
+                    <option>Jacquard</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Stitched / Unstitched</label>
+                <select name="StitchedType">
+                    <option value="">—</option>
+                    <option value="Stitched">Stitched</option>
+                    <option value="Semi-Stitched">Semi-Stitched</option>
+                    <option value="Unstitched">Unstitched</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Pieces (2 / 3)</label>
+                <input type="number" name="Pieces" min="1" max="5" placeholder="e.g. 3" />
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-cash-coin"></i> Pricing &amp; Stock</div>
+            <div class="form-group">
+                <label>Price (PKR) *</label>
+                <input type="number" name="Price" required min="0" step="0.01" placeholder="e.g. 2499" />
+            </div>
+            <div class="form-group">
+                <label>Discount (%)</label>
+                <input type="number" name="Discount" min="0" max="100" value="0" />
+            </div>
+            <div class="form-group">
+                <label>Stock *</label>
+                <input type="number" name="Stock" required min="0" value="0" />
+            </div>
+            <div class="form-group">
+                <label>Brand</label>
+                <input type="text" name="Brand" value="Amal" placeholder="e.g. Amal" />
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-palette"></i> Colors, Sizes &amp; Delivery</div>
+            <div class="form-group">
+                <label>Colors (comma separated)</label>
+                <input type="text" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
+            </div>
+            <div class="form-group">
+                <label>Sizes (comma separated)</label>
+                <input type="text" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
+                <datalist id="sizesList">
+                    @foreach (var s in allSizes)
+                    {
+                        <option value="@s" />
+                    }
+                </datalist>
+            </div>
+            <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center; flex-wrap:wrap;">
+                <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
+                    <input type="hidden" name="IsFreeDelivery" value="false" />
+                    <input type="checkbox" name="IsFreeDelivery" value="true" checked style="width:auto;" />
+                    Free delivery
+                </label>
+                <div id="deliveryChargeWrap" style="display:none; flex:1; min-width:180px;">
+                    <label>Delivery charge (PKR)</label>
+                    <input type="number" name="DeliveryCharge" min="0" step="1" placeholder="e.g. 200" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-section-title"><i class="bi bi-image"></i> Description &amp; Images</div>
+            <div class="form-group" style="grid-column: span 2;">
                 <label>Description</label>
                 <textarea name="Description" rows="3" placeholder="Product description…"></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="grid-column: span 2;">
                 <label>Product Images (up to 5)</label>
                 <input type="file" name="imageFiles" accept="image/*" multiple />
                 <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First image = cover. Max 5 images.</div>
             </div>
-            <div style="display:flex;gap:1rem;">
-                <button type="submit" class="btn-primary">Save Product</button>
-                <a href="/Admin/Products" class="btn-glass">Cancel</a>
-            </div>
-        </form>
-    </div>
-</section>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Product</button>
+            <a href="/Admin/Products" class="btn-glass">Cancel</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <script>

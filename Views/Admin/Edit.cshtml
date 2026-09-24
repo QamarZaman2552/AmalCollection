@@ -1,128 +1,138 @@
 @model ShoppingApp.Models.Product
 @{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Edit Product";
+    ViewData["SidebarActive"] = "products";
     var categories = ViewBag.Categories as List<ShoppingApp.Models.Category> ?? new List<ShoppingApp.Models.Category>();
     var images = Model.Images?.OrderBy(i => i.SortOrder).ToList() ?? new List<ShoppingApp.Models.ProductImage>();
     var allSizes = new[] { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
     var selectedSizes = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
-<section class="section">
-    <h1 class="section-title">✏ Edit Product</h1>
-    <div class="form-card">
-        <form method="post" action="/Admin/Edit/@Model.Id" enctype="multipart/form-data" class="admin-form">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="Id" value="@Model.Id" />
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Product Name *</label>
-                    <input type="text" name="Name" value="@Model.Name" required />
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select name="Category">
-                        <option value="">Select category</option>
-                        @foreach (var c in categories.Where(x => x.IsActive))
+<h1 class="section-title"><i class="bi bi-pencil"></i> Edit Product</h1>
+<div class="form-card">
+    <form method="post" action="/Admin/Edit/@Model.Id" enctype="multipart/form-data" class="admin-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="form-grid-2">
+            <div class="form-section-title"><i class="bi bi-info-circle"></i> Basic Information</div>
+            <div class="form-group">
+                <label>Product Name *</label>
+                <input type="text" name="Name" value="@Model.Name" required />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select name="Category">
+                    <option value="">Select category</option>
+                    @foreach (var c in categories.Where(x => x.IsActive))
+                    {
+                        if (c.Name == Model.Category)
                         {
-                            if (c.Name == Model.Category)
-                            {
-                                <option value="@c.Name" selected>@c.Name</option>
-                            }
-                            else
-                            {
-                                <option value="@c.Name">@c.Name</option>
-                            }
+                            <option value="@c.Name" selected>@c.Name</option>
                         }
-                        @if (!string.IsNullOrEmpty(Model.Category) && !categories.Any(c => c.Name == Model.Category))
+                        else
                         {
-                            <option value="@Model.Category" selected>@Model.Category</option>
+                            <option value="@c.Name">@c.Name</option>
                         }
-                    </select>
-                    <div style="margin-top:0.4rem;">
-                        <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Season</label>
-                    <select name="Season">
-                        <option value="">—</option>
-                        <option value="Summer" selected="@(Model.Season == "Summer")">Summer</option>
-                        <option value="Winter" selected="@(Model.Season == "Winter")">Winter</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fabric</label>
-                    <select name="Fabric">
-                        <option value="">—</option>
-                        @foreach (var f in new[] { "Lawn", "Cotton", "Chiffon", "Khaddar", "Wool", "Cambric", "Jacquard" })
-                        {
-                            if (Model.Fabric == f) { <option selected>@f</option> }
-                            else { <option>@f</option> }
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Stitched / Unstitched</label>
-                    <select name="StitchedType">
-                        <option value="">—</option>
-                        @foreach (var s in new[] { "Stitched", "Semi-Stitched", "Unstitched" })
-                        {
-                            if (Model.StitchedType == s) { <option value="@s" selected>@s</option> }
-                            else { <option value="@s">@s</option> }
-                        }
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Pieces (2 / 3)</label>
-                    <input type="number" name="Pieces" value="@(Model.Pieces?.ToString() ?? "")" min="1" max="5" />
-                </div>
-                <div class="form-group">
-                    <label>Price (PKR) *</label>
-                    <input type="number" name="Price" value="@Model.Price" required min="0" step="0.01" />
-                </div>
-                <div class="form-group">
-                    <label>Discount (%)</label>
-                    <input type="number" name="Discount" value="@Model.Discount" min="0" max="100" />
-                </div>
-                <div class="form-group">
-                    <label>Stock</label>
-                    <input type="number" name="Stock" value="@Model.Stock" min="0" />
-                </div>
-                <div class="form-group">
-                    <label>Brand</label>
-                    <input type="text" name="Brand" value="@Model.Brand" />
-                </div>
-                <div class="form-group">
-                    <label>Colors (comma separated)</label>
-                    <input type="text" name="Colors" value="@Model.Colors" placeholder="e.g. Sand, Charcoal" />
-                </div>
-                <div class="form-group">
-                    <label>Sizes (comma separated)</label>
-                    <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L" list="sizesList" />
-                    <datalist id="sizesList">
-                        @foreach (var s in allSizes)
-                        {
-                            <option value="@s" />
-                        }
-                    </datalist>
-                </div>
-                <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center;">
-                    <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
-                        <input type="hidden" name="IsFreeDelivery" value="false" />
-                        <input type="checkbox" name="IsFreeDelivery" value="true" checked="@(Model.IsFreeDelivery)" style="width:auto;" />
-                        Free delivery
-                    </label>
-                    <div id="deliveryChargeWrap" style="display:@(Model.IsFreeDelivery ? "none" : "block"); flex:1;">
-                        <label>Delivery charge (PKR)</label>
-                        <input type="number" name="DeliveryCharge" value="@(Model.DeliveryCharge?.ToString() ?? "")" min="0" step="1" />
-                    </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Category) && !categories.Any(c => c.Name == Model.Category))
+                    {
+                        <option value="@Model.Category" selected>@Model.Category</option>
+                    }
+                </select>
+                <div style="margin-top:0.4rem;">
+                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
                 </div>
             </div>
             <div class="form-group">
+                <label>Season</label>
+                <select name="Season">
+                    <option value="">—</option>
+                    <option value="Summer" selected="@(Model.Season == "Summer")">Summer</option>
+                    <option value="Winter" selected="@(Model.Season == "Winter")">Winter</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fabric</label>
+                <select name="Fabric">
+                    <option value="">—</option>
+                    @foreach (var f in new[] { "Lawn", "Cotton", "Chiffon", "Khaddar", "Wool", "Cambric", "Jacquard" })
+                    {
+                        if (Model.Fabric == f) { <option selected>@f</option> }
+                        else { <option>@f</option> }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Stitched / Unstitched</label>
+                <select name="StitchedType">
+                    <option value="">—</option>
+                    @foreach (var s in new[] { "Stitched", "Semi-Stitched", "Unstitched" })
+                    {
+                        if (Model.StitchedType == s) { <option value="@s" selected>@s</option> }
+                        else { <option value="@s">@s</option> }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Pieces (2 / 3)</label>
+                <input type="number" name="Pieces" value="@(Model.Pieces?.ToString() ?? "")" min="1" max="5" />
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-cash-coin"></i> Pricing &amp; Stock</div>
+            <div class="form-group">
+                <label>Price (PKR) *</label>
+                <input type="number" name="Price" value="@Model.Price" required min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+                <label>Discount (%)</label>
+                <input type="number" name="Discount" value="@Model.Discount" min="0" max="100" />
+            </div>
+            <div class="form-group">
+                <label>Stock</label>
+                <input type="number" name="Stock" value="@Model.Stock" min="0" />
+            </div>
+            <div class="form-group">
+                <label>Brand</label>
+                <input type="text" name="Brand" value="@Model.Brand" />
+            </div>
+
+            <div class="form-section-title"><i class="bi bi-palette"></i> Colors, Sizes &amp; Delivery</div>
+            <div class="form-group">
+                <label>Colors (comma separated)</label>
+                <input type="text" name="Colors" value="@Model.Colors" placeholder="e.g. Sand, Charcoal" />
+            </div>
+            <div class="form-group">
+                <label>Sizes (comma separated)</label>
+                <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L" list="sizesList" />
+                <datalist id="sizesList">
+                    @foreach (var s in allSizes)
+                    {
+                        <option value="@s" />
+                    }
+                </datalist>
+            </div>
+            <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center; flex-wrap:wrap;">
+                <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
+                    <input type="hidden" name="IsFreeDelivery" value="false" />
+                    <input type="checkbox" name="IsFreeDelivery" value="true" checked="@(Model.IsFreeDelivery)" style="width:auto;" />
+                    Free delivery
+                </label>
+                <div id="deliveryChargeWrap" style="display:@(Model.IsFreeDelivery ? "none" : "block"); flex:1; min-width:180px;">
+                    <label>Delivery charge (PKR)</label>
+                    <input type="number" name="DeliveryCharge" value="@(Model.DeliveryCharge?.ToString() ?? "")" min="0" step="1" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid-2">
+            <div class="form-section-title"><i class="bi bi-image"></i> Description &amp; Images</div>
+            <div class="form-group" style="grid-column: span 2;">
                 <label>Description</label>
                 <textarea name="Description" rows="3">@Model.Description</textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="grid-column: span 2;">
                 <label>Current Images (@images.Count / 5)</label>
                 @if (images.Any())
                 {
@@ -140,13 +150,14 @@
                 <input type="file" name="imageFiles" accept="image/*" multiple />
                 <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First new image becomes cover if no cover exists. Max 5 total.</div>
             </div>
-            <div style="display:flex;gap:1rem;">
-                <button type="submit" class="btn-primary">Update Product</button>
-                <a href="/Admin/Products" class="btn-glass">Cancel</a>
-            </div>
-        </form>
-    </div>
-</section>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Update Product</button>
+            <a href="/Admin/Products" class="btn-glass">Cancel</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <script>

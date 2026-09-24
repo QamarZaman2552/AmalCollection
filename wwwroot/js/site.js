@@ -1,4 +1,4 @@
-// ─── Mobile Hamburger Menu ──────────────────────────────
+﻿// â”€â”€â”€ Mobile Hamburger Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   const btn  = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('mobileMenu');
@@ -27,7 +27,7 @@
   window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
 })();
 
-// ─── Cart Badge ────────────────────────────────────────
+// â”€â”€â”€ Cart Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updateCartBadge() {
   try {
     const res = await fetch('/Cart/Count');
@@ -38,7 +38,7 @@ async function updateCartBadge() {
 }
 updateCartBadge();
 
-// ─── Wishlist Badge ─────────────────────────────────────
+// â”€â”€â”€ Wishlist Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updateWishlistBadge() {
   try {
     const res = await fetch('/Wishlist/Count');
@@ -53,11 +53,11 @@ async function updateWishlistBadge() {
 updateWishlistBadge();
 
 
-// ─── Auto-dismiss Toast ─────────────────────────────────
+// â”€â”€â”€ Auto-dismiss Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const toast = document.getElementById('toast') || document.getElementById('toast-success') || document.getElementById('toast-error');
 if (toast) setTimeout(() => toast.remove(), 4000);
 
-// ─── Chatbot Widget ─────────────────────────────────────
+// â”€â”€â”€ Chatbot Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const bubble    = document.getElementById('chatBubble');
 const chatWin   = document.getElementById('chatWindow');
 const chatClose = document.getElementById('chatClose');
@@ -158,117 +158,16 @@ async function sendMessage() {
     else if (lc.includes('recommend') || lc.includes('suggest')) showChips(['budget', 'show all']);
   } catch {
     hideTyping();
-    addMsg('⚠️ Connection error. Please try again.', 'bot');
+    addMsg('âš ï¸ Connection error. Please try again.', 'bot');
   } finally {
     chatSend.disabled = false;
     chatInput.focus();
   }
 }
 
-// ─── Hero Slider ─────────────────────────────────────────
-(function () {
-  const slider    = document.getElementById('heroSlider');
-  if (!slider) return;
+// â”€â”€â”€ Hero Slider handled by Prototype Hero Slider (#heroSlider) below â”€â”€â”€
 
-  const slides    = slider.querySelectorAll('.hero-slide');
-  const dots      = slider.querySelectorAll('.hs-dot');
-  const prevBtn   = document.getElementById('hsPrev');
-  const nextBtn   = document.getElementById('hsNext');
-  const progFill  = document.getElementById('hsProgress');
-
-  const DURATION  = 5000; // ms per slide
-  let   current   = 0;
-  let   autoTimer = null;
-  let   paused    = false;
-
-  /* ── Go to a specific slide ── */
-  function goTo(index) {
-    const total = slides.length;
-    const next  = ((index % total) + total) % total;
-    if (next === current) return;
-
-    slides[current].classList.remove('active');
-    dots[current].classList.remove('active');
-    dots[current].setAttribute('aria-selected', 'false');
-
-    current = next;
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
-    dots[current].setAttribute('aria-selected', 'true');
-
-    resetProgressBar();
-  }
-
-  /* ── Progress bar animation ── */
-  function resetProgressBar() {
-    if (!progFill) return;
-    progFill.style.transition = 'none';
-    progFill.style.width      = '0%';
-    // force reflow so transition resets
-    void progFill.offsetWidth;
-    progFill.style.transition = `width ${DURATION}ms linear`;
-    progFill.style.width      = '100%';
-  }
-
-  /* ── Auto-play ── */
-  function startAuto() {
-    if (paused) return;
-    stopAuto();
-    autoTimer = setInterval(() => goTo(current + 1), DURATION);
-    resetProgressBar();
-  }
-
-  function stopAuto() {
-    clearInterval(autoTimer);
-    autoTimer = null;
-    if (progFill) {
-      progFill.style.transition = 'none';
-      progFill.style.width      = '0%';
-    }
-  }
-
-  function resetAuto() { stopAuto(); startAuto(); }
-
-  /* ── Controls ── */
-  if (prevBtn) prevBtn.addEventListener('click', () => { goTo(current - 1); resetAuto(); });
-  if (nextBtn) nextBtn.addEventListener('click', () => { goTo(current + 1); resetAuto(); });
-
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      goTo(parseInt(dot.dataset.goto, 10));
-      resetAuto();
-    });
-  });
-
-  /* ── Pause on hover ── */
-  slider.addEventListener('mouseenter', () => { paused = true;  stopAuto(); });
-  slider.addEventListener('mouseleave', () => { paused = false; startAuto(); });
-
-  /* ── Keyboard navigation ── */
-  slider.setAttribute('tabindex', '0');
-  slider.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetAuto(); }
-    if (e.key === 'ArrowRight') { goTo(current + 1); resetAuto(); }
-  });
-
-  /* ── Touch / swipe support ── */
-  let touchX = 0;
-  slider.addEventListener('touchstart', e => {
-    touchX = e.changedTouches[0].clientX;
-  }, { passive: true });
-  slider.addEventListener('touchend', e => {
-    const diff = touchX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? goTo(current + 1) : goTo(current - 1);
-      resetAuto();
-    }
-  }, { passive: true });
-
-  /* ── Start ── */
-  startAuto();
-})();
-
-// ─── rn-Slider (Homepage Hero Banner) ────────────────────
+// â”€â”€â”€ rn-Slider (Homepage Hero Banner) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   const slider = document.getElementById('rnSlider');
   if (!slider) return;
@@ -322,7 +221,7 @@ async function sendMessage() {
   });
 
   start();
-})();// ─── Scroll Reveal ────────────────────────────────────────
+})();// â”€â”€â”€ Scroll Reveal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(el => {
@@ -343,18 +242,7 @@ async function sendMessage() {
   });
 })();
 
-// ─── Card Mouse-Glow Tracker ──────────────────────────────
-document.addEventListener('mousemove', (e) => {
-  document.querySelectorAll('.product-card').forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%';
-    const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%';
-    card.style.setProperty('--mx', x);
-    card.style.setProperty('--my', y);
-  });
-});
-
-// ─── Button Ripple Effect ─────────────────────────────────
+// â”€â”€â”€ Button Ripple Effect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-primary, .btn-glass');
   if (!btn) return;
@@ -384,18 +272,16 @@ if (!document.getElementById('rippleStyle')) {
   document.head.appendChild(s);
 }
 
-// ─── Navbar scroll shadow ─────────────────────────────────
-window.addEventListener('scroll', () => {
+// â”€â”€â”€ Navbar scroll shadow (cached nav ref) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+(function () {
   const nav = document.querySelector('.navbar.ac-nav');
   if (!nav) return;
-  if (window.scrollY > 10) {
-    nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.08)';
-  } else {
-    nav.style.boxShadow = '';
-  }
-}, { passive: true });
+  window.addEventListener('scroll', () => {
+    nav.style.boxShadow = window.scrollY > 10 ? '0 4px 24px rgba(0,0,0,0.08)' : '';
+  }, { passive: true });
+})();
 
-// ─── Password: show/hide + strength meter + match ────────
+// â”€â”€â”€ Password: show/hide + strength meter + match â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   function scorePassword(pw) {
     if (!pw) return 0;
@@ -405,7 +291,7 @@ window.addEventListener('scroll', () => {
     if (/\d/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
     if (pw.length >= 12) score++;
-    return score; // 0–5
+    return score; // 0â€“5
   }
   function levelOf(score, len) {
     if (len === 0) return '';
@@ -428,7 +314,7 @@ window.addEventListener('scroll', () => {
         if (icon) {
           icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
         } else {
-          toggle.textContent = show ? '🙈' : '👁️';
+          toggle.textContent = show ? 'ðŸ™ˆ' : 'ðŸ‘ï¸';
         }
         toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       });
@@ -470,7 +356,7 @@ window.addEventListener('scroll', () => {
       if (!m.value) { if (hint) hint.textContent = ''; return; }
       const ok = m.value === target.value;
       if (hint) {
-        hint.textContent = ok ? '✓ Passwords match' : '✗ Passwords do not match';
+        hint.textContent = ok ? 'âœ“ Passwords match' : 'âœ— Passwords do not match';
         hint.className = 'pw-match ' + (ok ? 'ok' : 'no');
       }
     }
@@ -479,32 +365,14 @@ window.addEventListener('scroll', () => {
   });
 })();
 
-// ─── Auth Pages: prevent zoom + shake on mobile ──────
+// â”€â”€â”€ Auth Pages: prevent pinch zoom on mobile â”€â”€â”€â”€â”€â”€
 (function () {
   var authPage = document.querySelector('.auth-page');
   if (!authPage) return;
-
-  // Prevent pinch zoom on auth pages
   document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
-
-  // Prevent rubber-band scroll shake on iOS/Android
-  var startX = 0, startY = 0;
-  authPage.addEventListener('touchstart', function (e) {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  authPage.addEventListener('touchmove', function (e) {
-    var dx = Math.abs(e.touches[0].clientX - startX);
-    var dy = Math.abs(e.touches[0].clientY - startY);
-    // If mostly horizontal swipe, prevent default to stop page shake
-    if (dx > dy && dx > 10) {
-      e.preventDefault();
-    }
-  }, { passive: false });
 })();
 
-// ─── Light/Dark Theme Toggle ───────────────────────
+// â”€â”€â”€ Light/Dark Theme Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function toggleTheme() {
   var body = document.body;
   if (body.classList.contains('light-mode')) {
@@ -528,7 +396,7 @@ window.addEventListener('DOMContentLoaded', function () {
   if (mobileBtn) mobileBtn.addEventListener('click', toggleTheme);
 });
 
-// ─── Prototype Hero Slider (#heroSlider) ───────────
+// â”€â”€â”€ Prototype Hero Slider (#heroSlider) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   const hero = document.getElementById('heroSlider');
   if (!hero) return;
@@ -575,7 +443,7 @@ window.addEventListener('DOMContentLoaded', function () {
   resetTimer();
 })();
 
-// ─── Prototype size/season filter chips ────────────
+// â”€â”€â”€ Prototype size/season filter chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', function (e) {
   const chip = e.target.closest('.size-chip');
   if (!chip) return;
@@ -585,7 +453,7 @@ document.addEventListener('click', function (e) {
   chip.classList.add('active');
 });
 
-// ─── Close Bootstrap collapse nav on link click ────
+// â”€â”€â”€ Close Bootstrap collapse nav on link click â”€â”€â”€â”€
 document.addEventListener('DOMContentLoaded', function () {
   const mainNav = document.getElementById('mainNav');
   if (!mainNav || typeof bootstrap === 'undefined') return;
@@ -597,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-// ─── Checkout pay option active state ──────────────
+// â”€â”€â”€ Checkout pay option active state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', function (e) {
   const pay = e.target.closest('.co-pay');
   if (!pay || pay.classList.contains('disabled')) return;
@@ -605,7 +473,7 @@ document.addEventListener('click', function (e) {
   pay.classList.add('active');
 });
 
-// ─── Checkout summary: open on desktop ─────────────
+// â”€â”€â”€ Checkout summary: open on desktop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('DOMContentLoaded', function () {
   const el = document.getElementById('orderSummary');
   if (!el) return;
@@ -615,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-// ─── Product detail size/color chip select ─────────
+// â”€â”€â”€ Product detail size/color chip select â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', function (e) {
   const sizeBtn = e.target.closest('.size-opt:not(.disabled)');
   if (sizeBtn) {
@@ -629,3 +497,46 @@ document.addEventListener('click', function (e) {
   }
 });
 
+// â”€â”€â”€ Filter Drawer (Offcanvas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+(function () {
+  const toggle   = document.getElementById('filterDrawerToggle');
+  const drawer   = document.getElementById('filterDrawer');
+  const backdrop = document.getElementById('filterBackdrop');
+  const closeBtn = document.getElementById('filterDrawerClose');
+  if (!toggle || !drawer) return;
+
+  function openDrawer() {
+    drawer.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.style.overflowY = 'hidden';
+    toggle.setAttribute('aria-expanded', 'true');
+  }
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflowY = '';
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+
+  let toggling = false;
+  toggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (toggling) return;
+    toggling = true;
+    setTimeout(() => { toggling = false; }, 350);
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  });
+  if (closeBtn)   closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
+  if (backdrop)   backdrop.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  drawer.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      const group = this.closest('.filter-chip-row');
+      if (!group) return;
+      group.querySelectorAll('.filter-chip-item').forEach(l => l.classList.remove('checked'));
+      this.closest('.filter-chip-item')?.classList.add('checked');
+    });
+  });
+})();
