@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
@@ -25,6 +26,15 @@ builder.Host.UseSerilog();
 
 #region Services
 builder.Services.AddControllersWithViews();
+
+// Response compression (Brotli + Gzip) — shrinks HTML/CSS/JS/JSON on the wire
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
+});
 
 // Rate Limiting - Global IP-based
 builder.Services.AddRateLimiter(options =>
@@ -171,6 +181,14 @@ builder.Services.AddAntiforgery(options =>
 #endregion
 
 var app = builder.Build();
+
+// Compress responses — must run before anything that writes to the response.
+// Dev only: VS Browser Link / hot-reload script injection + compression race
+// corrupts the stream (ERR_CONTENT_DECODING_FAILED). Production keeps compression.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 // Enable request buffering so body can be read multiple times
 app.Use(async (context, next) =>
@@ -324,33 +342,17 @@ using (var scope = app.Services.CreateScope())
         await db.Database.MigrateAsync();
         logger.LogInformation("Database migrated and seeded");
 
-        // Replace leftover BaazWix electronics hero slides with Amal Collection suit slides
-        var activeSlides = db.HeroSlides.Where(s => s.IsActive).ToList();
-        var hasSuitSlide = activeSlides.Any(s =>
-            s.ImagePath != null && s.ImagePath.Contains("suit-hero", StringComparison.OrdinalIgnoreCase));
-        if (!hasSuitSlide)
+        // Seed default hero slides only when the table is empty — never touch or duplicate existing slides
+        if (!await db.HeroSlides.AnyAsync())
         {
-            foreach (var old in activeSlides) old.IsActive = false;
-            if (activeSlides.Count == 0)
-            {
-                db.HeroSlides.AddRange(
-                    new ShoppingApp.Models.HeroSlide { Tagline = "FRESH FABRICS FOR EVERY SEASON", Title = "SUMMER LAWN SUITS", CategoryLabel = "SUMMER COLLECTION", Hashtag = "#StayCool", LinkUrl = "/?season=Summer", ImagePath = "/images/suit-hero-summer.jpg", SortOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "WARM, ELEGANT, WINTER-READY", Title = "KHADDAR & WOOL", CategoryLabel = "WINTER COLLECTION", Hashtag = "#StayWarm", LinkUrl = "/?season=Winter", ImagePath = "/images/suit-hero-winter.jpg", SortOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "UNSTITCHED TO STITCHED", Title = "CUSTOM FIT", CategoryLabel = "LAWN · COTTON · CHIFFON", Hashtag = "#YourStyle", LinkUrl = "/", ImagePath = "/images/suit-hero-unstitched.jpg", SortOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "ORDER IN MINUTES", Title = "NO LOGIN NEEDED", CategoryLabel = "COD AVAILABLE", Hashtag = "#EasyOrder", LinkUrl = "/", ImagePath = "/images/suit-hero-cod.jpg", SortOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
-                );
-            }
-            else
-            {
-                db.HeroSlides.AddRange(
-                    new ShoppingApp.Models.HeroSlide { Tagline = "FRESH FABRICS FOR EVERY SEASON", Title = "SUMMER LAWN SUITS", CategoryLabel = "SUMMER COLLECTION", Hashtag = "#StayCool", LinkUrl = "/?season=Summer", ImagePath = "/images/suit-hero-summer.jpg", SortOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "WARM, ELEGANT, WINTER-READY", Title = "KHADDAR & WOOL", CategoryLabel = "WINTER COLLECTION", Hashtag = "#StayWarm", LinkUrl = "/?season=Winter", ImagePath = "/images/suit-hero-winter.jpg", SortOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "UNSTITCHED TO STITCHED", Title = "CUSTOM FIT", CategoryLabel = "LAWN · COTTON · CHIFFON", Hashtag = "#YourStyle", LinkUrl = "/", ImagePath = "/images/suit-hero-unstitched.jpg", SortOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
-                    new ShoppingApp.Models.HeroSlide { Tagline = "ORDER IN MINUTES", Title = "NO LOGIN NEEDED", CategoryLabel = "COD AVAILABLE", Hashtag = "#EasyOrder", LinkUrl = "/", ImagePath = "/images/suit-hero-cod.jpg", SortOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
-                );
-            }
+            db.HeroSlides.AddRange(
+                new ShoppingApp.Models.HeroSlide { Tagline = "FRESH FABRICS FOR EVERY SEASON", Title = "SUMMER LAWN SUITS", CategoryLabel = "SUMMER COLLECTION", Hashtag = "#StayCool", LinkUrl = "/?season=Summer", ImagePath = "/images/suit-hero-summer.jpg", SortOrder = 1, IsActive = true, CreatedAt = DateTime.UtcNow },
+                new ShoppingApp.Models.HeroSlide { Tagline = "WARM, ELEGANT, WINTER-READY", Title = "KHADDAR & WOOL", CategoryLabel = "WINTER COLLECTION", Hashtag = "#StayWarm", LinkUrl = "/?season=Winter", ImagePath = "/images/suit-hero-winter.jpg", SortOrder = 2, IsActive = true, CreatedAt = DateTime.UtcNow },
+                new ShoppingApp.Models.HeroSlide { Tagline = "UNSTITCHED TO STITCHED", Title = "CUSTOM FIT", CategoryLabel = "LAWN · COTTON · CHIFFON", Hashtag = "#YourStyle", LinkUrl = "/", ImagePath = "/images/suit-hero-unstitched.jpg", SortOrder = 3, IsActive = true, CreatedAt = DateTime.UtcNow },
+                new ShoppingApp.Models.HeroSlide { Tagline = "ORDER IN MINUTES", Title = "NO LOGIN NEEDED", CategoryLabel = "COD AVAILABLE", Hashtag = "#EasyOrder", LinkUrl = "/", ImagePath = "/images/suit-hero-cod.jpg", SortOrder = 4, IsActive = true, CreatedAt = DateTime.UtcNow }
+            );
             await db.SaveChangesAsync();
-            logger.LogInformation("Installed Amal Collection hero slides (replaced {Count} old active slides)", activeSlides.Count);
+            logger.LogInformation("Seeded default Amal Collection hero slides");
         }
 
         // Seed homepage promo swipe deck if empty

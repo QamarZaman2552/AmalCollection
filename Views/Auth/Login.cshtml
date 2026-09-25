@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewData["Title"] = "Login";
 }
 
@@ -13,7 +13,7 @@
             <div class="alert alert-error"><i class="bi bi-exclamation-circle me-1"></i> @ViewBag.Error</div>
         }
 
-        <form method="post" action="/Auth/Login" class="auth-form" autocomplete="off">
+        <form data-noajax method="post" action="/Auth/Login" class="auth-form" autocomplete="off">
             @Html.AntiForgeryToken()
             <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
             <div class="form-group">

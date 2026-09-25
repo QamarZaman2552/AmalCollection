@@ -51,6 +51,7 @@
                             <div class="co-item">
                                 <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
                                      alt="@item.Product?.Name"
+                                     loading="lazy" decoding="async"
                                      onerror="this.src='/images/placeholder.jpg'" />
                                 <div class="co-item-info">
                                     <div class="co-item-name">@item.Product?.Name</div>

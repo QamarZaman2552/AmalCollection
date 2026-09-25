@@ -88,9 +88,10 @@ namespace ShoppingApp.Data
                 .IsUnique()
                 .HasDatabaseName("IX_WishlistItems_UserId_ProductId");
 
+            // Not unique: guest reviews have UserId = NULL (SQL Server unique index
+            // would allow only one NULL row per ProductId). Dedupe is enforced in code.
             modelBuilder.Entity<Review>()
                 .HasIndex(r => new { r.UserId, r.ProductId })
-                .IsUnique()
                 .HasDatabaseName("IX_Reviews_UserId_ProductId");
 
             modelBuilder.Entity<ChatbotLog>()

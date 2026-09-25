@@ -776,6 +776,9 @@ namespace ShoppingApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("CurrentPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -797,6 +800,9 @@ namespace ShoppingApp.Migrations
                     b.Property<string>("PlatformName")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
@@ -821,8 +827,20 @@ namespace ShoppingApp.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("Contact")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("GuestName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -830,7 +848,7 @@ namespace ShoppingApp.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -838,7 +856,6 @@ namespace ShoppingApp.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("UserId", "ProductId")
-                        .IsUnique()
                         .HasDatabaseName("IX_Reviews_UserId_ProductId");
 
                     b.ToTable("Reviews");
@@ -1085,9 +1102,7 @@ namespace ShoppingApp.Migrations
 
                     b.HasOne("ShoppingApp.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Product");
 

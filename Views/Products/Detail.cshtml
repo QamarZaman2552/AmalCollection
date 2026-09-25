@@ -1,4 +1,4 @@
-@model ShoppingApp.Models.Product
+﻿@model ShoppingApp.Models.Product
 @using ShoppingApp.Models
 @{
     ViewData["Title"] = Model.Name;
@@ -36,7 +36,7 @@
             <div class="pd-gallery">
                 <div class="pd-main-img">
                     <img id="mainImage" src="@(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg")"
-                         alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
+                         alt="@Model.Name" decoding="async" fetchpriority="high" onerror="this.src='/images/placeholder.jpg'" />
                 </div>
                 @if (gallery.Count > 1)
                 {
@@ -44,7 +44,7 @@
                         @foreach (var img in gallery)
                         {
                             <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@img.ImagePath">
-                                <img src="@img.ImagePath" alt="@Model.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                <img src="@img.ImagePath" alt="@Model.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                             </button>
                         }
                     </div>
@@ -172,7 +172,7 @@
                             <button type="submit" class="btn btn-primary flex-grow-1 py-2">
                                 <i class="bi bi-bag-plus me-1"></i> Add to Cart
                             </button>
-                            <button type="button" class="btn btn-outline-dark rounded-pill px-3 pd-wish" onclick="document.getElementById('wishForm@(Model.Id)').submit();" aria-label="Wishlist">
+                            <button type="button" class="btn btn-outline-dark rounded-pill px-3 pd-wish" onclick="document.getElementById('wishForm@(Model.Id)').requestSubmit();" aria-label="Wishlist">
                                 <i class="bi bi-heart"></i>
                             </button>
                         </div>
@@ -222,10 +222,29 @@
                         </h2>
                         <div id="accDetails" class="accordion-collapse collapse show" data-bs-parent="#pdAcc">
                             <div class="accordion-body">
-                                Fabric: @Model.Fabric · Season: @Model.Season · Category: @Model.Category
-                                @(Model.Pieces.HasValue ? $"· Pieces: {Model.Pieces}" : "")
-                                @(Model.StitchedType != null ? $"· {Model.StitchedType}" : "")
-                                · Care: Machine wash cold, do not bleach, tumble dry low.
+                                <div class="pd-specs">
+                                    @if (!string.IsNullOrEmpty(Model.Fabric))
+                                    {
+                                        <div class="pd-spec"><span class="pd-spec-label">Fabric</span><span class="pd-spec-val">@Model.Fabric</span></div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Season))
+                                    {
+                                        <div class="pd-spec"><span class="pd-spec-label">Season</span><span class="pd-spec-val">@Model.Season</span></div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Category))
+                                    {
+                                        <div class="pd-spec"><span class="pd-spec-label">Category</span><span class="pd-spec-val">@Model.Category</span></div>
+                                    }
+                                    @if (Model.Pieces.HasValue)
+                                    {
+                                        <div class="pd-spec"><span class="pd-spec-label">Pieces</span><span class="pd-spec-val">@Model.Pieces</span></div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.StitchedType))
+                                    {
+                                        <div class="pd-spec"><span class="pd-spec-label">Type</span><span class="pd-spec-val">@Model.StitchedType</span></div>
+                                    }
+                                    <div class="pd-spec pd-spec-wide"><span class="pd-spec-label">Care</span><span class="pd-spec-val">Machine wash cold, do not bleach, tumble dry low</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -261,7 +280,7 @@
                                                     <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i>
                                                 }
                                             </span>
-                                            – "@(r.Comment ?? "Great product!")" – @(r.User?.FullName ?? "User")
+                                            – "@(r.Comment ?? "Great product!")" – @(r.User?.FullName ?? r.GuestName ?? "Customer")
                                         </div>
                                     }
                                 }
@@ -308,7 +327,11 @@
                 }
             </div>
 
-            @if (userId != null && hasPurchased && !userReviewed)
+            @if (userReviewed)
+            {
+                <div class="reviewed-notice">You have already reviewed this product. Thank you!</div>
+            }
+            else if (hasPurchased)
             {
                 <div class="write-review-box">
                     <h3 class="write-review-title">Write a Review <span class="verified-buyer-tag">Verified Buyer</span></h3>
@@ -334,20 +357,50 @@
                     </form>
                 </div>
             }
-            else if (userId != null && hasPurchased && userReviewed)
-            {
-                <div class="reviewed-notice">You have already reviewed this product. Thank you!</div>
-            }
-            else if (userId != null && !hasPurchased)
-            {
-                <div class="not-buyer-notice">
-                    Only verified buyers can leave a review. <a href="/Cart/Add?productId=@Model.Id&quantity=1">Buy this product</a> to share your experience.
-                </div>
-            }
             else
             {
-                <div class="login-to-review">
-                    <a href="/Auth/Login?returnUrl=/Products/Detail/@Model.Id" class="btn-glass">Login to Write a Review</a>
+                <div class="write-review-box">
+                    <h3 class="write-review-title">Write a Review <span class="verified-buyer-tag">Verified Purchase</span></h3>
+                    <p style="color:var(--text-3);font-size:0.85rem;margin:-0.3rem 0 0.9rem;">
+                        <i class="bi bi-shield-check"></i> No account needed — just verify the order you received.
+                    </p>
+                    <form method="post" action="/Products/SubmitReview" id="reviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+                        <div class="star-picker" id="starPicker">
+                            <span class="sp-label">Your Rating:</span>
+                            <div class="sp-stars" id="spStars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)"><i class="bi bi-star-fill"></i></button>
+                                }
+                            </div>
+                            <span class="sp-hint" id="spHint">Click a star</span>
+                            <input type="hidden" name="rating" id="ratingInput" value="0" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Your Review (optional)</label>
+                            <textarea id="comment" name="comment" placeholder="Share your experience with this product…" rows="4"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr;gap:0.9rem;">
+                            <div class="form-group" style="margin:0;">
+                                <label for="orderNo">Order Number *</label>
+                                <input type="number" id="orderNo" name="orderId" min="1" required placeholder="e.g. 1042" />
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label for="orderContact">Phone or Email used at checkout *</label>
+                                <input type="text" id="orderContact" name="contact" required placeholder="03XX-XXXXXXX or you@example.com" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" id="submitReview" style="min-width:160px;">Submit Review</button>
+                    </form>
+                    <p style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-3);">
+                        <i class="bi bi-info-circle"></i> Order number aapko confirmation page / SMS me milta hai.
+                        @if (userId == null)
+                        {
+                            <span> Koi order nahi? <a href="/" style="color:var(--gold);">Shop now</a></span>
+                        }
+                    </p>
                 </div>
             }
 
@@ -357,10 +410,20 @@
                     @foreach (var r in reviews)
                     {
                         <div class="review-card">
+                            @{
+                                var revName = r.User?.FullName ?? r.GuestName ?? "Customer";
+                                if (string.IsNullOrWhiteSpace(revName)) { revName = "Customer"; }
+                            }
                             <div class="review-card-header">
-                                <div class="review-avatar">@(r.User?.FullName?[0].ToString().ToUpper() ?? "U")</div>
+                                <div class="review-avatar">@revName.Substring(0, 1).ToUpper()</div>
                                 <div>
-                                    <div class="review-author">@(r.User?.FullName ?? "User")</div>
+                                    <div class="review-author">
+                                        @revName
+                                        @if (r.IsVerified)
+                                        {
+                                            <span class="verified-buyer-tag" style="margin-left:0.4rem;">Verified Buyer</span>
+                                        }
+                                    </div>
                                     <div class="review-date">@r.CreatedAt.ToString("MMM dd, yyyy")</div>
                                 </div>
                                 <div class="review-stars ms-auto">
@@ -403,7 +466,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                                 <span class="badge-tag">@p.Season</span>
@@ -500,7 +563,7 @@ document.querySelector('.add-cart-form')?.addEventListener('submit', function (e
     }
 });
 
-const ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
+var ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
 function setRating(val) {
     document.getElementById('ratingInput').value = val;
     document.getElementById('spHint').textContent = ratingLabels[val];

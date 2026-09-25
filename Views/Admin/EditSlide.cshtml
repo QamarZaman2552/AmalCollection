@@ -1,4 +1,4 @@
-@model ShoppingApp.Models.HeroSlide
+﻿@model ShoppingApp.Models.HeroSlide
 @using ShoppingApp.Models
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -20,15 +20,15 @@
         <div class="form-grid-2">
             <div class="form-group">
                 <label>Tagline <small>(small text above title)</small></label>
-                <input name="Tagline" value="@Model.Tagline" placeholder="e.g. FRESH FABRICS FOR EVERY SEASON" required />
+                <input name="Tagline" value="@Model.Tagline" placeholder="e.g. FRESH FABRICS FOR EVERY SEASON" />
             </div>
             <div class="form-group">
                 <label>Title <small>(big bold name)</small></label>
-                <input name="Title" value="@Model.Title" placeholder="e.g. SUMMER LAWN SUITS" required />
+                <input name="Title" value="@Model.Title" placeholder="e.g. SUMMER LAWN SUITS" />
             </div>
             <div class="form-group">
                 <label>Category Label</label>
-                <input name="CategoryLabel" value="@Model.CategoryLabel" placeholder="e.g. SUMMER COLLECTION" required />
+                <input name="CategoryLabel" value="@Model.CategoryLabel" placeholder="e.g. SUMMER COLLECTION" />
             </div>
             <div class="form-group">
                 <label>Hashtag <small>(optional)</small></label>
@@ -40,7 +40,7 @@
             </div>
             <div class="form-group">
                 <label>Sort Order <small>(0 = first)</small></label>
-                <input name="SortOrder" type="number" value="@Model.SortOrder" min="0" />
+                <input name="SortOrder" type="number" value="@Model.SortOrder" />
             </div>
             <div class="form-group">
                 <label><i class="bi bi-link-45deg"></i> Linked Product <small>(Shop Now button adds this to cart)</small></label>
@@ -61,7 +61,7 @@
             </div>
             <div class="form-group">
                 <label><i class="bi bi-cash-stack"></i> Display Price on Slide <small>(optional, leave 0 to hide)</small></label>
-                <input name="DisplayPrice" id="displayPrice" type="number" step="0.01" min="0"
+                <input name="DisplayPrice" id="displayPrice" type="number" step="0.01"
                        value="@(Model.DisplayPrice.HasValue ? Model.DisplayPrice.Value.ToString("F2") : "")" placeholder="e.g. 29999" />
             </div>
         </div>
@@ -89,10 +89,10 @@
         </div>
 
         <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
-            <input type="hidden" name="IsActive" value="false" />
             <input type="checkbox" name="IsActive" id="isActive" value="true"
                    @(Model.IsActive ? "checked" : "")
                    style="width:18px;height:18px;accent-color:var(--accent);" />
+            <input type="hidden" name="IsActive" value="false" />
             <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage)</label>
         </div>
 
@@ -115,11 +115,11 @@
         }
     }
 
-    const zone    = document.getElementById('uploadZone');
-    const input   = document.getElementById('imageFile');
-    const preview = document.getElementById('imgPreview');
-    const preWrap = document.getElementById('imgPreviewWrap');
-    const preName = document.getElementById('imgPreviewName');
+    var zone    = document.getElementById('uploadZone');
+    var input   = document.getElementById('imageFile');
+    var preview = document.getElementById('imgPreview');
+    var preWrap = document.getElementById('imgPreviewWrap');
+    var preName = document.getElementById('imgPreviewName');
 
     zone.addEventListener('click', () => input.click());
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent-2)'; });

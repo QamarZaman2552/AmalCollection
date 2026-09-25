@@ -16,19 +16,19 @@
         <div class="form-grid-2">
             <div class="form-group">
                 <label>Brand Name</label>
-                <input name="BrandName" placeholder="SANA SAFINAZ" required maxlength="100" />
+                <input name="BrandName" placeholder="SANA SAFINAZ" maxlength="100" />
             </div>
             <div class="form-group">
                 <label>Discount %</label>
-                <input name="DiscountPercent" type="number" value="20" min="0" max="100" required />
+                <input name="DiscountPercent" type="number" value="20" />
             </div>
             <div class="form-group">
                 <label>Current Price (Rs.)</label>
-                <input name="CurrentPrice" type="number" step="0.01" min="0" placeholder="1999" required />
+                <input name="CurrentPrice" type="number" step="0.01" placeholder="1999" />
             </div>
             <div class="form-group">
                 <label>Original Price (Rs.)</label>
-                <input name="OriginalPrice" type="number" step="0.01" min="0" placeholder="2499" required />
+                <input name="OriginalPrice" type="number" step="0.01" placeholder="2499" />
             </div>
             <div class="form-group">
                 <label>Available On Text</label>
@@ -40,12 +40,32 @@
             </div>
             <div class="form-group">
                 <label>Sort Order</label>
-                <input name="SortOrder" type="number" value="0" min="0" />
+                <input name="SortOrder" type="number" value="0" />
             </div>
             <div class="form-group">
                 <label>Background Color</label>
                 <input name="BackgroundColor" type="color" value="#7B4F52"
                        style="width:100%;height:42px;padding:2px;border:1px solid var(--border);border-radius:8px;background:var(--bg-2);cursor:pointer;" />
+            </div>
+            <div class="form-group">
+                <label>Link Product <small>(optional — tap se product khulega)</small></label>
+                <select name="ProductId">
+                    <option value="">— No product link —</option>
+                    @foreach (var p in ViewBag.PromoProducts)
+                    {
+                        <option value="@p.Value">@p.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Link Category <small>(optional — dono ho to product link chalega)</small></label>
+                <select name="CategoryName">
+                    <option value="">— No category link —</option>
+                    @foreach (var c in ViewBag.PromoCategories)
+                    {
+                        <option value="@c">@c</option>
+                    }
+                </select>
             </div>
         </div>
 
@@ -78,8 +98,8 @@
         </div>
 
         <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
-            <input type="hidden" name="IsActive" value="false" />
             <input type="checkbox" name="IsActive" id="isActive" value="true" checked style="width:18px;height:18px;accent-color:var(--accent);" />
+            <input type="hidden" name="IsActive" value="false" />
             <label for="isActive" style="color:var(--text);font-size:0.9rem;cursor:pointer;">Active (show on homepage deck)</label>
         </div>
 

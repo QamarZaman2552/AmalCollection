@@ -1,4 +1,4 @@
-@model ShoppingApp.Models.Product
+﻿@model ShoppingApp.Models.Product
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Add Product";
@@ -101,8 +101,8 @@
             </div>
             <div class="form-group" style="grid-column: span 2; display:flex; flex-direction:row; gap:1.5rem; align-items:center; flex-wrap:wrap;">
                 <label style="display:flex; gap:0.5rem; align-items:center; white-space:nowrap;">
-                    <input type="hidden" name="IsFreeDelivery" value="false" />
                     <input type="checkbox" name="IsFreeDelivery" value="true" checked style="width:auto;" />
+                    <input type="hidden" name="IsFreeDelivery" value="false" />
                     Free delivery
                 </label>
                 <div id="deliveryChargeWrap" style="display:none; flex:1; min-width:180px;">
@@ -134,8 +134,8 @@
 
 @section Scripts {
     <script>
-        const freeCb = document.querySelector('input[name="IsFreeDelivery"]');
-        const chargeWrap = document.getElementById('deliveryChargeWrap');
+        var freeCb = document.querySelector('input[name="IsFreeDelivery"]');
+        var chargeWrap = document.getElementById('deliveryChargeWrap');
         function toggleCharge() {
             if (!freeCb || !chargeWrap) return;
             chargeWrap.style.display = freeCb.checked ? 'none' : 'block';

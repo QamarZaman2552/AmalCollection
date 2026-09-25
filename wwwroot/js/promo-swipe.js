@@ -10,6 +10,9 @@
     let currentIndex = 0;
     let isDragging   = false;
     let startX = 0, startY = 0, currentX = 0;
+    let movedDist = 0;
+    let suppressNextClick = false;
+    const TAP_MAX   = 8;
     const THRESHOLD  = 80;
     const FLY_MS     = 480;
 
@@ -81,6 +84,8 @@
         startX  = e.touches ? e.touches[0].clientX : e.clientX;
         startY  = e.touches ? e.touches[0].clientY : e.clientY;
         currentX = 0;
+        movedDist = 0;
+        suppressNextClick = false;
         const top = getTopCard();
         if (top) top.style.transition = 'none';
     }
@@ -91,15 +96,18 @@
         const y  = e.touches ? e.touches[0].clientY : e.clientY;
         currentX = x - startX;
         const dy = y - startY;
+        const dist = Math.max(Math.abs(currentX), Math.abs(dy));
+        if (dist > movedDist) movedDist = dist;
 
         if (Math.abs(dy) > Math.abs(currentX) * 1.5) {
             isDragging = false;
+            if (movedDist > TAP_MAX) suppressNextClick = true;
             const top = getTopCard();
             if (top) { top.style.transition = ''; top.style.transform = ''; }
             return;
         }
 
-        if (e.cancelable) e.preventDefault();
+        if (movedDist > TAP_MAX && e.cancelable) e.preventDefault();
 
         const top = getTopCard();
         if (top) top.style.transform = 'translateX(' + currentX + 'px) rotate(' + (currentX * 0.08) + 'deg)';
@@ -108,6 +116,7 @@
     function onEnd() {
         if (!isDragging) return;
         isDragging = false;
+        if (movedDist > TAP_MAX) suppressNextClick = true;
         const top = getTopCard();
         if (!top) { currentX = 0; return; }
 
@@ -120,7 +129,26 @@
         currentX = 0;
     }
 
+    // Tap = navigate (agar href ho); drag/swipe ke baad click ko block karo
+    deck.addEventListener('click', function (e) {
+        const suppress = suppressNextClick;
+        suppressNextClick = false;
+        if (suppress) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+
+    // Desktop: <a>/<img> ka native HTML5 drag ghost cursor se chipak jata hai aur
+    // mousemove/mouseup stream tod deta hai — swipe ko rok kar rakhta hai.
+    // Touch pe ye gesture nahi banta, isliye mobile pe pehle se sahi chalta tha.
+    deck.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
     deck.addEventListener('mousedown',     onStart);
+    if (window.__promoMove) document.removeEventListener('mousemove', window.__promoMove);
+    if (window.__promoEnd) document.removeEventListener('mouseup', window.__promoEnd);
+    window.__promoMove = onMove;
+    window.__promoEnd = onEnd;
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup',   onEnd);
 

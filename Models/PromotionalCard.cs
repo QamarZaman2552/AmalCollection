@@ -10,16 +10,13 @@ namespace ShoppingApp.Models
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [MaxLength(100)]
         public string BrandName { get; set; } = string.Empty;
 
-        [Required]
         public int DiscountPercent { get; set; }
 
-        [Required]
         public decimal CurrentPrice { get; set; }
 
-        [Required]
         public decimal OriginalPrice { get; set; }
 
         [MaxLength(100)]
@@ -33,6 +30,10 @@ namespace ShoppingApp.Models
 
         public bool IsActive { get; set; } = true;
         public int SortOrder { get; set; } = 0;
+
+        // Optional links (dono optional; Product link ko priority)
+        public int? ProductId { get; set; }
+        public string? CategoryName { get; set; }
 
         public string BackgroundColor { get; set; } = "#7B4F52";
     }

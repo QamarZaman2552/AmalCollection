@@ -60,6 +60,7 @@
                         <div class="otc-item">
                             <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
                                  alt="@item.Product?.Name"
+                                 loading="lazy" decoding="async"
                                  onerror="this.src='/images/placeholder.jpg'" />
                             <div class="otc-item-info">
                                 <div class="otc-item-name">@item.Product?.Name</div>

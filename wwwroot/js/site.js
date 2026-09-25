@@ -27,6 +27,10 @@
   window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
 })();
 
+// --- Page Init Registry (ajax-nav content swap ke baad dobara chalta hai) ---
+window.__pageInits = window.__pageInits || [];
+function pageInit(fn) { window.__pageInits.push(fn); fn(); }
+
 // â”€â”€â”€ Cart Badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updateCartBadge() {
   try {
@@ -54,8 +58,11 @@ updateWishlistBadge();
 
 
 // â”€â”€â”€ Auto-dismiss Toast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const toast = document.getElementById('toast') || document.getElementById('toast-success') || document.getElementById('toast-error');
-if (toast) setTimeout(() => toast.remove(), 4000);
+function initToast() {
+  const toast = document.getElementById('toast') || document.getElementById('toast-success') || document.getElementById('toast-error');
+  if (toast) setTimeout(() => toast.remove(), 4000);
+}
+pageInit(initToast);
 
 // â”€â”€â”€ Chatbot Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const bubble    = document.getElementById('chatBubble');
@@ -168,7 +175,8 @@ async function sendMessage() {
 // â”€â”€â”€ Hero Slider handled by Prototype Hero Slider (#heroSlider) below â”€â”€â”€
 
 // â”€â”€â”€ rn-Slider (Homepage Hero Banner) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-(function () {
+function initRnSlider() {
+  if (window.__rnSliderStop) { window.__rnSliderStop(); window.__rnSliderStop = null; }
   const slider = document.getElementById('rnSlider');
   if (!slider) return;
 
@@ -221,8 +229,10 @@ async function sendMessage() {
   });
 
   start();
-})();// â”€â”€â”€ Scroll Reveal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-(function () {
+  window.__rnSliderStop = stop;
+}
+pageInit(initRnSlider);// â”€â”€â”€ Scroll Reveal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function initReveal() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(el => {
       if (el.isIntersecting) {
@@ -240,7 +250,8 @@ async function sendMessage() {
     if (i % 4 === 3) el.classList.add('reveal-delay-3');
     observer.observe(el);
   });
-})();
+}
+pageInit(initReveal);
 
 // â”€â”€â”€ Button Ripple Effect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', (e) => {
@@ -395,7 +406,8 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 
 // â”€â”€â”€ Prototype Hero Slider (#heroSlider) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-(function () {
+function initHeroSlider() {
+  if (window.__heroSliderStop) { window.__heroSliderStop(); window.__heroSliderStop = null; }
   const hero = document.getElementById('heroSlider');
   if (!hero) return;
   const slides = hero.querySelectorAll('.hero-slide');
@@ -439,7 +451,9 @@ window.addEventListener('DOMContentLoaded', function () {
     if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
   }, { passive: true });
   resetTimer();
-})();
+  window.__heroSliderStop = function () { clearInterval(timer); };
+}
+pageInit(initHeroSlider);
 
 // â”€â”€â”€ Prototype size/season filter chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', function (e) {
@@ -472,14 +486,15 @@ document.addEventListener('click', function (e) {
 });
 
 // â”€â”€â”€ Checkout summary: open on desktop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-document.addEventListener('DOMContentLoaded', function () {
+function initOrderSummary() {
   const el = document.getElementById('orderSummary');
   if (!el) return;
   if (window.matchMedia('(min-width: 992px)').matches) {
     el.classList.add('show');
     document.getElementById('sumToggle')?.setAttribute('aria-expanded', 'true');
   }
-});
+}
+pageInit(initOrderSummary);
 
 // â”€â”€â”€ Product detail size/color chip select â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('click', function (e) {
@@ -496,7 +511,7 @@ document.addEventListener('click', function (e) {
 });
 
 // â”€â”€â”€ Filter Drawer (Offcanvas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-(function () {
+function initFilterDrawer() {
   const toggle   = document.getElementById('filterDrawerToggle');
   const drawer   = document.getElementById('filterDrawer');
   const backdrop = document.getElementById('filterBackdrop');
@@ -527,7 +542,9 @@ document.addEventListener('click', function (e) {
   });
   if (closeBtn)   closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
   if (backdrop)   backdrop.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  if (window.__fdEscHandler) document.removeEventListener('keydown', window.__fdEscHandler);
+  window.__fdEscHandler = (e) => { if (e.key === 'Escape') closeDrawer(); };
+  document.addEventListener('keydown', window.__fdEscHandler);
 
   drawer.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', function () {
@@ -537,4 +554,5 @@ document.addEventListener('click', function (e) {
       this.closest('.filter-chip-item')?.classList.add('checked');
     });
   });
-})();
+}
+pageInit(initFilterDrawer);

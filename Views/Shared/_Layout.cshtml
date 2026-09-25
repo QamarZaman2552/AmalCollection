@@ -1,4 +1,4 @@
-@using ShoppingApp.Data
+﻿@using ShoppingApp.Data
 @inject AppDbContext _db
 @{
     var siteSettings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
@@ -35,7 +35,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -50,11 +50,11 @@
     </div>
 
     <!-- ─── Navbar ───────────────────────────────────────── -->
-    <nav class="navbar navbar-expand-lg sticky-top ac-nav">
+    <nav class="navbar navbar-expand-xl sticky-top ac-nav">
         <div class="container">
             <a class="navbar-brand ac-brand" href="/">Amal<em>Collection</em></a>
 
-            <div class="d-flex align-items-center order-1 order-lg-3 ms-auto ac-nav-wrap">
+            <div class="d-flex align-items-center order-1 order-xl-3 ms-auto ac-nav-wrap">
                 <div class="d-flex align-items-center gap-1 ac-nav-actions">
                     <a href="/Wishlist" class="btn ac-icon-btn position-relative" aria-label="Wishlist">
                         <i class="bi bi-heart"></i>
@@ -66,54 +66,54 @@
                     </a>
                     @if (userId != null && !isAdmin)
                     {
-                        <a href="/Profile" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-lg-inline-block"><i class="bi bi-person me-1"></i> @Context.Session.GetString("UserName")</a>
-                        <a href="/Auth/Logout" class="btn-outline-sm ms-1 d-none d-lg-inline-block">Logout</a>
+                        <a href="/Profile" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-xl-inline-block"><i class="bi bi-person me-1"></i> @Context.Session.GetString("UserName")</a>
+                        <a href="/Auth/Logout" class="btn-outline-sm ms-1 d-none d-xl-inline-block">Logout</a>
                     }
                     else if (userId != null && isAdmin)
                     {
-                        <a href="/Admin/Products" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-lg-inline-block"><i class="bi bi-gear me-1"></i> Admin</a>
-                        <a href="/Auth/Logout" class="btn-outline-sm ms-1 d-none d-lg-inline-block">Logout</a>
+                        <a href="/Admin/Products" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-xl-inline-block"><i class="bi bi-gear me-1"></i> Admin</a>
+                        <a href="/Auth/Logout" class="btn-outline-sm ms-1 d-none d-xl-inline-block">Logout</a>
                     }
                     else
                     {
-                        <a href="/Auth/Login" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-lg-inline-block">Sign in</a>
+                        <a href="/Auth/Login" class="btn btn-outline-dark btn-sm rounded-pill ms-1 d-none d-xl-inline-block">Sign in</a>
                     }
                 </div>
-                <button class="navbar-toggler ac-toggler ms-1 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler ac-toggler ms-1 d-xl-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="bi bi-list fs-3"></i>
                 </button>
             </div>
 
-            <div class="collapse navbar-collapse order-2 order-lg-1" id="mainNav">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 ac-nav-links">
+            <div class="collapse navbar-collapse order-2 order-xl-1" id="mainNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-xl-0 ac-nav-links">
                     <li class="nav-item">
                         <a class="nav-link" href="/">
                             <span>Home</span>
-                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/?season=Summer">
                             <span>Summer</span>
-                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/?season=Winter">
                             <span>Winter</span>
-                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/About">
                             <span>About Us</span>
-                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/Contact">
                             <span>Contact</span>
-                            <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     @if (userId != null && !isAdmin)
@@ -121,17 +121,17 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/Orders/History">
                                 <span>My Orders</span>
-                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                                <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                             </a>
                         </li>
                     }
                     @if (isAdmin)
                     {
-                        <li class="nav-section d-lg-none">Account</li>
+                        <li class="nav-section d-xl-none">Account</li>
                         <li class="nav-item">
                             <a class="nav-link" href="/Admin/Products">
                                 <span>Admin</span>
-                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none" aria-hidden="true"></i>
+                                <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -141,20 +141,20 @@
                                 {
                                     <span class="nav-msg-badge">@unreadMsgs</span>
                                 }
-                                <i class="bi bi-chevron-right nav-link-chevron d-lg-none ms-auto" aria-hidden="true"></i>
+                                <i class="bi bi-chevron-right nav-link-chevron d-xl-none ms-auto" aria-hidden="true"></i>
                             </a>
                         </li>
                     }
                 </ul>
 
-                <form class="d-none d-lg-flex ac-search mb-2 mb-lg-0" action="/Products/Search" method="get">
+                <form class="d-none d-xl-flex ac-search mb-2 mb-xl-0" action="/Products/Search" method="get">
                     <input class="form-control" type="search" id="navSearch" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
                     <button class="btn ac-search-btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                 </form>
             </div>
         </div>
 
-        <div class="ac-mobile-search d-lg-none">
+        <div class="ac-mobile-search d-xl-none">
             <div class="container">
                 <form class="d-flex ac-search" action="/Products/Search" method="get">
                     <input class="form-control" type="search" id="mobileNavSearch" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
@@ -215,7 +215,7 @@
                         <li><a href="/Contact">Contact Us</a></li>
                     </ul>
                 </div>
-                <div class="col-6 col-lg-3">
+                <div class="col-12 col-lg-3">
                     <h4>Contact</h4>
                     <ul class="list-unstyled">
                         @if (!string.IsNullOrWhiteSpace(waDigits))
@@ -282,6 +282,7 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
 
     <script>
         // Lock pinch zoom only — do NOT block normal touch scroll
@@ -295,6 +296,6 @@
         })();
     </script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <div id="pageScripts">@await RenderSectionAsync("Scripts", required: false)</div>
 </body>
 </html>

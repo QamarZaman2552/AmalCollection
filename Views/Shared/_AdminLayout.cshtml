@@ -1,4 +1,4 @@
-@using ShoppingApp.Data
+﻿@using ShoppingApp.Data
 @inject AppDbContext _db
 @{
     var siteSettings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
@@ -31,7 +31,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -196,6 +196,7 @@
         document.getElementById('sidebarClose').addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
         overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
     </script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
+    <div id="pageScripts">@await RenderSectionAsync("Scripts", required: false)</div>
 </body>
 </html>

@@ -21,6 +21,24 @@ namespace ShoppingApp.Controllers
 
         private static readonly string[] AllSizes = { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
 
+        private void EnsurePromoLinkViewBag()
+        {
+            var products = _db.Products.OrderBy(p => p.Name).ToList();
+            ViewBag.PromoProducts = products
+                .Select(p => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = $"{p.Name} — PKR {p.FinalPrice:N0}"
+                })
+                .ToList();
+            ViewBag.PromoCategories = _db.Products
+                .Where(p => p.Category != null && p.Category != "")
+                .Select(p => p.Category!)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+        }
+
         // ─── Product List ─────────────────────────────────────────
         public IActionResult Products()
         {
@@ -133,7 +151,7 @@ namespace ShoppingApp.Controllers
 
             _db.SaveChanges();
             TempData["Success"] = "Product updated!";
-            return RedirectToAction("Edit", new { id = product.Id });
+            return RedirectToAction("Products");
         }
 
         // ─── Delete Product Image ─────────────────────────────────
@@ -445,6 +463,10 @@ namespace ShoppingApp.Controllers
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
 
+            slide.Tagline = slide.Tagline ?? string.Empty;
+            slide.Title = slide.Title ?? string.Empty;
+            slide.CategoryLabel = slide.CategoryLabel ?? string.Empty;
+
             if (imageFile != null && imageFile.Length > 0)
             {
                 slide.ImagePath = await _imageService.UploadAsync(imageFile, "hero");
@@ -483,9 +505,9 @@ namespace ShoppingApp.Controllers
             var slide = _db.HeroSlides.FirstOrDefault(s => s.Id == updated.Id);
             if (slide == null) return NotFound();
 
-            slide.Tagline       = updated.Tagline;
-            slide.Title         = updated.Title;
-            slide.CategoryLabel = updated.CategoryLabel;
+            slide.Tagline       = updated.Tagline ?? string.Empty;
+            slide.Title         = updated.Title ?? string.Empty;
+            slide.CategoryLabel = updated.CategoryLabel ?? string.Empty;
             slide.Hashtag       = updated.Hashtag;
             slide.LinkUrl       = updated.LinkUrl;
             slide.SortOrder     = updated.SortOrder;
@@ -542,6 +564,7 @@ namespace ShoppingApp.Controllers
         public IActionResult AddPromo()
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            EnsurePromoLinkViewBag();
             return View(new PromotionalCard { IsActive = true, BackgroundColor = "#7B4F52" });
         }
 
@@ -555,18 +578,16 @@ namespace ShoppingApp.Controllers
             {
                 card.ImagePath = await _imageService.UploadAsync(imageFile, "promo-img");
             }
-            else if (string.IsNullOrWhiteSpace(card.ImagePath))
-            {
-                TempData["Error"] = "Please upload a product image.";
-                return View(card);
-            }
 
             if (logoFile != null && logoFile.Length > 0)
             {
                 card.LogoPath = await _imageService.UploadAsync(logoFile, "promo-logo");
             }
 
+            if (card.BrandName == null) card.BrandName = string.Empty;
             if (string.IsNullOrWhiteSpace(card.BackgroundColor)) card.BackgroundColor = "#7B4F52";
+            if (string.IsNullOrWhiteSpace(card.CategoryName)) card.CategoryName = null;
+            if (!card.ProductId.HasValue) card.ProductId = null;
 
             _db.PromotionalCards.Add(card);
             _db.SaveChanges();
@@ -580,18 +601,19 @@ namespace ShoppingApp.Controllers
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == id);
             if (card == null) return NotFound();
+            EnsurePromoLinkViewBag();
             return View(card);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPromo(PromotionalCard updated, IFormFile? imageFile, IFormFile? logoFile)
+        public async Task<IActionResult> EditPromo(PromotionalCard updated, IFormFile? imageFile, IFormFile? logoFile, bool removeImage = false, bool removeLogo = false)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var card = _db.PromotionalCards.FirstOrDefault(c => c.Id == updated.Id);
             if (card == null) return NotFound();
 
-            card.BrandName = updated.BrandName;
+            card.BrandName = updated.BrandName ?? string.Empty;
             card.DiscountPercent = updated.DiscountPercent;
             card.CurrentPrice = updated.CurrentPrice;
             card.OriginalPrice = updated.OriginalPrice;
@@ -600,14 +622,24 @@ namespace ShoppingApp.Controllers
             card.SortOrder = updated.SortOrder;
             card.IsActive = updated.IsActive;
             card.BackgroundColor = string.IsNullOrWhiteSpace(updated.BackgroundColor) ? "#7B4F52" : updated.BackgroundColor;
+            card.ProductId = updated.ProductId;
+            card.CategoryName = string.IsNullOrWhiteSpace(updated.CategoryName) ? null : updated.CategoryName;
 
             if (imageFile != null && imageFile.Length > 0)
             {
                 card.ImagePath = await _imageService.UploadAsync(imageFile, "promo-img");
             }
+            else if (removeImage)
+            {
+                card.ImagePath = null;
+            }
             if (logoFile != null && logoFile.Length > 0)
             {
                 card.LogoPath = await _imageService.UploadAsync(logoFile, "promo-logo");
+            }
+            else if (removeLogo)
+            {
+                card.LogoPath = null;
             }
 
             _db.SaveChanges();

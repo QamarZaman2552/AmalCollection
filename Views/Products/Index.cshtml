@@ -1,4 +1,4 @@
-@model List<ShoppingApp.Models.Product>
+﻿@model List<ShoppingApp.Models.Product>
 @using ShoppingApp.Data
 @inject AppDbContext _db
 @{
@@ -50,11 +50,21 @@
         return p.Count > 0 ? "/?" + string.Join("&", p) + "#products" : "/#products";
     }
 
-    var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
-    var wa = settings?.ContactWhatsapp;
-    var waDigits = string.IsNullOrWhiteSpace(wa) ? "" : new string(wa.Where(char.IsDigit).ToArray());
-    if (waDigits.Length > 0 && waDigits.StartsWith("0") && !waDigits.StartsWith("92"))
-        waDigits = "92" + waDigits[1..];
+    int curPage   = ViewBag.Page ?? 1;
+    int pageCount = ViewBag.PageCount ?? 1;
+    int totalCount = ViewBag.TotalCount ?? Model.Count;
+
+    string PageUrl(int pg)
+    {
+        var q = new List<string>();
+        if (!string.IsNullOrEmpty(selectedCat))    q.Add("category=" + Uri.EscapeDataString(selectedCat));
+        if (!string.IsNullOrEmpty(selectedSeason)) q.Add("season=" + Uri.EscapeDataString(selectedSeason));
+        if (!string.IsNullOrEmpty(selectedFabric)) q.Add("fabric=" + Uri.EscapeDataString(selectedFabric));
+        if (!string.IsNullOrEmpty(selectedSize))   q.Add("size=" + Uri.EscapeDataString(selectedSize));
+        if (!string.IsNullOrEmpty(selectedSort))   q.Add("sort=" + Uri.EscapeDataString(selectedSort));
+        if (pg > 1) q.Add("page=" + pg);
+        return q.Count > 0 ? "/?" + string.Join("&", q) + "#products" : "/#products";
+    }
 
     if (!heroSlides.Any())
     {
@@ -154,36 +164,54 @@
                     @for (int i = promoCards.Count - 1; i >= 0; i--)
                     {
                         var card = promoCards[i];
-                        <div class="promo-card" data-index="@i">
+                        string? promoHref = null;
+                        if (card.ProductId.HasValue)
+                            promoHref = "/Products/Detail/" + card.ProductId.Value;
+                        else if (!string.IsNullOrWhiteSpace(card.CategoryName))
+                            promoHref = "/?category=" + Uri.EscapeDataString(card.CategoryName) + "#products";
+                        <a class="promo-card" data-index="@i" href="@promoHref">
 
                             <img class="promo-card__img"
                                  src="@(string.IsNullOrEmpty(card.ImagePath) ? "/images/placeholder.jpg" : card.ImagePath)"
                                  alt="@card.BrandName"
+                                 loading="lazy" decoding="async"
                                  draggable="false" />
 
                             <div class="promo-card__info">
-                                <div class="promo-card__brand">@card.BrandName</div>
-                                <div class="promo-card__discount">
-                                    @card.DiscountPercent%
-                                    <span>OFF</span>
-                                </div>
-                                <div class="promo-card__now">Now: Rs.@card.CurrentPrice.ToString("N0")</div>
-                                <div class="promo-card__was">Was: Rs.@card.OriginalPrice.ToString("N0")</div>
-                                @if (!string.IsNullOrEmpty(card.AvailableOnText))
+                                @if (!string.IsNullOrWhiteSpace(card.BrandName))
+                                {
+                                    <div class="promo-card__brand">@card.BrandName</div>
+                                }
+                                @if (card.DiscountPercent > 0)
+                                {
+                                    <div class="promo-card__discount">
+                                        @card.DiscountPercent%
+                                        <span>OFF</span>
+                                    </div>
+                                }
+                                @if (card.CurrentPrice > 0)
+                                {
+                                    <div class="promo-card__now">Now: Rs.@card.CurrentPrice.ToString("N0")</div>
+                                }
+                                @if (card.OriginalPrice > 0)
+                                {
+                                    <div class="promo-card__was">Was: Rs.@card.OriginalPrice.ToString("N0")</div>
+                                }
+                                @if (!string.IsNullOrEmpty(card.AvailableOnText) && (!string.IsNullOrEmpty(card.PlatformName) || !string.IsNullOrEmpty(card.LogoPath)))
                                 {
                                     <div class="promo-card__avail">@card.AvailableOnText</div>
                                 }
                                 @if (!string.IsNullOrEmpty(card.LogoPath))
                                 {
                                     <img class="promo-card__logo" src="@card.LogoPath"
-                                         alt="@card.PlatformName" draggable="false" />
+                                         alt="@card.PlatformName" width="70" height="32" loading="lazy" decoding="async" draggable="false" />
                                 }
                                 @if (!string.IsNullOrEmpty(card.PlatformName))
                                 {
                                     <div class="promo-card__platform">@card.PlatformName</div>
                                 }
                             </div>
-                        </div>
+                        </a>
                     }
                 </div>
 
@@ -196,7 +224,7 @@
             </div>
         </div>
     </section>
-    <script src="~/js/promo-swipe.js"></script>
+    <script src="~/js/promo-swipe.js" asp-append-version="true"></script>
 }
 
 <!-- ═══ Promo Banners ═══ -->
@@ -301,7 +329,7 @@
 
                 <!-- Sort + Count -->
                 <div class="sort-count-wrap">
-                    <span class="product-count-text d-none d-md-inline"><strong>@Model.Count</strong> suit@(Model.Count == 1 ? "" : "s")</span>
+                    <span class="product-count-text d-none d-md-inline"><strong>@totalCount</strong> suit@(totalCount == 1 ? "" : "s")</span>
                     <div class="sort-dropdown-wrap">
                         <i class="bi bi-sort-down sort-icon"></i>
                         <form method="get" action="/" id="sortForm" style="display:inline;">
@@ -309,7 +337,7 @@
                             @if (!string.IsNullOrEmpty(selectedSeason)) { <input type="hidden" name="season" value="@selectedSeason" /> }
                             @if (!string.IsNullOrEmpty(selectedFabric)) { <input type="hidden" name="fabric" value="@selectedFabric" /> }
                             @if (!string.IsNullOrEmpty(selectedSize)) { <input type="hidden" name="size" value="@selectedSize" /> }
-                            <select name="sort" class="sort-select" onchange="this.form.submit()">
+                            <select name="sort" class="sort-select" onchange="this.form.requestSubmit()">
                                 @foreach (var opt in sortOptions)
                                 {
                                     if (opt.Value == selectedSort)
@@ -463,7 +491,7 @@
             </div>
             <div class="filter-drawer-footer">
                 <a href="/" class="btn-filter-reset">Reset All</a>
-                <button class="btn-filter-apply" onclick="document.getElementById('filterForm').submit()">
+                <button class="btn-filter-apply" onclick="document.getElementById('filterForm').requestSubmit()">
                     Apply Filters
                 </button>
             </div>
@@ -488,7 +516,7 @@
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
                                     <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
-                                         alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                         alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0)
                                 {
@@ -541,6 +569,42 @@
                     </div>
                 }
             </div>
+
+            @if (pageCount > 1)
+            {
+                var pageLinks = new List<int>();
+                int pgFrom = Math.Max(1, curPage - 2);
+                int pgTo = Math.Min(pageCount, curPage + 2);
+                if (pgFrom > 1) { pageLinks.Add(1); if (pgFrom > 2) pageLinks.Add(-1); }
+                for (int i = pgFrom; i <= pgTo; i++) pageLinks.Add(i);
+                if (pgTo < pageCount) { if (pgTo < pageCount - 1) pageLinks.Add(-1); pageLinks.Add(pageCount); }
+
+                <nav class="pager-chips d-flex justify-content-center flex-wrap gap-2 mt-4" aria-label="Product pages">
+                    @if (curPage > 1)
+                    {
+                        <a class="quick-chip" href="@PageUrl(curPage - 1)" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a>
+                    }
+                    @foreach (var pg in pageLinks)
+                    {
+                        if (pg == -1)
+                        {
+                            <span class="quick-chip" style="pointer-events:none;">&hellip;</span>
+                        }
+                        else if (pg == curPage)
+                        {
+                            <a class="quick-chip active" href="@PageUrl(pg)" aria-current="page">@pg</a>
+                        }
+                        else
+                        {
+                            <a class="quick-chip" href="@PageUrl(pg)">@pg</a>
+                        }
+                    }
+                    @if (curPage < pageCount)
+                    {
+                        <a class="quick-chip" href="@PageUrl(curPage + 1)" aria-label="Next page"><i class="bi bi-chevron-right"></i></a>
+                    }
+                </nav>
+            }
         }
     </div>
 </section>
@@ -640,7 +704,7 @@
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
                                     <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
-                                         alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                         alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 <span class="badge-tag">@p.Season</span>
                             </div>
@@ -711,23 +775,3 @@
     </div>
 </section>
 
-<!-- ═══ Newsletter / Contact ═══ -->
-<section class="newsletter py-5" id="contact">
-    <div class="container text-center">
-        <div class="section-kicker">Stay In Touch</div>
-        <h2 class="section-title">Get 10% Off Your First Order</h2>
-        <p class="section-sub">New arrivals, exclusive sales &amp; WhatsApp updates — delivered straight to your inbox.</p>
-        <form class="news-form mx-auto mt-4" onsubmit="event.preventDefault(); alert('Thank you! You have successfully subscribed.');">
-            <input class="form-control" type="email" id="newsletterEmail" name="email" placeholder="Enter your email address" required autocomplete="email" />
-            <button type="submit" class="btn btn-gold">Subscribe</button>
-        </form>
-        @if (!string.IsNullOrWhiteSpace(waDigits))
-        {
-            <p class="news-wa mt-3 mb-0">WhatsApp orders: <a href="https://wa.me/@waDigits" target="_blank" rel="noopener noreferrer">@(settings?.ContactWhatsapp ?? wa)</a></p>
-        }
-        else
-        {
-            <p class="news-wa mt-3 mb-0">Questions? <a href="/Contact">Contact us</a></p>
-        }
-    </div>
-</section>

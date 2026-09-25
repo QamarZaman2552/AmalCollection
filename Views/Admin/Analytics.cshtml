@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Admin – Analytics";
     ViewData["SidebarActive"] = "analytics";
@@ -93,7 +93,7 @@
 @section Scripts {
 <script src="~/lib/chartjs/chart.umd.min.js" asp-append-version="true"></script>
 <script>
-    const chartDefaults = {
+    var chartDefaults = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {

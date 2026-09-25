@@ -128,7 +128,7 @@ a { text-decoration: none; }
 .nav-section,
 .nav-msg-badge { display: none; }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
   .nav-link-chevron { display: inline-block; }
   .nav-section { display: block; }
   .nav-msg-badge { display: inline-flex; }
@@ -192,7 +192,7 @@ a { text-decoration: none; }
 }
 .ac-mobile-search .ac-search { max-width: none; }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
   .ac-nav .container { padding-top: 10px; padding-bottom: 10px; }
   .ac-nav .collapse.navbar-collapse {
     width: 100%;
@@ -283,6 +283,26 @@ a { text-decoration: none; }
   }
   .ac-search { max-width: none; }
   .ac-nav-wrap { flex-shrink: 0; }
+}
+
+/* ─── Desktop ≥1200: single-row navbar — search absorbs slack ── */
+@media (min-width: 1200px) {
+  .ac-nav .container { flex-wrap: nowrap; }
+  .ac-nav-wrap .btn { white-space: nowrap; }
+  .ac-nav .navbar-collapse {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    gap: clamp(10px, 1.6vw, 26px);
+  }
+  .ac-nav .ac-nav-links { flex: 0 0 auto; margin-left: 0 !important; margin-right: auto !important; }
+  .ac-nav .ac-search { flex: 1 1 170px; width: auto; min-width: 140px; max-width: 320px; margin-bottom: 0 !important; }
+}
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  .ac-brand { font-size: 1.45rem; }
+  .ac-nav-links .nav-link { font-size: 0.78rem; letter-spacing: 0.03em; padding-left: 0.1rem; padding-right: 0.1rem; }
+  .ac-nav .navbar-collapse { gap: 10px; }
+  .ac-nav .ac-search { min-width: 130px; }
 }
 
 /* ─── Buttons ──────────────────────────────────────── */
@@ -1624,6 +1644,7 @@ a { text-decoration: none; }
   line-height: 1.7;
   margin-bottom: 18px;
   max-width: 300px;
+  text-align: justify;
 }
 .footer-social a {
   width: 42px; height: 42px;
@@ -1861,7 +1882,7 @@ a { text-decoration: none; }
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 18px 0;
+  padding: 16px 18px;
   box-shadow: none !important;
 }
 #faqAcc .accordion-button {
@@ -1884,9 +1905,52 @@ a { text-decoration: none; }
   font-size: 0.9rem;
   color: var(--text-2);
   line-height: 1.7;
-  padding: 0 0 18px;
+  padding: 2px 18px 18px;
 }
 #faqAcc .accordion-body { padding: 0 20px 18px; background: var(--card); }
+
+/* ── Product details accordion — polish ───────────────── */
+.pd-acc .accordion-button { transition: background var(--transition), color var(--transition); }
+.pd-acc .accordion-button:hover { background: var(--bg-3); }
+.pd-acc .accordion-button:not(.collapsed) {
+  color: var(--gold);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--gold) !important;
+}
+.pd-acc .accordion-body { background: var(--card); }
+.pd-acc .accordion-body .mb-2 + .mb-2 {
+  border-top: 1px dashed var(--border);
+  padding-top: 0.55rem;
+}
+
+/* Spec grid inside "Product Details" accordion */
+.pd-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.pd-spec {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.pd-spec-wide { grid-column: 1 / -1; }
+.pd-spec-label {
+  display: block;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.pd-spec-val {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
 
 /* ═══════════════════════════════════════════════════
    ABOUT PAGE
@@ -1958,6 +2022,8 @@ a { text-decoration: none; }
 .checkout-page { background: var(--bg-2); padding-bottom: 90px; }
 
 .co-header {
+  position: sticky;
+  top: 0;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -2395,6 +2461,9 @@ a { text-decoration: none; }
   /* ── Footer: center columns ── */
   .footer { text-align: center; }
   .footer .row > [class*="col-"] { text-align: center; }
+  /* Shop / Help / Contact columns — keep text justified (left), not centered */
+  .footer .row > .col-6, .footer .row > .col-12 { text-align: left; }
+  .footer .row > .col-12:first-child { text-align: center; }
   .footer-brand { margin-bottom: 10px; }
   .footer-about {
     margin-left: auto;
@@ -2529,7 +2598,18 @@ a { text-decoration: none; }
   .wish-btn { width: 36px; height: 36px; }
   .quick-add { min-height: 36px; }
   .btn-gold,
-  .btn-ghost { min-height: 44px; }
+  .btn-ghost {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .hero-actions .btn {
+    min-height: 40px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
 
   /* ── Nav ── */
   .ac-nav .container {

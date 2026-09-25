@@ -1,4 +1,4 @@
-@model List<ShoppingApp.Models.CartItem>
+﻿@model List<ShoppingApp.Models.CartItem>
 @{
     ViewData["Title"] = "Shopping Cart";
     decimal total = (decimal)(ViewBag.CartTotal ?? Model.Sum(i => (i.Product?.FinalPrice ?? 0) * i.Quantity));
@@ -40,7 +40,7 @@
                     @foreach (var item in Model)
                     {
                         <div class="cart-item">
-                            <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
+                            <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
                             <div class="cart-item-info">
                                 <h3>@item.Product?.Name</h3>
                                 <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Fabric</div>
@@ -58,7 +58,7 @@
                                 <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="cartItemId" value="@item.Id" />
-                                    <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.submit()" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.requestSubmit()" />
                                 </form>
                                 <div class="cart-item-subtotal">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
                                 <form method="post" action="/Cart/Remove">
@@ -93,3 +93,4 @@
         }
     </div>
 </section>
+

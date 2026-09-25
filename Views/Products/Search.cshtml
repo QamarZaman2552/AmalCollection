@@ -24,7 +24,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" onerror="this.src='/images/placeholder.jpg'" />
+                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                                 <span class="badge-tag">@p.Season</span>

@@ -294,5 +294,17 @@ namespace ShoppingApp.Controllers
             var count = _db.CartItems.Where(c => c.UserId == UserId).Sum(c => c.Quantity);
             return Json(count);
         }
+
+        // ─── Quick Add guard: kya product pehle se cart me hai? ──
+        public IActionResult Contains(int productId)
+        {
+            if (UserId == null)
+            {
+                var guest = _guestCart.Get(HttpContext.Session);
+                return Json(new { inCart = guest.Any(g => g.ProductId == productId) });
+            }
+            var inCart = _db.CartItems.Any(c => c.UserId == UserId && c.ProductId == productId);
+            return Json(new { inCart });
+        }
     }
 }

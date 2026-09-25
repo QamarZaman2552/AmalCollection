@@ -1,4 +1,13 @@
-/* ─── Contact Page ───────────────────────────────────── */
+﻿/* ─── Contact Page ───────────────────────────────────── */
+/* Side spacing: prototype.css .section { padding: 72px 0 } se sab edges tak
+   jaata tha (Contact view me .container nahi hai) — header/cards ko inset karo */
+.section-header, .contact-grid {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+@media (min-width: 768px) {
+  .section-header, .contact-grid { padding-left: 2rem; padding-right: 2rem; }
+}
 .contact-grid {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
