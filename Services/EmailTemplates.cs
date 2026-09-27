@@ -94,6 +94,41 @@ namespace ShoppingApp.Services
             return Wrap("Password Reset Confirmation", body, logoUrl, siteUrl);
         }
 
+        public static string EmailChangeOtp(string userName, string otp, string logoUrl, string siteUrl)
+        {
+            var body = $@"<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">Hello {userName},</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">We received a request to change the email address of your <strong>Amal Collection</strong> account. Use the verification code below to confirm:</p>
+<table role=""presentation"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""margin:0 0 18px;"">
+    <tr>
+        <td align=""center"" style=""background:#f8fafc; border:2px dashed #7c5cfc; border-radius:10px; padding:20px;"">
+            <div style=""font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#6b7280; margin-bottom:6px;"">Verification Code</div>
+            <div style=""font-size:32px; font-weight:bold; letter-spacing:8px; color:#171e30; font-family:Consolas, monospace;"">{otp}</div>
+        </td>
+    </tr>
+</table>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 8px;"">This code is valid for <strong>10 minutes</strong>. The change only happens after you enter this code on the website.</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 8px;"">If you did <strong>not</strong> request this, please ignore this email and consider changing your password.</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:20px 0 0;"">Regards,<br><strong>Amal Collection Security Team</strong></p>";
+
+            return Wrap("Email Change Verification", body, logoUrl, siteUrl);
+        }
+
+        public static string EmailChangedNotice(string userName, string newEmail, string logoUrl, string siteUrl)
+        {
+            var body = $@"<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">Hello {userName},</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">This is to confirm that the email address for your <strong>{siteUrl}</strong> account was successfully changed.</p>
+<table role=""presentation"" style=""background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px 18px; margin:0 0 18px; width:100%;"">
+    <tr>
+        <td style=""font-size:13px; color:#166534; line-height:1.6;"">&#10003; New email: <strong>{newEmail}</strong> &mdash; updated on {DateTime.UtcNow.AddHours(5).ToString("dd MMM yyyy 'at' hh:mm tt")} (PKT)</td>
+    </tr>
+</table>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 8px;"">You can now sign in with the new email address. Your password stays the same.</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 8px;"">If you did <strong>not</strong> make this change, please reset your password immediately and contact our support team.</p>
+<p style=""font-size:14px; line-height:1.7; color:#374151; margin:20px 0 0;"">Regards,<br><strong>Amal Collection Security Team</strong></p>";
+
+            return Wrap("Email Address Changed", body, logoUrl, siteUrl);
+        }
+
         public static string Welcome(string userName, string logoUrl, string siteUrl)
         {
             var body = $@"<p style=""font-size:14px; line-height:1.7; color:#374151; margin:0 0 16px;"">Welcome to <strong>{siteUrl}</strong>, {userName}!</p>

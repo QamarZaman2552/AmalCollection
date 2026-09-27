@@ -45,6 +45,9 @@ namespace ShoppingApp.Controllers
                 TempData.Keep("OtpSent");
             }
 
+            // Pending email change (if OTP step is in progress)
+            ViewBag.PendingEmail = HttpContext.Session.GetString(PendingEmailKey);
+
             // Stats
             ViewBag.TotalOrders    = _db.Orders.Count(o => o.UserId == UserId);
             ViewBag.TotalSpent     = _db.Orders.Where(o => o.UserId == UserId).Sum(o => (decimal?)o.TotalAmount) ?? 0;
@@ -54,10 +57,10 @@ namespace ShoppingApp.Controllers
             return View(user);
         }
 
-        // ─── Update Profile ───────────────────────────────────
+        // ─── Update Profile (name + phone only; email change is OTP-verified) ──
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update(string fullName, string email, string? phone)
+        public IActionResult Update(string fullName, string? phone)
         {
             if (UserId == null) return Unauthorized();
 
@@ -69,22 +72,8 @@ namespace ShoppingApp.Controllers
                 TempData["Error"] = "Name cannot be empty.";
                 return RedirectToAction("Index");
             }
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                TempData["Error"] = "Email cannot be empty.";
-                return RedirectToAction("Index");
-            }
-
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            var emailTaken = _db.Users.Any(u => u.Id != user.Id && u.Email.ToLower() == normalizedEmail);
-            if (emailTaken)
-            {
-                TempData["Error"] = "This email is already in use by another account.";
-                return RedirectToAction("Index");
-            }
 
             user.FullName = fullName.Trim();
-            user.Email    = normalizedEmail;
             user.Phone    = phone?.Trim();
             _db.SaveChanges();
 
@@ -187,6 +176,147 @@ namespace ShoppingApp.Controllers
 
             TempData["OtpSent"] = null;
             TempData["Success"] = "Password changed successfully!";
+            return RedirectToAction("Index");
+        }
+
+        // ─── Change Email (OTP verification to CURRENT email) ──
+        private const string PendingEmailKey = "EmailChangePending";
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email) || email.Length > 254) return false;
+            try
+            {
+                var e = email.Trim();
+                var addr = new System.Net.Mail.MailAddress(e);
+                if (addr.Address != e) return false;
+                var at  = e.IndexOf('@');
+                var dot = e.LastIndexOf('.');
+                if (at <= 0 || dot <= at + 1 || dot >= e.Length - 1) return false;
+                if (e.Contains("..") || e.Contains(" ") || e.Contains(",")) return false;
+                return true;
+            }
+            catch { return false; }
+        }
+
+        // Step 1: send a 6-digit code to the CURRENT email before allowing a change
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendEmailChangeOtp(string newEmail)
+        {
+            if (UserId == null) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+            if (user == null) return NotFound();
+
+            var pending = (newEmail ?? "").Trim().ToLowerInvariant();
+
+            if (!IsValidEmail(pending))
+            {
+                TempData["Error"] = "Please enter a valid new email address.";
+                return RedirectToAction("Index");
+            }
+            if (pending == user.Email.ToLowerInvariant())
+            {
+                TempData["Error"] = "That is already your current email address.";
+                return RedirectToAction("Index");
+            }
+            if (_db.Users.Any(u => u.Id != user.Id && u.Email.ToLower() == pending))
+            {
+                TempData["Error"] = "This email is already in use by another account.";
+                return RedirectToAction("Index");
+            }
+
+            var (otp, error) = _auth.CreateResetOtp(user.Email); // code goes to CURRENT email
+            if (otp == null)
+            {
+                TempData["Error"] = error ?? "Could not create verification code.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                await _emailSender.SendAsync(
+                    user.Email,
+                    "Amal Collection Email Change Verification Code",
+                    EmailTemplates.EmailChangeOtp(user.FullName, otp, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                TempData["Error"] = "Could not send the verification email. Please try again.";
+                return RedirectToAction("Index");
+            }
+
+            HttpContext.Session.SetString(PendingEmailKey, pending);
+            TempData["Success"] = $"A 6-digit verification code has been sent to your current email {user.Email}. It expires in 10 minutes.";
+            return RedirectToAction("Index");
+        }
+
+        // Step 2: verify the OTP (against CURRENT email) and apply the new email
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeEmail(string otp)
+        {
+            if (UserId == null) return RedirectToAction("Login", "Auth");
+
+            var user = _db.Users.FirstOrDefault(u => u.Id == UserId);
+            if (user == null) return NotFound();
+
+            var pending = HttpContext.Session.GetString(PendingEmailKey);
+            if (string.IsNullOrEmpty(pending))
+            {
+                TempData["Error"] = "No email change is in progress. Please start again.";
+                return RedirectToAction("Index");
+            }
+
+            var (verified, verifyError) = _auth.VerifyResetOtp(user.Email, otp?.Trim() ?? "");
+            if (verified == null)
+            {
+                TempData["Error"] = verifyError ?? "Invalid verification code.";
+                return RedirectToAction("Index");
+            }
+
+            // Re-validate at apply time (availability may have changed)
+            if (!IsValidEmail(pending) ||
+                pending == user.Email.ToLowerInvariant() ||
+                _db.Users.Any(u => u.Id != user.Id && u.Email.ToLower() == pending))
+            {
+                HttpContext.Session.Remove(PendingEmailKey);
+                TempData["Error"] = "The new email is no longer available. Please start again.";
+                return RedirectToAction("Index");
+            }
+
+            var oldEmail = user.Email;
+            user.Email = pending;
+            _db.SaveChanges();
+            HttpContext.Session.Remove(PendingEmailKey);
+
+            // Security notice to the OLD address
+            try
+            {
+                await _emailSender.SendAsync(
+                    oldEmail,
+                    "Amal Collection Email Address Changed",
+                    EmailTemplates.EmailChangedNotice(user.FullName, pending, Logo, SiteUrl)
+                );
+            }
+            catch
+            {
+                // Never block the change if the notice email fails
+            }
+
+            TempData["Success"] = $"Email address changed to {pending}. Use it next time you log in.";
+            return RedirectToAction("Index");
+        }
+
+        // Cancel a pending email change
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelEmailChange()
+        {
+            HttpContext.Session.Remove(PendingEmailKey);
+            TempData["Success"] = "Email change cancelled.";
             return RedirectToAction("Index");
         }
 
