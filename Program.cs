@@ -233,7 +233,13 @@ app.Use(async (context, next) =>
     context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
     context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
-    context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
+    // COOP only on trustworthy origins (https/localhost) - browsers ignore it on http://IP
+    // anyway and log a console warning ("untrustworthy origin"), so skip it there.
+    var reqHost = context.Request.Host.Host;
+    if (context.Request.IsHttps || reqHost == "localhost" || reqHost == "127.0.0.1")
+    {
+        context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
+    }
     context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
 
     // CSP: Different for Development vs Production

@@ -31,10 +31,13 @@ namespace ShoppingApp.Services
                 <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""max-width:560px; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #e5e7eb; box-shadow:0 2px 8px rgba(0,0,0,0.05);"">
                     <!-- Header / Branding -->
                     <tr>
-                        <td align=""center"" style=""background:#171e30; padding:32px 24px 28px;"">
-                            <img src=""{logoUrl}"" alt=""{siteName}"" width=""72"" height=""72"" style=""height:72px; width:72px; border-radius:14px; object-fit:cover; display:inline-block;"" onerror=""this.style.display='none'"">
-                            <div style=""color:#ffffff; font-size:24px; font-weight:bold; letter-spacing:0.5px; margin-top:10px;"">{siteName}</div>
-                            <div style=""color:#9ca3af; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:4px;"">Shop Smart. Live Better.</div>
+                        <td align=""center"" style=""background:#b8964f; padding:6px 0;""></td>
+                    </tr>
+                    <tr>
+                        <td align=""center"" style=""background:#ffffff; padding:30px 24px 24px; border-bottom:2px solid #b8964f;"">
+                            <img src=""{siteUrl}/images/amal-logo.png"" alt=""{siteName}"" width=""76"" height=""76"" style=""width:76px; height:76px; display:block; margin:0 auto; border-radius:50%;"" />
+                            <div style=""color:#171e30; font-size:23px; font-weight:bold; letter-spacing:1px; margin-top:14px;"">{siteName}</div>
+                            <div style=""color:#b8964f; font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-top:7px;"">Shop Smart. Live Better.</div>
                         </td>
                     </tr>
                     <!-- Body -->
@@ -47,7 +50,7 @@ namespace ShoppingApp.Services
                     <!-- Footer -->
                     <tr>
                         <td align=""center"" style=""padding:20px 24px; background:#f9fafb; border-top:1px solid #e5e7eb;"">
-                            <a href=""{siteUrl}"" style=""color:#7c5cfc; font-size:13px; font-weight:bold; text-decoration:none;"">{siteName}</a>
+                            <a href=""{siteUrl}"" style=""color:#b8964f; font-size:13px; font-weight:bold; text-decoration:none;"">{siteName}</a>
                             <div style=""font-size:11px; color:#9ca3af; margin-top:6px;"">This is an automated message from the {siteName} website.</div>
                             <div style=""font-size:11px; color:#9ca3af; margin-top:2px;"">&copy; {DateTime.UtcNow.Year} {siteName}. All rights reserved.</div>
                         </td>
