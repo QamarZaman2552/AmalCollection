@@ -30,7 +30,21 @@
         </div>
         @if (ViewBag.IsGuest as bool? == true)
         {
-            <p class="confirm-guest-note">You checked out as a guest — keep order number <strong>#@ViewBag.OrderId</strong> for reference. Support: <a href="/Contact">@ViewBag.SupportPhone</a></p>
+            <div class="confirm-guest-note">
+                <strong>Track your order — no login needed:</strong>
+                <ul style="margin:6px 0 6px;padding-left:1.1rem;">
+                    @if (!string.IsNullOrEmpty(ViewBag.GuestEmail as string))
+                    {
+                        <li>Open the email we sent to <strong>@ViewBag.GuestEmail</strong> (check <strong>Spam</strong>) and tap <strong>"Track Your Order"</strong></li>
+                    }
+                    else
+                    {
+                        <li>Open your confirmation email (check <strong>Spam</strong>) and tap <strong>"Track Your Order"</strong></li>
+                    }
+                    <li>Or use the <strong>Track Order</strong> button in the menu / footer — enter order <strong>#@ViewBag.OrderId</strong> + your email/phone</li>
+                </ul>
+                Support: <a href="/Contact">@ViewBag.SupportPhone</a>
+            </div>
         }
     </div>
 </section>

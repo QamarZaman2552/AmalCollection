@@ -46,7 +46,7 @@
 <body class="@ViewData["BodyClass"]">
     <!-- ─── Announcement Bar ─────────────────────────────── -->
     <div class="announce text-center">
-        Cash on Delivery available &nbsp;·&nbsp; No login needed to order &nbsp;·&nbsp; 7-Day Exchange
+        Cash on Delivery available &nbsp;·&nbsp; No login needed to order &nbsp;·&nbsp; 7-Day Exchange &nbsp;·&nbsp; Track your order anytime — check your email after ordering
     </div>
 
     <!-- ─── Navbar ───────────────────────────────────────── -->
@@ -147,6 +147,11 @@
                     }
                 </ul>
 
+                <div class="d-xl-none px-3 pb-2">
+                    <a href="/Orders/Track" class="btn btn-dark btn-sm w-100 rounded-pill"><i class="bi bi-truck me-1"></i> Track Order</a>
+                    <p style="font-size:0.75rem;color:var(--text-3);margin:8px 0 0;line-height:1.5;">Placed an order? Use this button to track it anytime — no login needed. Keep checking your email for status updates after ordering.</p>
+                </div>
+
                 <form class="d-none d-xl-flex ac-search mb-2 mb-xl-0" action="/Products/Search" method="get">
                     <input class="form-control" type="search" id="navSearch" name="q" placeholder="Search lawn suits, khaddar..." aria-label="Search" value="@ViewBag.Query" autocomplete="off" />
                     <button class="btn ac-search-btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
@@ -212,6 +217,7 @@
                         <li><a href="/About">Shipping &amp; Delivery</a></li>
                         <li><a href="/About">Returns &amp; Exchange</a></li>
                         <li><a href="/About#faqs">FAQs</a></li>
+                        <li><a href="/Orders/Track">Track Order</a></li>
                         <li><a href="/Contact">Contact Us</a></li>
                     </ul>
                 </div>

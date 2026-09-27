@@ -60,7 +60,7 @@
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
-    touch-action: none;
+    touch-action: pan-y;
     will-change: transform;
 }
 .promo-card:active { cursor: grabbing; }

@@ -10,7 +10,22 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly IImageService _imageService;
-        public AdminController(AppDbContext db, IImageService imageService) { _db = db; _imageService = imageService; }
+        private readonly IEmailSender _emailSender;
+        private readonly EmailSettings _emailSettings;
+        private readonly ILogger<AdminController> _logger;
+
+        public AdminController(AppDbContext db, IImageService imageService, IEmailSender emailSender, EmailSettings emailSettings, ILogger<AdminController> logger)
+        {
+            _db = db;
+            _imageService = imageService;
+            _emailSender = emailSender;
+            _emailSettings = emailSettings;
+            _logger = logger;
+        }
+
+        private string SiteUrl => $"{Request.Scheme}://{Request.Host}";
+
+        private string Logo => EmailTemplates.GetLogoUrl(SiteUrl);
 
         private bool IsAdmin => HttpContext.Session.GetString("UserRole") == "admin";
 
@@ -352,7 +367,7 @@ namespace ShoppingApp.Controllers
         // ─── Update Order Status ──────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateStatus(int id, string status)
+        public async Task<IActionResult> UpdateStatus(int id, string status)
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
 
@@ -363,12 +378,39 @@ namespace ShoppingApp.Controllers
                 return RedirectToAction("Orders");
             }
 
-            var order = _db.Orders.FirstOrDefault(o => o.Id == id);
+            var order = _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefault(o => o.Id == id);
+
             if (order != null)
             {
                 order.Status = status;
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 TempData["Success"] = $"Order #{id} status updated to {status}.";
+
+                if (status != "pending")
+                {
+                    var toEmail = !string.IsNullOrWhiteSpace(order.GuestEmail) ? order.GuestEmail : order.User?.Email;
+                    var customerName = !string.IsNullOrWhiteSpace(order.GuestName) ? order.GuestName : order.User?.FullName ?? "Customer";
+
+                    if (!string.IsNullOrWhiteSpace(toEmail))
+                    {
+                        var statusWord = char.ToUpperInvariant(status[0]) + status[1..];
+                        try
+                        {
+                            await _emailSender.SendAsync(
+                                toEmail.Trim(),
+                                $"Amal Collection Order #{order.Id} — {statusWord}",
+                                EmailTemplates.OrderStatusUpdate(customerName, order, Logo, SiteUrl));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Order status email ({Status}) failed for order #{OrderId}", status, order.Id);
+                        }
+                    }
+                }
             }
             return RedirectToAction("Orders");
         }

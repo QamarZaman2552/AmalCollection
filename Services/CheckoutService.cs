@@ -150,6 +150,13 @@ namespace ShoppingApp.Services
             {
                 if (string.IsNullOrWhiteSpace(guestName) || string.IsNullOrWhiteSpace(guestPhone))
                     return CheckoutResult.Fail("Name and phone are required for guest checkout.");
+
+                guestEmail = guestEmail?.Trim();
+                if (string.IsNullOrWhiteSpace(guestEmail))
+                    return CheckoutResult.Fail("Email is required for guest checkout.");
+                if (!IsValidEmail(guestEmail))
+                    return CheckoutResult.Fail("Please enter a valid email address.");
+
                 if (!items.Any() || items.All(i => i.Product == null))
                     return CheckoutResult.Fail("Your cart is empty. Add items before checkout.");
 
@@ -175,7 +182,7 @@ namespace ShoppingApp.Services
                     UserId = null,
                     GuestName = guestName.Trim(),
                     GuestPhone = guestPhone.Trim(),
-                    GuestEmail = string.IsNullOrWhiteSpace(guestEmail) ? null : guestEmail.Trim(),
+                    GuestEmail = guestEmail,
                     Subtotal = cartTotal,
                     DeliveryCharge = deliveryCharge,
                     TotalAmount = grandTotal,
@@ -205,6 +212,32 @@ namespace ShoppingApp.Services
             catch (Exception ex)
             {
                 return CheckoutResult.Fail($"Checkout failed: {ex.Message}");
+            }
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            if (email.Length > 254) return false;
+
+            var at = email.IndexOf('@');
+            if (at < 1 || at != email.LastIndexOf('@')) return false;
+
+            var domain = email[(at + 1)..];
+            if (domain.Length < 3 || !domain.Contains('.') ||
+                domain.StartsWith('.') || domain.EndsWith('.') || domain.Contains(".."))
+                return false;
+
+            var tld = domain[(domain.LastIndexOf('.') + 1)..];
+            if (tld.Length < 2) return false;
+
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

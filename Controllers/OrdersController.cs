@@ -13,19 +13,22 @@ namespace ShoppingApp.Controllers
         private readonly GuestCartService _guestCart;
         private readonly IEmailSender _emailSender;
         private readonly EmailSettings _emailSettings;
+        private readonly ILogger<OrdersController> _logger;
 
         public OrdersController(
             AppDbContext db,
             CheckoutService checkout,
             GuestCartService guestCart,
             IEmailSender emailSender,
-            EmailSettings emailSettings)
+            EmailSettings emailSettings,
+            ILogger<OrdersController> logger)
         {
             _db = db;
             _checkout = checkout;
             _guestCart = guestCart;
             _emailSender = emailSender;
             _emailSettings = emailSettings;
+            _logger = logger;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
@@ -164,9 +167,15 @@ namespace ShoppingApp.Controllers
 
                     _guestCart.Clear(HttpContext.Session);
                     TempData["OrderId"] = result.OrderId!.Value.ToString();
+                    TempData["GuestEmail"] = email!.Trim();
                     TempData["Success"] = $"Order #{result.OrderId} placed successfully!";
 
-                    if (!string.IsNullOrWhiteSpace(email))
+                    var placedOrder = _db.Orders
+                        .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .FirstOrDefault(o => o.Id == result.OrderId);
+
+                    if (placedOrder != null && !string.IsNullOrWhiteSpace(email))
                     {
                         try
                         {
@@ -175,18 +184,19 @@ namespace ShoppingApp.Controllers
                                 $"Amal Collection Order Confirmation #{result.OrderId}",
                                 EmailTemplates.OrderConfirmation(
                                     $"{firstName} {lastName}".Trim(),
-                                    result.OrderId!.Value.ToString(),
-                                    result.OrderTotal?.ToString("N0") ?? "",
-                                    paymentMethod,
+                                    placedOrder,
                                     Logo,
                                     SiteUrl)
                             );
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Order confirmation email failed for order #{OrderId}", result.OrderId);
+                        }
                     }
 
                     var guestAdminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
-                    if (!string.IsNullOrWhiteSpace(guestAdminEmail))
+                    if (placedOrder != null && !string.IsNullOrWhiteSpace(guestAdminEmail))
                     {
                         try
                         {
@@ -195,14 +205,15 @@ namespace ShoppingApp.Controllers
                                 $"Amal Collection New Order #{result.OrderId}",
                                 EmailTemplates.NewOrder(
                                     $"{firstName} {lastName}".Trim(),
-                                    result.OrderId!.Value.ToString(),
-                                    result.OrderTotal?.ToString("N0") ?? "",
-                                    paymentMethod,
+                                    placedOrder,
                                     Logo,
                                     SiteUrl)
                             );
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "New order admin email failed for order #{OrderId}", result.OrderId);
+                        }
                     }
 
                     return RedirectToAction("Confirmation", new { id = result.OrderId });
@@ -226,40 +237,50 @@ namespace ShoppingApp.Controllers
 
                 if (user != null)
                 {
-                    try
-                    {
-                        await _emailSender.SendAsync(
-                            user.Email,
-                            $"Amal Collection Order Confirmation #{userResult.OrderId}",
-                            EmailTemplates.OrderConfirmation(
-                                user.FullName,
-                                userResult.OrderId!.Value.ToString(),
-                                userResult.OrderTotal?.ToString("N0") ?? "",
-                                paymentMethod,
-                                Logo,
-                                SiteUrl)
-                        );
-                    }
-                    catch { }
+                    var placedOrder = _db.Orders
+                        .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .FirstOrDefault(o => o.Id == userResult.OrderId);
 
-                    var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
-                    if (!string.IsNullOrWhiteSpace(adminEmail))
+                    if (placedOrder != null)
                     {
                         try
                         {
                             await _emailSender.SendAsync(
-                                adminEmail,
-                                $"Amal Collection New Order #{userResult.OrderId}",
-                                EmailTemplates.NewOrder(
+                                user.Email,
+                                $"Amal Collection Order Confirmation #{userResult.OrderId}",
+                                EmailTemplates.OrderConfirmation(
                                     user.FullName,
-                                    userResult.OrderId!.Value.ToString(),
-                                    userResult.OrderTotal?.ToString("N0") ?? "",
-                                    paymentMethod,
+                                    placedOrder,
                                     Logo,
                                     SiteUrl)
                             );
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Order confirmation email failed for order #{OrderId}", userResult.OrderId);
+                        }
+
+                        var adminEmail = string.IsNullOrWhiteSpace(_emailSettings.AdminEmail) ? _emailSettings.FromEmail : _emailSettings.AdminEmail;
+                        if (!string.IsNullOrWhiteSpace(adminEmail))
+                        {
+                            try
+                            {
+                                await _emailSender.SendAsync(
+                                    adminEmail,
+                                    $"Amal Collection New Order #{userResult.OrderId}",
+                                    EmailTemplates.NewOrder(
+                                        user.FullName,
+                                        placedOrder,
+                                        Logo,
+                                        SiteUrl)
+                                );
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "New order admin email failed for order #{OrderId}", userResult.OrderId);
+                            }
+                        }
                     }
                 }
 
@@ -285,10 +306,73 @@ namespace ShoppingApp.Controllers
 
             ViewBag.OrderId = orderId;
             ViewBag.IsGuest = UserId == null;
+            ViewBag.GuestEmail = TempData["GuestEmail"] as string ?? "";
 
             var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
             ViewBag.SupportPhone = settings?.ContactPhone ?? "0321-6068091";
             return View();
+        }
+
+        // ─── Order Tracking (guest-friendly, no login) ───────────
+        [HttpGet]
+        public IActionResult Track(int? id)
+        {
+            ViewBag.PrefillId = id;
+            return View((Order?)null);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Track(int id, string contact)
+        {
+            ViewBag.PrefillId = id > 0 ? (int?)id : null;
+
+            if (id <= 0 || string.IsNullOrWhiteSpace(contact))
+            {
+                ViewBag.Error = "Enter your order number and the email or phone you used at checkout.";
+                return View((Order?)null);
+            }
+
+            var contactTrim = contact.Trim();
+            var order = _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .FirstOrDefault(o => o.Id == id);
+
+            var matched = false;
+            if (order != null)
+            {
+                if (contactTrim.Contains('@'))
+                {
+                    matched = new[] { order.GuestEmail, order.User?.Email }
+                        .Where(e => !string.IsNullOrWhiteSpace(e))
+                        .Any(e => string.Equals(e!.Trim(), contactTrim, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    var contactPhone = NormalizePhone(contactTrim);
+                    matched = new[] { order.GuestPhone, order.User?.Phone }
+                        .Where(p => !string.IsNullOrWhiteSpace(p))
+                        .Any(p => NormalizePhone(p!) == contactPhone);
+                }
+            }
+
+            if (!matched)
+            {
+                ViewBag.Error = "No order found with those details. Please check the order number and the email or phone used at checkout.";
+                return View((Order?)null);
+            }
+
+            return View(order);
+        }
+
+        private static string NormalizePhone(string phone)
+        {
+            var digits = new string(phone.Where(char.IsDigit).ToArray());
+            if (digits.Length > 10 && digits.StartsWith("92"))
+                digits = "0" + digits[2..];
+            return digits;
         }
 
         // ─── Order History ────────────────────────────────────────

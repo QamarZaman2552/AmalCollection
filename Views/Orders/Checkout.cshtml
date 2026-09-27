@@ -1,4 +1,4 @@
-@model List<ShoppingApp.Models.CartItem>
+﻿@model List<ShoppingApp.Models.CartItem>
 @{
     ViewData["Title"] = "Checkout — Guest Order";
     ViewData["BodyClass"] = "checkout-body";
@@ -134,8 +134,8 @@
                             <input type="tel" class="form-control" id="phone" name="phone" value="@phone" placeholder="03XX-XXXXXXX" required autocomplete="tel" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="email">Email <span class="text-secondary fw-normal">(optional)</span></label>
-                            <input type="email" class="form-control" id="email" name="email" value="@email" @(isGuest ? "" : "readonly") placeholder="you@example.com" autocomplete="email" />
+<label class="form-label" for="email">Email *</label>
+<input type="email" class="form-control" id="email" name="email" value="@email" @(isGuest ? "" : "readonly") placeholder="you@example.com" autocomplete="email" required maxlength="254" />
                         </div>
                     </section>
 
