@@ -2546,20 +2546,20 @@ a { text-decoration: none; }
     left: 1rem;
     right: 1rem;
     max-width: none;
-    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(5.5rem + var(--pdp-bar-h, 0px) + env(safe-area-inset-bottom, 0px));
     text-align: center;
   }
 
   /* ── Floating actions: side-by-side + safe area ── */
   .wa-float {
-    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(1.15rem + var(--pdp-bar-h, 0px) + env(safe-area-inset-bottom, 0px));
     right: 4.65rem;
     width: 48px;
     height: 48px;
     z-index: 1051;
   }
   .chatbot-bubble {
-    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(1.15rem + var(--pdp-bar-h, 0px) + env(safe-area-inset-bottom, 0px));
     right: 1.15rem;
     width: 48px;
     height: 48px;
@@ -2569,7 +2569,7 @@ a { text-decoration: none; }
     right: 0.75rem;
     width: auto;
     max-width: none;
-    bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(5.75rem + var(--pdp-bar-h, 0px) + env(safe-area-inset-bottom, 0px));
     height: min(72vh, 520px);
     max-height: none;
     border-radius: 14px;

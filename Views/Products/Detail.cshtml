@@ -16,6 +16,7 @@
 
     var sizeList = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     var colorList = (Model.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+    var recentlyViewed = ViewBag.RecentlyViewed as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
 }
 
 <div class="container">
@@ -183,6 +184,20 @@
                         <input type="hidden" name="productId" value="@Model.Id" />
                         <input type="hidden" name="returnUrl" value="/Products/Detail/@Model.Id" />
                     </form>
+
+                    <!-- Sticky mobile add-to-cart bar -->
+                    <div class="pdp-sticky-bar" id="pdpStickyBar" aria-hidden="true">
+                        <div class="pdp-sticky-info">
+                            <span class="n">@Model.Name</span>
+                            <span class="p">PKR @Model.FinalPrice.ToString("N0")</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-dark rounded-pill pdp-sticky-wish" id="pdpStickyWish" aria-label="Add to wishlist">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary rounded-pill pdp-sticky-add" id="pdpStickyAdd">
+                            <i class="bi bi-bag-plus me-1"></i> Add to Cart
+                        </button>
+                    </div>
                 }
                 else
                 {
@@ -486,6 +501,40 @@
     </section>
 }
 
+<!-- ═══ Recently Viewed ═══ -->
+@if (recentlyViewed.Any())
+{
+    <section class="section">
+        <div class="container">
+            <div class="section-kicker">Pick Up Where You Left Off</div>
+            <h2 class="section-title mb-4">Recently Viewed</h2>
+            <div class="row g-3 g-md-4">
+                @foreach (var p in recentlyViewed)
+                {
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="product-card h-100">
+                            <div class="product-media">
+                                <a href="/Products/Detail/@p.Id" class="product-media-link">
+                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
+                                </a>
+                                @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
+                                <span class="badge-tag">@p.Season</span>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-cat">@p.Season · @p.Category</div>
+                                <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                <div class="product-pricing">
+                                    <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
 @functions {
     private static string GetColorHex(string color)
     {
@@ -592,5 +641,51 @@ document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
         document.getElementById('spHint').style.color = 'var(--red)';
     }
 });
+
+// ─── Sticky mobile add-to-cart bar ───────────────────────
+(function () {
+    var bar = document.getElementById('pdpStickyBar');
+    var form = document.querySelector('.add-cart-form');
+    if (!bar || !form || !('IntersectionObserver' in window)) return;
+
+    var shown = false;
+    function show(on) {
+        if (on === shown) return;
+        shown = on;
+        bar.classList.toggle('show', on);
+        bar.setAttribute('aria-hidden', on ? 'false' : 'true');
+        document.body.classList.toggle('pdp-sticky-on', on);
+    }
+    var io = new IntersectionObserver(function (entries) {
+        var e = entries[0];
+        // Show only after the form has been scrolled past (above the viewport)
+        show(!e.isIntersecting && e.boundingClientRect.top < 0);
+    }, { threshold: 0 });
+    io.observe(form);
+
+    function missingOption() {
+        var sizes = document.querySelectorAll('#sizeOptions .size-opt');
+        var colors = document.querySelectorAll('#colorOptions .color-opt');
+        if (sizes.length && !document.querySelector('#sizeOptions .size-opt.active')) return 'sizeOptions';
+        if (colors.length && !document.querySelector('#colorOptions .color-opt.active')) return 'colorOptions';
+        return null;
+    }
+
+    document.getElementById('pdpStickyAdd').addEventListener('click', function () {
+        var missing = missingOption();
+        if (missing) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            var box = document.getElementById(missing);
+            if (box) { box.classList.remove('pd-flash'); void box.offsetWidth; box.classList.add('pd-flash'); }
+            return;
+        }
+        form.requestSubmit();
+    });
+
+    document.getElementById('pdpStickyWish').addEventListener('click', function () {
+        var wf = document.getElementById('wishForm@(Model.Id)');
+        if (wf) wf.requestSubmit();
+    });
+})();
 </script>
 }

@@ -35,7 +35,7 @@ namespace ShoppingApp.Services
                     </tr>
                     <tr>
                         <td align=""center"" style=""background:#ffffff; padding:30px 24px 24px; border-bottom:2px solid #b8964f;"">
-                            <img src=""{siteUrl}/images/amal-logo.png"" alt=""{siteName}"" width=""76"" height=""76"" style=""width:76px; height:76px; display:block; margin:0 auto; border-radius:50%;"" />
+                            <img src=""cid:amal-logo"" alt=""{siteName}"" width=""76"" height=""76"" style=""width:76px; height:76px; display:block; margin:0 auto; border-radius:50%;"" />
                             <div style=""color:#171e30; font-size:23px; font-weight:bold; letter-spacing:1px; margin-top:14px;"">{siteName}</div>
                             <div style=""color:#b8964f; font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-top:7px;"">Shop Smart. Live Better.</div>
                         </td>

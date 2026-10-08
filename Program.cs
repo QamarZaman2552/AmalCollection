@@ -93,13 +93,15 @@ builder.Services.AddHealthChecks()
 // Email Settings
 var emailSettings = builder.Configuration.GetSection("Email").Get<EmailSettings>() ?? new EmailSettings();
 builder.Services.AddSingleton(emailSettings);
-if (!string.IsNullOrWhiteSpace(emailSettings.ApiKey))
+var emailTransport = emailSettings.Transport.Trim().ToLowerInvariant();
+if (emailTransport != "smtp" && !string.IsNullOrWhiteSpace(emailSettings.ApiKey))
 {
     // HTTPS email API (Brevo etc.) - works on hosts that block SMTP (Railway free/trial)
     builder.Services.AddHttpClient<IEmailSender, HttpEmailSender>();
 }
-else if (emailSettings.Enabled && !string.IsNullOrWhiteSpace(emailSettings.Host))
+else if (emailTransport != "api" && emailSettings.Enabled && !string.IsNullOrWhiteSpace(emailSettings.Host))
 {
+    // SMTP supports inline (cid:) logo attachments, which Brevo's API does not.
     builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 }
 else

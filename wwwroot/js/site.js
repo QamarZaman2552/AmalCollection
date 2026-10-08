@@ -556,3 +556,110 @@ function initFilterDrawer() {
   });
 }
 pageInit(initFilterDrawer);
+
+// ─── Mini Cart Drawer ────────────────────────────────────────
+(function () {
+  const link = document.getElementById('cartLink');
+  const drawer = document.getElementById('mcDrawer');
+  const backdrop = document.getElementById('mcBackdrop');
+  if (!link || !drawer || !backdrop) return;
+
+  const body = document.getElementById('mcBody');
+  const foot = document.getElementById('mcFoot');
+  const closeBtn = document.getElementById('mcClose');
+  const countEl = document.getElementById('mcCount');
+
+  const money = n => 'PKR ' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+
+  function openDrawer() {
+    drawer.classList.add('open');
+    backdrop.classList.add('show');
+    drawer.setAttribute('aria-hidden', 'false');
+    loadCart();
+  }
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    backdrop.classList.remove('show');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  async function loadCart() {
+    body.innerHTML = '<div class="mc-loading"><div class="mc-spin"></div></div>';
+    foot.style.display = 'none';
+    try {
+      const res = await fetch('/Cart/Mini');
+      const data = await res.json();
+      render(data);
+    } catch {
+      body.innerHTML = '<div class="mc-blocked"><i class="bi bi-exclamation-circle"></i><p>Could not load your cart. Please try again.</p></div>';
+    }
+  }
+
+  function render(d) {
+    if (d.blocked) {
+      countEl.textContent = '';
+      body.innerHTML = '<div class="mc-blocked"><i class="bi bi-shield-lock"></i><p>Admin accounts cannot shop.</p></div>';
+      return;
+    }
+    countEl.textContent = d.count > 0 ? '(' + d.count + ')' : '';
+    if (d.isEmpty || !d.items || d.items.length === 0) {
+      body.innerHTML = '<div class="mc-empty"><i class="bi bi-bag-x"></i><p>Your cart is empty.</p><a href="/" class="btn btn-dark btn-sm rounded-pill">Start Shopping</a></div>';
+      return;
+    }
+
+    let html = '';
+    d.items.forEach(it => {
+      const meta = [];
+      if (it.size) meta.push('Size: ' + esc(it.size));
+      if (it.color) meta.push('Color: ' + esc(it.color));
+      html += '<div class="mc-item">' +
+        '<a href="' + it.url + '"><img src="' + esc(it.image) + '" alt="' + esc(it.name) + '" onerror="this.src=\'/images/placeholder.jpg\'" /></a>' +
+        '<div class="mc-item-info">' +
+          '<p class="n"><a href="' + it.url + '">' + esc(it.name) + '</a></p>' +
+          (meta.length ? '<p class="m">' + meta.join(' &middot; ') + '</p>' : '') +
+          '<div class="mc-item-bottom">' +
+            '<span class="mc-qty">Qty: ' + it.qty + '</span>' +
+            '<span class="mc-line">' + money(it.lineTotal) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    body.innerHTML = html;
+
+    // Free delivery progress
+    const freeRow = document.getElementById('mcFreeRow');
+    let freeHtml = '';
+    if (Number(d.freeThreshold) > 0) {
+      if (Number(d.delivery) === 0) {
+        freeHtml = '<div class="mc-free"><i class="bi bi-truck"></i> You have free delivery!</div>';
+      } else {
+        const left = Number(d.freeThreshold) - Number(d.subtotal);
+        const pct = Math.min(100, Math.round((Number(d.subtotal) / Number(d.freeThreshold)) * 100));
+        freeHtml = '<div class="mc-free"><i class="bi bi-truck"></i> ' + money(left) + ' away from free delivery</div>' +
+                   '<div class="mc-free-bar"><span style="width:' + pct + '%"></span></div>';
+      }
+    }
+    freeRow.innerHTML = freeHtml;
+    freeRow.style.display = freeHtml ? 'block' : 'none';
+
+    document.getElementById('mcSubtotal').textContent = money(d.subtotal);
+    const delRow = document.getElementById('mcDelRow');
+    if (Number(d.delivery) > 0) {
+      delRow.style.display = 'flex';
+      document.getElementById('mcDelivery').textContent = money(d.delivery);
+    } else {
+      delRow.style.display = 'none';
+    }
+    document.getElementById('mcGrand').textContent = money(d.grand);
+    foot.style.display = 'block';
+  }
+
+  link.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openDrawer(); });
+  closeBtn.addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+  const cont = document.getElementById('mcContinue');
+  if (cont) cont.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+  drawer.addEventListener('click', e => { if (e.target.closest('a')) closeDrawer(); });
+})();

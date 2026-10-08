@@ -139,6 +139,22 @@ namespace ShoppingApp.Controllers
             if (userId.HasValue)
                 await _rec.RecordViewAsync(userId.Value, id);
 
+            // Recently viewed (session-based — works for guests too)
+            var rvRaw = HttpContext.Session.GetString("RecentlyViewed") ?? "";
+            var rvIds = rvRaw.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s, out var n) ? n : 0)
+                .Where(n => n > 0).Distinct().ToList();
+            rvIds.Remove(id);
+            rvIds.Insert(0, id);
+            rvIds = rvIds.Take(8).ToList();
+            HttpContext.Session.SetString("RecentlyViewed", string.Join(',', rvIds));
+            var rvProducts = await _db.Products.AsNoTracking()
+                .Where(p => rvIds.Contains(p.Id) && p.Id != id).ToListAsync();
+            ViewBag.RecentlyViewed = rvIds
+                .Select(fid => rvProducts.FirstOrDefault(p => p.Id == fid))
+                .Where(p => p != null)
+                .ToList();
+
             var cat = product.Category;
             ViewBag.Related = await _db.Products
                 .AsNoTracking()

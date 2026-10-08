@@ -60,7 +60,7 @@
                         <i class="bi bi-heart"></i>
                         <span class="ac-badge" id="wishlistBadge" style="display:none;">0</span>
                     </a>
-                    <a href="/Cart" class="btn ac-icon-btn position-relative" aria-label="Cart">
+                    <a href="/Cart" class="btn ac-icon-btn position-relative" aria-label="Cart" id="cartLink" data-noajax>
                         <i class="bi bi-bag"></i>
                         <span class="ac-badge" id="cartBadge">0</span>
                     </a>
@@ -294,6 +294,24 @@
             <button id="chatSend" aria-label="Send message"><i class="bi bi-send-fill"></i></button>
         </div>
     </div>
+
+    <!-- ─── Mini Cart Drawer ─────────────────────────────── -->
+    <div class="mc-backdrop" id="mcBackdrop"></div>
+    <aside class="mc-drawer" id="mcDrawer" aria-hidden="true" aria-label="Shopping cart">
+        <div class="mc-head">
+            <span class="mc-title"><i class="bi bi-bag"></i> Shopping Cart <span class="mc-count" id="mcCount"></span></span>
+            <button class="mc-close" id="mcClose" aria-label="Close cart"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="mc-body" id="mcBody"></div>
+        <div class="mc-foot" id="mcFoot" style="display:none;">
+            <div class="mc-row"><span>Subtotal</span><strong id="mcSubtotal">PKR 0</strong></div>
+            <div class="mc-row mc-row-del" id="mcDelRow" style="display:none;"><span>Delivery</span><span id="mcDelivery">PKR 0</span></div>
+            <div class="mc-free" id="mcFreeRow" style="display:none;"></div>
+            <div class="mc-row mc-total"><span>Total</span><strong id="mcGrand">PKR 0</strong></div>
+            <a href="/Cart" class="btn btn-primary w-100 rounded-pill mb-2" id="mcViewCart"><i class="bi bi-bag-check me-1"></i> View Cart</a>
+            <button type="button" class="btn btn-outline-dark w-100 rounded-pill" id="mcContinue">Continue Shopping</button>
+        </div>
+    </aside>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

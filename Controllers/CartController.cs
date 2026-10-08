@@ -295,6 +295,54 @@ namespace ShoppingApp.Controllers
             return Json(count);
         }
 
+        // ─── Mini-cart payload (drawer in navbar) ────────────────
+        [HttpGet]
+        public IActionResult Mini()
+        {
+            if (IsAdmin)
+                return Json(new { blocked = true, isEmpty = true, count = 0, items = Array.Empty<object>() });
+
+            List<CartItem> items;
+            if (UserId == null)
+            {
+                items = HydrateGuest(_db, _guestCart.Get(HttpContext.Session));
+            }
+            else
+            {
+                items = _db.CartItems
+                    .Include(c => c.Product)
+                    .Where(c => c.UserId == UserId)
+                    .ToList();
+            }
+
+            var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+            var subtotal = CheckoutService.ComputeCartTotal(items);
+            var delivery = CheckoutService.ComputeDeliveryCharge(items, settings);
+
+            return Json(new
+            {
+                isEmpty = items.Count == 0,
+                count = items.Sum(i => i.Quantity),
+                subtotal,
+                delivery,
+                grand = subtotal + delivery,
+                freeThreshold = settings?.FreeDeliveryThreshold ?? 0,
+                items = items.Select(i => new
+                {
+                    id = i.Id,
+                    productId = i.ProductId,
+                    name = i.Product?.Name ?? "",
+                    image = i.Product?.ImagePath ?? "/images/placeholder.jpg",
+                    qty = i.Quantity,
+                    size = i.Size ?? "",
+                    color = i.Color ?? "",
+                    price = i.Product?.FinalPrice ?? 0,
+                    lineTotal = (i.Product?.FinalPrice ?? 0) * i.Quantity,
+                    url = $"/Products/Detail/{i.ProductId}"
+                }).ToList()
+            });
+        }
+
         // ─── Quick Add guard: kya product pehle se cart me hai? ──
         public IActionResult Contains(int productId)
         {
