@@ -1840,6 +1840,10 @@ a { text-decoration: none; }
 .pd-wish:hover { border-color: var(--red); color: var(--red); background: #fff; }
 .pd-wish.is-active { color: var(--red); border-color: var(--red); }
 
+.pd-share i { font-size: 1.1rem; }
+.pd-share:hover { border-color: var(--gold); color: var(--gold); background: #fff; }
+.pd-share.is-copied { border-color: var(--green); color: var(--green); background: #fff; }
+
 .delivery-box {
   background: var(--bg-2);
   border: 1px solid var(--border);

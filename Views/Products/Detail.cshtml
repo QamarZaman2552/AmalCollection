@@ -176,6 +176,11 @@
                             <button type="button" class="btn btn-outline-dark rounded-pill px-3 pd-wish" onclick="document.getElementById('wishForm@(Model.Id)').requestSubmit();" aria-label="Wishlist">
                                 <i class="bi bi-heart"></i>
                             </button>
+                            <button type="button" class="btn btn-outline-dark rounded-pill px-3 pd-share" id="pdShare"
+                                    data-name="@Model.Name" data-price="@Model.FinalPrice.ToString("N0")"
+                                    aria-label="Share this product" title="Share this product">
+                                <i class="bi bi-share"></i>
+                            </button>
                         </div>
                         <p class="pd-nologin"><i class="bi bi-check-circle me-1"></i> No login required – guest checkout available</p>
                     </form>
@@ -596,6 +601,45 @@ document.querySelectorAll('#colorOptions .color-opt').forEach(function (btn) {
     var plus = document.getElementById('qtyPlus');
     if (minus) minus.addEventListener('click', function () { qty.value = Math.max(1, parseInt(qty.value) - 1); });
     if (plus) plus.addEventListener('click', function () { qty.value = Math.min(parseInt(qty.max) || 99, parseInt(qty.value) + 1); });
+})();
+
+// Share product (native share → copy link → WhatsApp)
+(function () {
+    var btn = document.getElementById('pdShare');
+    if (!btn) return;
+    var icon = btn.querySelector('i');
+
+    function reset() {
+        btn.classList.remove('is-copied');
+        btn.setAttribute('aria-label', 'Share this product');
+        if (icon) icon.className = 'bi bi-share';
+    }
+
+    btn.addEventListener('click', async function () {
+        var name = btn.dataset.name || document.title;
+        var price = btn.dataset.price;
+        var url = window.location.href;
+        var text = 'Check out ' + name + (price ? ' – PKR ' + price : '') + ' at Amal Collection';
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: name, text: text, url: url });
+                return;
+            } catch (err) {
+                if (err && err.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(url);
+            btn.classList.add('is-copied');
+            btn.setAttribute('aria-label', 'Link copied');
+            if (icon) icon.className = 'bi bi-check2';
+            setTimeout(reset, 1800);
+        } catch (e) {
+            window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+        }
+    });
 })();
 
 // Require size/color when options exist
