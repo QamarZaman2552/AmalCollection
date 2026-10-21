@@ -15,13 +15,34 @@
     var isAdmin = Context.Session.GetString("UserRole") == "admin";
     var userId = Context.Session.GetInt32("UserId");
     var unreadMsgs = isAdmin ? _db.ContactMessages.Count(m => !m.IsRead) : 0;
+
+    var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var ogTitle = ViewData["OgTitle"] as string ?? "Amal Collection – Ladies Suits";
+    var ogDescription = ViewData["OgDescription"] as string
+        ?? "Amal Collection – elegant summer & winter ladies suits with cash on delivery across Pakistan.";
+    var ogImage = ViewData["OgImage"] as string ?? "/images/placeholder.jpg";
+    if (!ogImage.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        ogImage = siteUrl + (ogImage.StartsWith('/') ? ogImage : "/" + ogImage);
+    var ogUrl = ViewData["OgUrl"] as string ?? (siteUrl + Context.Request.Path + Context.Request.QueryString);
+    var ogType = ViewData["OgType"] as string ?? "website";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="description" content="Amal Collection – elegant summer & winter ladies suits with cash on delivery across Pakistan." />
+    <meta name="description" content="@ogDescription" />
+    <link rel="canonical" href="@ogUrl" />
+    <meta property="og:site_name" content="Amal Collection" />
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:title" content="@ogTitle" />
+    <meta property="og:description" content="@ogDescription" />
+    <meta property="og:url" content="@ogUrl" />
+    <meta property="og:image" content="@ogImage" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@ogTitle" />
+    <meta name="twitter:description" content="@ogDescription" />
+    <meta name="twitter:image" content="@ogImage" />
     <title>@ViewData["Title"] – Amal Collection</title>
     <script>
         (function () {

@@ -17,6 +17,14 @@
     var sizeList = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     var colorList = (Model.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     var recentlyViewed = ViewBag.RecentlyViewed as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
+
+    var suitDesc = string.Join(" · ", new[] { Model.Season, Model.Fabric, Model.StitchedType }
+        .Where(x => !string.IsNullOrWhiteSpace(x)));
+    ViewData["OgTitle"] = $"{Model.Name} | Amal Collection";
+    ViewData["OgDescription"] = $"{Model.Name}{(suitDesc.Length > 0 ? " – " + suitDesc : "")}. PKR {Model.FinalPrice:N0} with cash on delivery across Pakistan.";
+    ViewData["OgImage"] = gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg";
+    ViewData["OgUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}{Url.Action("Detail", "Products", new { id = Model.Id })}";
+    ViewData["OgType"] = "product";
 }
 
 <div class="container">
