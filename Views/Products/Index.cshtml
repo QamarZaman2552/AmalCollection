@@ -500,9 +500,10 @@
         @if (!Model.Any())
         {
             <div class="empty-state">
-                <div class="empty-icon">No products found</div>
+                <div class="empty-icon" aria-hidden="true"><i class="bi bi-bag-x"></i></div>
+                <h3 class="empty-title">No products found</h3>
                 <p>Try different filters or clear them to see all suits.</p>
-                <a href="/" class="btn-primary">See All Products</a>
+                <a href="/" class="btn btn-gold">@(hasFilters ? "Clear Filters" : "See All Products")</a>
             </div>
         }
         else

@@ -909,8 +909,42 @@ body.light-mode .pw-match.no { color: #b91c1c; }
 
 /* ─── Empty State ─────────────────────────────────────── */
 .empty-state { text-align: center; padding: 4rem 2rem; }
-.empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.empty-icon { font-size: 3.5rem; margin-bottom: 1rem; color: var(--gold); }
+.empty-title { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
 .empty-state p { color: var(--text-2); margin-bottom: 1.5rem; }
+
+/* ─── Error / 404 Page ────────────────────────────────── */
+.error-page { padding-top: 4rem; padding-bottom: 5rem; }
+.error-card {
+  position: relative; max-width: 620px; margin: 0 auto; text-align: center;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 3rem 2rem; box-shadow: var(--shadow); overflow: hidden;
+}
+.error-code {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-family: var(--font-head); font-size: clamp(8rem, 30vw, 15rem); font-weight: 800;
+  line-height: 1; color: var(--gold); opacity: 0.07; user-select: none; pointer-events: none;
+}
+.error-icon {
+  position: relative; width: 72px; height: 72px; margin: 0 auto 1.25rem;
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--gold-soft); color: var(--gold); font-size: 2rem;
+}
+.error-title { position: relative; font-family: var(--font-head); font-size: clamp(1.6rem, 5vw, 2.1rem); margin-bottom: 0.75rem; }
+.error-text { position: relative; color: var(--text-2); max-width: 46ch; margin: 0 auto 2rem; }
+.error-actions { position: relative; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.error-links {
+  position: relative; display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap;
+  margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border);
+}
+.error-links a { color: var(--text-2); font-size: 0.9rem; font-weight: 500; }
+.error-links a:hover { color: var(--gold); }
+.error-ref { position: relative; margin: 1.5rem 0 0; font-size: 0.75rem; color: var(--text-3); }
+.error-ref code { color: var(--text-3); }
+@media (max-width: 575.98px) {
+  .error-card { padding: 2.25rem 1.25rem; }
+  .error-actions .btn { flex: 1 1 100%; }
+}
 
 /* ─── Toast ───────────────────────────────────────────── */
 .toast {

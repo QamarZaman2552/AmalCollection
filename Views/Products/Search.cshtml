@@ -27,7 +27,14 @@
                                     <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
-                                <span class="badge-tag">@p.Season</span>
+                                @if (p.Stock == 0)
+                                {
+                                    <span class="badge-tag" style="background:var(--red);color:#fff;">Out of Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-tag">@p.Season</span>
+                                }
                             </div>
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
@@ -37,6 +44,18 @@
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                     @if (p.Discount > 0) { <span class="price-original">PKR @p.Price.ToString("N0")</span> }
                                 </div>
+                            </div>
+                            <div class="product-actions">
+                                <form method="post" action="/Wishlist/Toggle" class="wish-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                                    <button type="submit" class="wish-btn" aria-label="Wishlist"><i class="bi bi-heart"></i></button>
+                                </form>
+                                @if (p.Stock > 0)
+                                {
+                                    <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                }
                             </div>
                         </div>
                     </div>

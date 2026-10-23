@@ -1,7 +1,22 @@
 ﻿@using ShoppingApp.Data
 @inject AppDbContext _db
 @{
-    var siteSettings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+    var isAdmin = Context.Session.GetString("UserRole") == "admin";
+    var userId = Context.Session.GetInt32("UserId");
+
+    // Never let a DB outage break the layout (e.g. when rendering the 500 page).
+    SiteSettings? siteSettings = null;
+    var unreadMsgs = 0;
+    try
+    {
+        siteSettings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+        if (isAdmin) unreadMsgs = _db.ContactMessages.Count(m => !m.IsRead);
+    }
+    catch
+    {
+        // Fall back to defaults below.
+    }
+
     var waNum = siteSettings?.ContactWhatsapp;
     var waDigits = string.IsNullOrWhiteSpace(waNum) ? "" : new string(waNum.Where(char.IsDigit).ToArray());
     if (waDigits.Length > 0 && waDigits.StartsWith("0") && !waDigits.StartsWith("92"))
@@ -12,9 +27,6 @@
     var contactEmail = siteSettings?.ContactEmail;
     if (string.IsNullOrWhiteSpace(contactEmail))
         contactEmail = "hello@amalcollection.pk";
-    var isAdmin = Context.Session.GetString("UserRole") == "admin";
-    var userId = Context.Session.GetInt32("UserId");
-    var unreadMsgs = isAdmin ? _db.ContactMessages.Count(m => !m.IsRead) : 0;
 
     var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
     var ogTitle = ViewData["OgTitle"] as string ?? "Amal Collection – Ladies Suits";
