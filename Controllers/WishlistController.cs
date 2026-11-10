@@ -162,6 +162,13 @@ namespace ShoppingApp.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Variant products need an explicit size/color choice before they can go in the cart.
+            if (!string.IsNullOrWhiteSpace(product.Sizes) || !string.IsNullOrWhiteSpace(product.Colors))
+            {
+                TempData["Error"] = "Please choose the available size/color options for this product first.";
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
+
             if (UserId == null)
             {
                 var guestWish = _guestWish.Get(HttpContext.Session);

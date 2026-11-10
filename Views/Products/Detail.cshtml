@@ -154,7 +154,7 @@
 
                         @if (colorList.Count > 0)
                         {
-                            <div class="opt-label mb-3"><span>Select Color · <span id="colorLabelName">@colorList[0]</span></span></div>
+                            <div class="opt-label mb-3"><span>Select Color · <span id="colorLabelName">@(colorList.Count == 1 ? colorList[0] : "Choose one")</span></span></div>
                             <div class="color-options mb-4" id="colorOptions">
                                 @foreach (var c in colorList)
                                 {

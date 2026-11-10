@@ -92,6 +92,7 @@ namespace ShoppingApp.Controllers
             ViewBag.GrandTotal = cartTotal + delivery;
             ViewBag.IsGuest = UserId == null;
             ViewBag.CodEnabled = settings?.CodEnabled ?? true;
+            ViewBag.FreeDeliveryThreshold = settings?.FreeDeliveryThreshold ?? 0m;
 
             if (UserId != null)
             {

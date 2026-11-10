@@ -27,6 +27,7 @@
                 @foreach (var item in Model)
                 {
                     var p = item.Product!;
+                    var hasOptions = !string.IsNullOrWhiteSpace(p.Sizes) || !string.IsNullOrWhiteSpace(p.Colors);
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
                             <div class="product-media">
@@ -57,11 +58,18 @@
                                 <div class="d-flex gap-2 mt-2">
                                     @if (p.Stock > 0)
                                     {
-                                        <form method="post" action="/Wishlist/MoveToCart" style="flex:1">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="productId" value="@p.Id" />
-                                            <button type="submit" class="btn btn-gold btn-sm w-100">Move to Cart</button>
-                                        </form>
+                                        if (hasOptions)
+                                        {
+                                            <a href="/Products/Detail/@p.Id" class="btn btn-gold btn-sm w-100" style="flex:1">Select Options</a>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" action="/Wishlist/MoveToCart" style="flex:1">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="productId" value="@p.Id" />
+                                                <button type="submit" class="btn btn-gold btn-sm w-100">Move to Cart</button>
+                                            </form>
+                                        }
                                     }
                                     else
                                     {

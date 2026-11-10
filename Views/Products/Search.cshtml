@@ -20,6 +20,7 @@
             <div class="row g-3 g-md-4">
                 @foreach (var p in Model)
                 {
+                    var hasOptions = !string.IsNullOrWhiteSpace(p.Sizes) || !string.IsNullOrWhiteSpace(p.Colors);
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
                             <div class="product-media">
@@ -54,7 +55,14 @@
                                 </form>
                                 @if (p.Stock > 0)
                                 {
-                                    <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                    if (hasOptions)
+                                    {
+                                        <a href="/Products/Detail/@p.Id" class="quick-add" aria-label="Choose size and color"><i class="bi bi-sliders2"></i> Select Options</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                    }
                                 }
                             </div>
                         </div>

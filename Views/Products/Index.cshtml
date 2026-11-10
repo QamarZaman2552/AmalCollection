@@ -112,7 +112,7 @@
                         }
                         @{
                             string shopHref = slide.ProductId.HasValue
-                                ? $"/Cart/Add?productId={slide.ProductId.Value}&quantity=1"
+                                ? $"/Products/Detail/{slide.ProductId.Value}"
                                 : (string.IsNullOrEmpty(slide.LinkUrl) ? "/" : slide.LinkUrl);
                         }
                         <div class="hero-actions">
@@ -512,6 +512,7 @@
                 @foreach (var p in Model)
                 {
                     var pColors = (p.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(4).ToList();
+                    var hasOptions = !string.IsNullOrWhiteSpace(p.Sizes) || !string.IsNullOrWhiteSpace(p.Colors);
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
                             <div class="product-media">
@@ -563,7 +564,14 @@
                                 </form>
                                 @if (p.Stock > 0)
                                 {
-                                    <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                    if (hasOptions)
+                                    {
+                                        <a href="/Products/Detail/@p.Id" class="quick-add" aria-label="Choose size and color"><i class="bi bi-sliders2"></i> Select Options</a>
+                                    }
+                                    else
+                                    {
+                                        <a href="/Cart/Add?productId=@p.Id&quantity=1" class="quick-add" aria-label="Quick Add"><i class="bi bi-bag-plus"></i> Quick Add</a>
+                                    }
                                 }
                             </div>
                         </div>

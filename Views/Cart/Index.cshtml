@@ -4,6 +4,11 @@
     decimal total = (decimal)(ViewBag.CartTotal ?? Model.Sum(i => (i.Product?.FinalPrice ?? 0) * i.Quantity));
     decimal delivery = (decimal)(ViewBag.DeliveryCharge ?? 0m);
     decimal grand = (decimal)(ViewBag.GrandTotal ?? (total + delivery));
+    decimal freeThreshold = (decimal)(ViewBag.FreeDeliveryThreshold ?? 0m);
+    bool showFreeProgress = freeThreshold > 0 && (delivery > 0 || total >= freeThreshold);
+    bool freeQualified = freeThreshold > 0 && total >= freeThreshold;
+    decimal freeRemaining = freeThreshold > total ? freeThreshold - total : 0m;
+    int freePct = freeThreshold > 0 ? (int)Math.Min(100m, Math.Round(total / freeThreshold * 100m)) : 0;
 }
 
 <section class="section">
@@ -73,6 +78,24 @@
 
                 <div class="cart-summary">
                     <h2>Order Summary</h2>
+                    @if (showFreeProgress)
+                    {
+                        <div class="cart-free @(freeQualified ? "is-qualified" : "")">
+                            <div class="cart-free-text">
+                                @if (freeQualified)
+                                {
+                                    <span><i class="bi bi-truck"></i> Free delivery unlocked!</span>
+                                }
+                                else
+                                {
+                                    <span><i class="bi bi-truck"></i> Add <strong>PKR @freeRemaining.ToString("N0")</strong> more for free delivery</span>
+                                }
+                            </div>
+                            <div class="cart-free-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@freePct" aria-label="Progress towards free delivery">
+                                <span style="width:@freePct%"></span>
+                            </div>
+                        </div>
+                    }
                     <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
                     <div class="summary-row">
                         <span>Delivery</span>

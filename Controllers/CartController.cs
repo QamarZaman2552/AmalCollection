@@ -20,6 +20,16 @@ namespace ShoppingApp.Controllers
         private int? UserId => HttpContext.Session.GetInt32("UserId");
         private bool IsAdmin => HttpContext.Session.GetString("UserRole") == "admin";
 
+        // Products with variants must never be added with an empty size/color.
+        private static string? MissingOptionMessage(Product product, string? size, string? color)
+        {
+            if (!string.IsNullOrWhiteSpace(product.Sizes) && string.IsNullOrWhiteSpace(size))
+                return "Please select a size before adding this product to your cart.";
+            if (!string.IsNullOrWhiteSpace(product.Colors) && string.IsNullOrWhiteSpace(color))
+                return "Please select a color before adding this product to your cart.";
+            return null;
+        }
+
         private static List<CartItem> HydrateGuest(AppDbContext db, List<GuestCartItem> guest)
         {
             var productIds = guest.Select(g => g.ProductId).Distinct().ToList();
@@ -70,6 +80,7 @@ namespace ShoppingApp.Controllers
             ViewBag.CartTotal = cartTotal;
             ViewBag.DeliveryCharge = CheckoutService.ComputeDeliveryCharge(items, settings);
             ViewBag.GrandTotal = cartTotal + CheckoutService.ComputeDeliveryCharge(items, settings);
+            ViewBag.FreeDeliveryThreshold = settings?.FreeDeliveryThreshold ?? 0m;
 
             return View(items);
         }
@@ -90,6 +101,13 @@ namespace ShoppingApp.Controllers
             if (quantity <= 0) quantity = 1;
             size ??= "";
             color ??= "";
+
+            var optionError = MissingOptionMessage(product, size, color);
+            if (optionError != null)
+            {
+                TempData["Error"] = optionError;
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
 
             if (UserId == null)
             {
@@ -160,6 +178,13 @@ namespace ShoppingApp.Controllers
 
             size ??= "";
             color ??= "";
+
+            var optionError = MissingOptionMessage(product, size, color);
+            if (optionError != null)
+            {
+                TempData["Error"] = optionError;
+                return RedirectToAction("Detail", "Products", new { id = productId });
+            }
 
             if (UserId == null)
             {
