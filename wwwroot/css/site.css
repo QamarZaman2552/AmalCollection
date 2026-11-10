@@ -2235,6 +2235,20 @@ body.light-mode .mobile-search-icon { color: #6f6a62; }
 @keyframes pdFlash { 0%, 100% { box-shadow: 0 0 0 0 rgba(184, 150, 79, 0); } 50% { box-shadow: 0 0 0 8px rgba(184, 150, 79, 0.35); } }
 .size-options.pd-flash, .color-options.pd-flash { animation: pdFlash 0.7s ease 2; border-radius: 14px; }
 
+/* Inline size/color validation message */
+.opt-error {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius-sm);
+}
+.opt-error[hidden] { display: none; }
+
 /* ─── Mini Cart Drawer ─────────────────────────────────── */
 .mc-backdrop {
   position: fixed; inset: 0; z-index: 1200;

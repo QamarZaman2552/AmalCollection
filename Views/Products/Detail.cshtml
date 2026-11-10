@@ -168,6 +168,8 @@
                             <input type="hidden" name="color" value="" />
                         }
 
+                        <p class="opt-error" id="optError" role="alert" aria-live="polite" hidden></p>
+
                         <div class="d-flex align-items-center gap-3 mb-4">
                             <span class="opt-label mb-0">Quantity</span>
                             <div class="input-group qty-ctrl" style="width:auto;">
@@ -586,6 +588,7 @@ document.querySelectorAll('#sizeOptions .size-opt').forEach(function (btn) {
         btn.classList.add('active');
         var input = document.getElementById('sizeInput');
         if (input) input.value = btn.dataset.value || btn.textContent.trim();
+        clearOptError();
     });
 });
 
@@ -598,6 +601,7 @@ document.querySelectorAll('#colorOptions .color-opt').forEach(function (btn) {
         if (input) input.value = btn.dataset.name || '';
         var label = document.getElementById('colorLabelName');
         if (label) label.textContent = btn.dataset.name || '';
+        clearOptError();
     });
 });
 
@@ -650,18 +654,38 @@ document.querySelectorAll('#colorOptions .color-opt').forEach(function (btn) {
     });
 })();
 
-// Require size/color when options exist
+// Require size/color when options exist — inline message, no blocking alert
+function showOptError(message, boxId) {
+    var err = document.getElementById('optError');
+    if (err) { err.textContent = message; err.hidden = false; }
+    var box = document.getElementById(boxId);
+    if (box) {
+        box.classList.remove('pd-flash');
+        void box.offsetWidth;
+        box.classList.add('pd-flash');
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function clearOptError() {
+    var err = document.getElementById('optError');
+    if (err) { err.hidden = true; err.textContent = ''; }
+}
+
 document.querySelector('.add-cart-form')?.addEventListener('submit', function (e) {
     var sizeOpts = document.querySelectorAll('#sizeOptions .size-opt');
     var colorOpts = document.querySelectorAll('#colorOptions .color-opt');
-    if (sizeOpts.length > 0) {
-        var size = document.querySelector('#sizeOptions .size-opt.active');
-        if (!size) { e.preventDefault(); alert('Please select a size.'); return; }
+    if (sizeOpts.length > 0 && !document.querySelector('#sizeOptions .size-opt.active')) {
+        e.preventDefault();
+        showOptError('Please select a size before adding to cart.', 'sizeOptions');
+        return;
     }
-    if (colorOpts.length > 0) {
-        var color = document.querySelector('#colorOptions .color-opt.active');
-        if (!color) { e.preventDefault(); alert('Please select a color.'); return; }
+    if (colorOpts.length > 0 && !document.querySelector('#colorOptions .color-opt.active')) {
+        e.preventDefault();
+        showOptError('Please select a color before adding to cart.', 'colorOptions');
+        return;
     }
+    clearOptError();
 });
 
 var ratingLabels = ['','Terrible','Poor','Average','Good','Excellent'];
@@ -718,8 +742,10 @@ document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
     function missingOption() {
         var sizes = document.querySelectorAll('#sizeOptions .size-opt');
         var colors = document.querySelectorAll('#colorOptions .color-opt');
-        if (sizes.length && !document.querySelector('#sizeOptions .size-opt.active')) return 'sizeOptions';
-        if (colors.length && !document.querySelector('#colorOptions .color-opt.active')) return 'colorOptions';
+        if (sizes.length && !document.querySelector('#sizeOptions .size-opt.active'))
+            return { box: 'sizeOptions', message: 'Please select a size before adding to cart.' };
+        if (colors.length && !document.querySelector('#colorOptions .color-opt.active'))
+            return { box: 'colorOptions', message: 'Please select a color before adding to cart.' };
         return null;
     }
 
@@ -727,10 +753,10 @@ document.getElementById('reviewForm')?.addEventListener('submit', function (e) {
         var missing = missingOption();
         if (missing) {
             form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            var box = document.getElementById(missing);
-            if (box) { box.classList.remove('pd-flash'); void box.offsetWidth; box.classList.add('pd-flash'); }
+            showOptError(missing.message, missing.box);
             return;
         }
+        clearOptError();
         form.requestSubmit();
     });
 
