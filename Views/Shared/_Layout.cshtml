@@ -37,6 +37,23 @@
         ogImage = siteUrl + (ogImage.StartsWith('/') ? ogImage : "/" + ogImage);
     var ogUrl = ViewData["OgUrl"] as string ?? (siteUrl + Context.Request.Path + Context.Request.QueryString);
     var ogType = ViewData["OgType"] as string ?? "website";
+
+    // ─── Active nav state ────────────────────────────────────
+    var navPath = (Context.Request.Path.Value ?? "/").TrimEnd('/');
+    if (navPath.Length == 0) navPath = "/";
+    var navSeason = Context.Request.Query["season"].ToString();
+    var isHomePage = navPath.Equals("/", StringComparison.OrdinalIgnoreCase);
+    bool NavStarts(string path) => navPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+
+    var navHomeActive   = isHomePage && string.IsNullOrEmpty(navSeason);
+    var navSummerActive = isHomePage && navSeason.Equals("Summer", StringComparison.OrdinalIgnoreCase);
+    var navWinterActive = isHomePage && navSeason.Equals("Winter", StringComparison.OrdinalIgnoreCase);
+    var navAboutActive  = NavStarts("/About");
+    var navContactActive = NavStarts("/Contact");
+    var navProfileActive = NavStarts("/Profile");
+    var navOrdersActive  = NavStarts("/Orders/History");
+    var navMessagesActive = NavStarts("/Admin/Messages");
+    var navAdminActive    = NavStarts("/Admin") && !navMessagesActive;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -120,31 +137,31 @@
             <div class="collapse navbar-collapse order-2 order-xl-1" id="mainNav">
                 <ul class="navbar-nav mx-auto mb-2 mb-xl-0 ac-nav-links">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <a class="nav-link @(navHomeActive ? "active" : "")" href="/" aria-current="@(navHomeActive ? "page" : null)">
                             <span>Home</span>
                             <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/?season=Summer">
+                        <a class="nav-link @(navSummerActive ? "active" : "")" href="/?season=Summer" aria-current="@(navSummerActive ? "page" : null)">
                             <span>Summer</span>
                             <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/?season=Winter">
+                        <a class="nav-link @(navWinterActive ? "active" : "")" href="/?season=Winter" aria-current="@(navWinterActive ? "page" : null)">
                             <span>Winter</span>
                             <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/About">
+                        <a class="nav-link @(navAboutActive ? "active" : "")" href="/About" aria-current="@(navAboutActive ? "page" : null)">
                             <span>About Us</span>
                             <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/Contact">
+                        <a class="nav-link @(navContactActive ? "active" : "")" href="/Contact" aria-current="@(navContactActive ? "page" : null)">
                             <span>Contact</span>
                             <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                         </a>
@@ -152,7 +169,7 @@
                     @if (userId != null)
                     {
                         <li class="nav-item d-xl-none">
-                            <a class="nav-link" href="/Profile">
+                            <a class="nav-link @(navProfileActive ? "active" : "")" href="/Profile" aria-current="@(navProfileActive ? "page" : null)">
                                 <span>My Profile</span>
                                 <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                             </a>
@@ -161,7 +178,7 @@
                     @if (userId != null && !isAdmin)
                     {
                         <li class="nav-item">
-                            <a class="nav-link" href="/Orders/History">
+                            <a class="nav-link @(navOrdersActive ? "active" : "")" href="/Orders/History" aria-current="@(navOrdersActive ? "page" : null)">
                                 <span>My Orders</span>
                                 <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                             </a>
@@ -171,13 +188,13 @@
                     {
                         <li class="nav-section d-xl-none">Account</li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Admin/Products">
+                            <a class="nav-link @(navAdminActive ? "active" : "")" href="/Admin/Products" aria-current="@(navAdminActive ? "page" : null)">
                                 <span>Admin</span>
                                 <i class="bi bi-chevron-right nav-link-chevron d-xl-none" aria-hidden="true"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Admin/Messages">
+                            <a class="nav-link @(navMessagesActive ? "active" : "")" href="/Admin/Messages" aria-current="@(navMessagesActive ? "page" : null)">
                                 <span>Messages</span>
                                 @if (unreadMsgs > 0)
                                 {

@@ -255,6 +255,9 @@ a { text-decoration: none; }
     color: var(--gold, #b8964f);
     transform: translateX(3px);
   }
+  .ac-nav-links .nav-link.active .nav-link-chevron {
+    color: var(--gold, #b8964f);
+  }
   .nav-section {
     display: block;
     padding: 1.1rem 14px 0.4rem;
