@@ -72,18 +72,45 @@ const chatInput = document.getElementById('chatInput');
 const chatSend  = document.getElementById('chatSend');
 const chatMsgs  = document.getElementById('chatMessages');
 
+const CHAT_STARTER_CHIPS = ['Sizing help', 'Delivery time', 'Track my order', 'Cash on delivery'];
+
 if (bubble && chatWin) {
+  let starterShown = false;
+
+  function openChat() {
+    chatWin.classList.add('open');
+    bubble.style.display = 'none';
+    chatInput.focus();
+    if (!starterShown) {
+      starterShown = true;
+      showChips(CHAT_STARTER_CHIPS);
+    }
+  }
+
+  function closeChat() {
+    chatWin.classList.remove('open');
+    bubble.style.display = 'flex';
+  }
+
   bubble.addEventListener('click', () => {
-    chatWin.classList.toggle('open');
-    bubble.style.display = chatWin.classList.contains('open') ? 'none' : 'flex';
-    if (chatWin.classList.contains('open')) chatInput.focus();
+    chatWin.classList.contains('open') ? closeChat() : openChat();
+  });
+  bubble.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openChat(); }
   });
 
-  chatClose.addEventListener('click', () => { chatWin.classList.remove('open'); bubble.style.display = 'flex'; });
+  chatClose.addEventListener('click', closeChat);
+
   document.addEventListener('click', (e) => {
     if (chatWin.classList.contains('open') && !chatWin.contains(e.target) && !bubble.contains(e.target)) {
-      chatWin.classList.remove('open');
-      bubble.style.display = 'flex';
+      closeChat();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && chatWin.classList.contains('open')) {
+      closeChat();
+      bubble.focus();
     }
   });
 
@@ -149,6 +176,7 @@ async function sendMessage() {
   chatInput.value = '';
   chatSend.disabled = true;
   addMsg(text, 'user');
+  chatMsgs.querySelectorAll('.chat-chips').forEach(c => c.remove());
   showTyping();
 
   try {
@@ -163,6 +191,7 @@ async function sendMessage() {
     const lc = data.reply.toLowerCase();
     if (lc.includes('product') || lc.includes('item')) showChips(['budget', 'expensive', 'show all']);
     else if (lc.includes('recommend') || lc.includes('suggest')) showChips(['budget', 'show all']);
+    else showChips(CHAT_STARTER_CHIPS);
   } catch {
     hideTyping();
     addMsg('âš ï¸ Connection error. Please try again.', 'bot');
