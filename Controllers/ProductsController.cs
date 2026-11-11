@@ -105,7 +105,65 @@ namespace ShoppingApp.Controllers
             ViewBag.Query = q;
             ViewBag.Categories = await GetFilterValuesAsync(p => p.Category);
             ViewBag.Seasons    = await GetFilterValuesAsync(p => p.Season);
+            ViewBag.PopularTerms = await GetPopularTermsAsync();
             return View(results);
+        }
+
+        // ─── Live search suggestions (navbar autocomplete) ────────────────
+        [HttpGet]
+        public async Task<IActionResult> Suggest(string? q, int limit = 6)
+        {
+            q = (q ?? "").Trim();
+            if (limit < 1) limit = 1;
+            if (limit > 10) limit = 10;
+
+            // Empty box → only popular terms (used as starter chips).
+            if (q.Length < 2)
+                return Json(new { products = Array.Empty<object>(), terms = await GetPopularTermsAsync(8) });
+
+            var rows = await _db.Products
+                .AsNoTracking()
+                .Where(p => p.Stock > 0 && (
+                    p.Name.Contains(q) ||
+                    (p.Fabric != null && p.Fabric.Contains(q)) ||
+                    (p.Category != null && p.Category.Contains(q)) ||
+                    (p.Season != null && p.Season.Contains(q))))
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(limit)
+                .Select(p => new { p.Id, p.Name, p.Price, p.Discount, p.ImagePath })
+                .ToListAsync();
+
+            var products = rows.Select(p => new
+            {
+                id = p.Id,
+                name = p.Name,
+                price = p.Price - (p.Price * p.Discount / 100m),
+                image = string.IsNullOrWhiteSpace(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath
+            }).ToList();
+
+            var terms = await _db.Products
+                .AsNoTracking()
+                .Where(p => p.Stock > 0 && p.Fabric != null && p.Fabric.Contains(q))
+                .GroupBy(p => p.Fabric)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key!)
+                .Take(4)
+                .ToListAsync();
+
+            return Json(new { products, terms });
+        }
+
+        // Most common fabrics — used for popular-search chips.
+        private async Task<List<string>> GetPopularTermsAsync(int take = 8)
+        {
+            return await _db.Products
+                .AsNoTracking()
+                .Where(p => p.Stock > 0 && p.Fabric != null && p.Fabric != "")
+                .GroupBy(p => p.Fabric)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key!)
+                .Take(take)
+                .ToListAsync();
         }
 
         // Distinct, trimmed, case-insensitive, sorted, in-stock only.

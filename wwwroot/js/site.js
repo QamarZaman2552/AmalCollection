@@ -663,3 +663,153 @@ pageInit(initFilterDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
   drawer.addEventListener('click', e => { if (e.target.closest('a')) closeDrawer(); });
 })();
+
+// ═══════════ Live Search Suggestions ═══════════════════════════════
+// Typeahead under the navbar search boxes: matching products + popular terms.
+(function () {
+  const forms = document.querySelectorAll('form.ac-search');
+  if (!forms.length) return;
+
+  const cache = Object.create(null);
+  const MAX_CACHE = 40;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  function money(n) {
+    return 'PKR ' + Math.round(Number(n) || 0).toLocaleString('en-PK');
+  }
+
+  function remember(key, data) {
+    const keys = Object.keys(cache);
+    if (keys.length >= MAX_CACHE) delete cache[keys[0]];
+    cache[key] = data;
+  }
+
+  forms.forEach(form => {
+    const input = form.querySelector('input[type="search"]');
+    if (!input) return;
+
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+
+    const box = document.createElement('div');
+    box.className = 'search-suggest';
+    box.setAttribute('role', 'listbox');
+    box.setAttribute('aria-label', 'Search suggestions');
+    box.hidden = true;
+    form.appendChild(box);
+
+    let timer = null;
+    let activeIndex = -1;
+    let items = [];
+
+    function close() {
+      box.hidden = true;
+      box.innerHTML = '';
+      activeIndex = -1;
+      items = [];
+      input.setAttribute('aria-expanded', 'false');
+    }
+
+    function paint(data, query) {
+      const products = (data && data.products) || [];
+      const terms = (data && data.terms) || [];
+      let html = '';
+
+      if (products.length) {
+        html += '<div class="ss-group">Products</div>';
+        products.forEach(p => {
+          html += '<a class="ss-item" role="option" aria-selected="false" href="/Products/Detail/' + p.id + '">' +
+                    '<img src="' + esc(p.image) + '" alt="" loading="lazy" onerror="this.src=\'/images/placeholder.jpg\'" />' +
+                    '<span class="ss-text"><span class="ss-name">' + esc(p.name) + '</span>' +
+                    '<span class="ss-price">' + money(p.price) + '</span></span>' +
+                  '</a>';
+        });
+      }
+
+      if (terms.length) {
+        html += '<div class="ss-group">' + (products.length ? 'More like this' : 'Popular searches') + '</div>';
+        html += '<div class="ss-chips">';
+        terms.forEach(t => {
+          html += '<a class="ss-chip" href="/Products/Search?q=' + encodeURIComponent(t) + '">' + esc(t) + '</a>';
+        });
+        html += '</div>';
+      }
+
+      if (!html) {
+        html = '<div class="ss-empty">No matches for &ldquo;' + esc(query) + '&rdquo;. Press Enter to search all products.</div>';
+      }
+
+      box.innerHTML = html;
+      box.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      items = Array.prototype.slice.call(box.querySelectorAll('.ss-item'));
+      activeIndex = -1;
+    }
+
+    function load(query) {
+      if (cache[query]) { paint(cache[query], query); return; }
+      fetch('/Products/Suggest?q=' + encodeURIComponent(query), { headers: { 'Accept': 'application/json' } })
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (!data) return;
+          remember(query, data);
+          if (input.value.trim() === query) paint(data, query);
+        })
+        .catch(() => { /* silent — plain search still works */ });
+    }
+
+    function schedule() {
+      const q = input.value.trim();
+      clearTimeout(timer);
+      timer = setTimeout(() => load(q.length >= 2 ? q : ''), 170);
+    }
+
+    function highlight(idx) {
+      items.forEach((el, i) => {
+        el.classList.toggle('is-active', i === idx);
+        el.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+      });
+      if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    input.addEventListener('focus', () => {
+      load(input.value.trim().length >= 2 ? input.value.trim() : '');
+    });
+    input.addEventListener('input', schedule);
+
+    input.addEventListener('keydown', e => {
+      if (box.hidden) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!items.length) return;
+        e.preventDefault();
+        activeIndex = e.key === 'ArrowDown'
+          ? (activeIndex + 1) % items.length
+          : (activeIndex - 1 + items.length) % items.length;
+        highlight(activeIndex);
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && items[activeIndex]) {
+          e.preventDefault();
+          window.location.href = items[activeIndex].getAttribute('href');
+        } else {
+          close();
+        }
+      } else if (e.key === 'Escape') {
+        close();
+      }
+    });
+
+    form.addEventListener('submit', close);
+    document.addEventListener('click', e => {
+      if (!form.contains(e.target)) close();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !box.hidden) close();
+    });
+  });
+})();

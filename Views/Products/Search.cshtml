@@ -1,6 +1,7 @@
 @model List<ShoppingApp.Models.Product>
 @{
     ViewData["Title"] = $"Search: {ViewBag.Query}";
+    var popularTerms = ViewBag.PopularTerms as List<string> ?? new List<string>();
 }
 
 <section class="section">
@@ -12,6 +13,18 @@
             <div class="empty-state">
                 <div class="empty-icon"><i class="bi bi-search"></i></div>
                 <p>No products matched your search. Try different keywords.</p>
+                @if (popularTerms.Any())
+                {
+                    <div class="popular-search">
+                        <span class="popular-search-label">Popular searches</span>
+                        <div class="popular-search-chips">
+                            @foreach (var term in popularTerms)
+                            {
+                                <a class="popular-chip" href="/Products/Search?q=@Uri.EscapeDataString(term)">@term</a>
+                            }
+                        </div>
+                    </div>
+                }
                 <a href="/" class="btn btn-gold">Back to Shop</a>
             </div>
         }
