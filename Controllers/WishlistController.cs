@@ -11,12 +11,14 @@ namespace ShoppingApp.Controllers
         private readonly AppDbContext _db;
         private readonly GuestWishlistService _guestWish;
         private readonly GuestCartService _guestCart;
+        private readonly ReviewSummaryService _reviews;
 
-        public WishlistController(AppDbContext db, GuestWishlistService guestWish, GuestCartService guestCart)
+        public WishlistController(AppDbContext db, GuestWishlistService guestWish, GuestCartService guestCart, ReviewSummaryService reviews)
         {
             _db = db;
             _guestWish = guestWish;
             _guestCart = guestCart;
+            _reviews = reviews;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
@@ -44,7 +46,7 @@ namespace ShoppingApp.Controllers
         }
 
         // ─── View Wishlist ────────────────────────────────────
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (IsAdmin)
             {
@@ -55,7 +57,10 @@ namespace ShoppingApp.Controllers
             if (UserId == null)
             {
                 var guest = _guestWish.Get(HttpContext.Session);
-                return View(HydrateGuest(guest));
+                var guestItems = HydrateGuest(guest);
+                ViewBag.RatingSummaries = await _reviews.GetAsync(
+                    guestItems.Where(i => i.Product != null).Select(i => i.ProductId));
+                return View(guestItems);
             }
 
             var uid = UserId.Value;
@@ -64,6 +69,9 @@ namespace ShoppingApp.Controllers
                 .Where(w => w.UserId == uid)
                 .OrderByDescending(w => w.AddedAt)
                 .ToList();
+
+            ViewBag.RatingSummaries = await _reviews.GetAsync(
+                items.Where(i => i.Product != null).Select(i => i.ProductId));
 
             return View(items);
         }

@@ -17,6 +17,8 @@
     var sizeList = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     var colorList = (Model.Colors ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     var recentlyViewed = ViewBag.RecentlyViewed as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
+    var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
+        ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
 
     var suitDesc = string.Join(" · ", new[] { Model.Season, Model.Fabric, Model.StitchedType }
         .Where(x => !string.IsNullOrWhiteSpace(x)));
@@ -71,7 +73,7 @@
                     <span class="stars">
                         @for (int i = 1; i <= 5; i++)
                         {
-                            if (i <= Math.Round(avgRating))
+                            if (i <= Math.Round(avgRating, MidpointRounding.AwayFromZero))
                             {
                                 <i class="bi bi-star-fill"></i>
                             }
@@ -504,6 +506,7 @@
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                 </div>
@@ -538,6 +541,7 @@
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                 </div>

@@ -12,11 +12,13 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly RecommendationService _rec;
+        private readonly ReviewSummaryService _reviews;
 
-        public ProductsController(AppDbContext db, RecommendationService rec)
+        public ProductsController(AppDbContext db, RecommendationService rec, ReviewSummaryService reviews)
         {
             _db = db;
             _rec = rec;
+            _reviews = reviews;
         }
 
         // ─── Homepage / Product List ──────────────────────────────────────
@@ -69,7 +71,11 @@ namespace ShoppingApp.Controllers
                 .ToListAsync();
 
             var userId = HttpContext.Session.GetInt32("UserId");
-            ViewBag.Recommendations = await _rec.GetRecommendationsAsync(userId, 4);
+            var recommendations = await _rec.GetRecommendationsAsync(userId, 4);
+            ViewBag.Recommendations = recommendations;
+
+            ViewBag.RatingSummaries = await _reviews.GetAsync(
+                products.Select(p => p.Id).Concat(recommendations.Select(p => p.Id)));
 
             ViewBag.HeroSlides = await _db.HeroSlides
                 .AsNoTracking()
@@ -121,6 +127,7 @@ namespace ShoppingApp.Controllers
             ViewBag.Categories = await GetFilterValuesAsync(p => p.Category);
             ViewBag.Seasons    = await GetFilterValuesAsync(p => p.Season);
             ViewBag.PopularTerms = await GetPopularTermsAsync();
+            ViewBag.RatingSummaries = await _reviews.GetAsync(results.Select(p => p.Id));
             return View(results);
         }
 
@@ -223,16 +230,22 @@ namespace ShoppingApp.Controllers
             HttpContext.Session.SetString("RecentlyViewed", string.Join(',', rvIds));
             var rvProducts = await _db.Products.AsNoTracking()
                 .Where(p => rvIds.Contains(p.Id) && p.Id != id).ToListAsync();
-            ViewBag.RecentlyViewed = rvIds
+            var recentlyViewed = rvIds
                 .Select(fid => rvProducts.FirstOrDefault(p => p.Id == fid))
                 .Where(p => p != null)
                 .ToList();
+            ViewBag.RecentlyViewed = recentlyViewed;
 
             var cat = product.Category;
-            ViewBag.Related = await _db.Products
+            var related = await _db.Products
                 .AsNoTracking()
                 .Where(p => p.Category == cat && p.Id != id && p.Stock > 0)
                 .Take(4).ToListAsync();
+            ViewBag.Related = related;
+
+            // Ratings for the "Related" and "Recently viewed" cards
+            ViewBag.RatingSummaries = await _reviews.GetAsync(
+                related.Select(p => p.Id).Concat(recentlyViewed.Select(p => p!.Id)));
 
             // Load reviews with user names
             var reviews = await _db.Reviews

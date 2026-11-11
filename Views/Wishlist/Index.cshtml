@@ -1,6 +1,8 @@
 @model List<ShoppingApp.Models.WishlistItem>
 @{
     ViewData["Title"] = "My Wishlist";
+    var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
+        ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
 }
 
 <section class="section">
@@ -47,6 +49,7 @@
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
                                 <div class="product-meta">@p.Brand</div>
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>

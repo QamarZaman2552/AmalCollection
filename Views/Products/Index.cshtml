@@ -8,6 +8,8 @@
     var seasons     = ViewBag.Seasons as List<string> ?? new List<string>();
     var fabrics     = ViewBag.Fabrics as List<string> ?? new List<string>();
     var sizes       = ViewBag.Sizes as List<string> ?? new List<string>();
+    var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
+        ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
     var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
     var promoCards = ViewBag.PromotionalCards as List<ShoppingApp.Models.PromotionalCard> ?? new List<ShoppingApp.Models.PromotionalCard>();
     string selectedCat    = ViewBag.SelectedCategory ?? "";
@@ -614,6 +616,7 @@
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
                                 <div class="product-meta">@p.Fabric @(p.StitchedType != null ? $"· {p.StitchedType}" : "")</div>
                                 @if (pColors.Any())
                                 {
@@ -798,6 +801,7 @@
                             <div class="product-info">
                                 <div class="product-cat">@p.Season · @p.Category</div>
                                 <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                                @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                     @if (p.Discount > 0)

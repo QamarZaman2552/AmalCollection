@@ -114,6 +114,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<ChatbotService>();
 builder.Services.AddScoped<RecommendationService>();
+builder.Services.AddScoped<ReviewSummaryService>();
 
 // Image Storage — Cloudinary (free) or local fallback
 var cloudinarySettings = builder.Configuration.GetSection("Cloudinary").Get<CloudinarySettings>() ?? new CloudinarySettings();

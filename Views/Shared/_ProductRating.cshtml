@@ -1,0 +1,13 @@
+@model ShoppingApp.Services.RatingSummary
+@if (Model.HasReviews)
+{
+    <div class="card-rating" aria-label="@Model.Average.ToString("0.0") out of 5 stars, @Model.Count @(Model.Count == 1 ? "review" : "reviews")">
+        <span class="card-stars" aria-hidden="true">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <i class="bi @(i <= Math.Round(Model.Average, MidpointRounding.AwayFromZero) ? "bi-star-fill" : "bi-star")"></i>
+            }
+        </span>
+        <span class="card-rating-text">@Model.Average.ToString("0.0") (@Model.Count)</span>
+    </div>
+}
