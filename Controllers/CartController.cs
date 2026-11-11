@@ -82,6 +82,7 @@ namespace ShoppingApp.Controllers
             var cartTotal = CheckoutService.ComputeCartTotal(items);
             var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
             ViewBag.CartTotal = cartTotal;
+            ViewBag.CartSavings = CheckoutService.ComputeSavings(items);
             ViewBag.DeliveryCharge = CheckoutService.ComputeDeliveryCharge(items, settings);
             ViewBag.GrandTotal = cartTotal + CheckoutService.ComputeDeliveryCharge(items, settings);
             ViewBag.FreeDeliveryThreshold = settings?.FreeDeliveryThreshold ?? 0m;

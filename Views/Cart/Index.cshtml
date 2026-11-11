@@ -5,6 +5,7 @@
     decimal delivery = (decimal)(ViewBag.DeliveryCharge ?? 0m);
     decimal grand = (decimal)(ViewBag.GrandTotal ?? (total + delivery));
     decimal freeThreshold = (decimal)(ViewBag.FreeDeliveryThreshold ?? 0m);
+    decimal savings = (decimal)(ViewBag.CartSavings ?? 0m);
     bool showFreeProgress = freeThreshold > 0 && (delivery > 0 || total >= freeThreshold);
     bool freeQualified = freeThreshold > 0 && total >= freeThreshold;
     decimal freeRemaining = freeThreshold > total ? freeThreshold - total : 0m;
@@ -67,7 +68,13 @@
                                         @if (!string.IsNullOrEmpty(item.Color)) { <span>Color: @item.Color</span> }
                                     </div>
                                 }
-                                <div class="cart-item-price">PKR @item.Product?.FinalPrice.ToString("N0") each</div>
+                                <div class="cart-item-price">
+                                    PKR @item.Product?.FinalPrice.ToString("N0") each
+                                    @if (item.Product is { Discount: > 0 })
+                                    {
+                                        <s class="cart-item-was">PKR @item.Product.Price.ToString("N0")</s>
+                                    }
+                                </div>
                             </div>
                             <div class="cart-item-actions">
                                 <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
@@ -106,6 +113,13 @@
                             </div>
                         </div>
                     }
+                    @if (savings > 0)
+                    {
+                        <div class="cart-savings">
+                            <i class="bi bi-tag-fill" aria-hidden="true"></i>
+                            <span>You save <strong>PKR @savings.ToString("N0")</strong> on this order</span>
+                        </div>
+                    }
                     <div class="summary-row"><span>Items (@Model.Sum(i => i.Quantity))</span><span>PKR @total.ToString("N0")</span></div>
                     <div class="summary-row">
                         <span>Delivery</span>
@@ -121,6 +135,11 @@
                     <div class="summary-total"><span>Cart total</span><span>PKR @grand.ToString("N0")</span></div>
                     <a href="/Orders/Checkout" class="btn btn-gold w-100 py-2">Proceed to Checkout</a>
                     <a href="/" class="btn btn-outline-dark w-100 py-2 mt-2">Continue Shopping</a>
+                    <div class="cart-trust">
+                        <span><i class="bi bi-shield-check" aria-hidden="true"></i> Secure checkout</span>
+                        <span><i class="bi bi-cash-coin" aria-hidden="true"></i> Cash on delivery</span>
+                        <span><i class="bi bi-arrow-repeat" aria-hidden="true"></i> 7-day exchange</span>
+                    </div>
                 </div>
             </div>
         }

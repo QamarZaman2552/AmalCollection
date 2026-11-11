@@ -13,6 +13,12 @@ namespace ShoppingApp.Services
         public static decimal ComputeCartTotal(IEnumerable<CartItem> items) =>
             items.Sum(i => (i.Product?.FinalPrice ?? 0m) * i.Quantity);
 
+        /// <summary>Total discount amount the customer is saving versus list price.</summary>
+        public static decimal ComputeSavings(IEnumerable<CartItem> items) =>
+            items.Sum(i => i.Product == null
+                ? 0m
+                : Math.Max(0m, i.Product.Price - i.Product.FinalPrice) * i.Quantity);
+
         public static decimal ComputeDeliveryCharge(IEnumerable<CartItem> items, SiteSettings? settings)
         {
             var subtotal = ComputeCartTotal(items);
