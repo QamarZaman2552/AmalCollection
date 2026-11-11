@@ -635,6 +635,7 @@
                                         <span class="price-original">PKR @p.Price.ToString("N0")</span>
                                     }
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                             </div>
                             <div class="product-actions">
                                 <form method="post" action="/Wishlist/Toggle" class="wish-form">
@@ -809,6 +810,7 @@
                                         <span class="price-original">PKR @p.Price.ToString("N0")</span>
                                     }
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                             </div>
                         </div>
                     </div>

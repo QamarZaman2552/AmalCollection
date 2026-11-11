@@ -58,6 +58,7 @@
                                         <span class="price-original">PKR @p.Price.ToString("N0")</span>
                                     }
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                                 <div class="d-flex gap-2 mt-2">
                                     @if (p.Stock > 0)
                                     {

@@ -1599,6 +1599,24 @@ a { text-decoration: none; }
   font-weight: 600;
   color: var(--text-2, #6f6a62);
 }
+
+/* Low-stock urgency */
+.badge-low-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.badge-low-stock i { font-size: 0.7rem; }
+.pd-low-stock { color: #b45309; font-weight: 700; }
 .product-meta {
   font-size: 0.74rem;
   color: var(--text-3);

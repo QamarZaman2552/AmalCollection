@@ -97,8 +97,16 @@
                 <div class="pd-stock @(Model.Stock > 0 ? "in" : "")">
                     @if (Model.Stock > 0)
                     {
-                        <i class="bi bi-check-circle me-1"></i>
-                        <span style="color:var(--green);">In Stock (@Model.Stock available)</span>
+                        if (Model.Stock <= 5)
+                        {
+                            <i class="bi bi-fire me-1"></i>
+                            <span class="pd-low-stock">Only @Model.Stock left — order soon!</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check-circle me-1"></i>
+                            <span style="color:var(--green);">In Stock (@Model.Stock available)</span>
+                        }
                     }
                     else
                     {
@@ -510,6 +518,7 @@
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                             </div>
                         </div>
                     </div>
@@ -545,6 +554,7 @@
                                 <div class="product-pricing">
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                             </div>
                         </div>
                     </div>

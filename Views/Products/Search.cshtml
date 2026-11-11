@@ -61,6 +61,7 @@
                                     <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
                                     @if (p.Discount > 0) { <span class="price-original">PKR @p.Price.ToString("N0")</span> }
                                 </div>
+                                @await Html.PartialAsync("_ProductStockBadge", p.Stock)
                             </div>
                             <div class="product-actions">
                                 <form method="post" action="/Wishlist/Toggle" class="wish-form">
