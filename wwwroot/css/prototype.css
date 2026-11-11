@@ -1295,6 +1295,26 @@ a { text-decoration: none; }
   user-select: none;
 }
 .filter-chip-item input[type="radio"] { display: none; }
+.filter-chip-item input[type="checkbox"] { display: none; }
+
+/* Price range inputs (filter drawer) */
+.price-range { display: flex; align-items: center; gap: 8px; padding-top: 6px; }
+.price-range input {
+  width: 100%; min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1c1b19;
+  font-size: 0.85rem;
+}
+.price-range input::placeholder { color: var(--text-3, #9d978d); }
+.price-range input:focus {
+  outline: none;
+  border-color: var(--gold, #b8964f);
+  box-shadow: 0 0 0 3px rgba(184, 150, 79, 0.15);
+}
+.price-range-sep { flex: none; color: var(--text-3, #9d978d); }
 .filter-chip-item:hover {
   border-color: var(--gold, #b8964f);
   color: #1c1b19;

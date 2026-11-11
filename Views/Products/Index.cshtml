@@ -15,8 +15,16 @@
     string selectedFabric = ViewBag.SelectedFabric ?? "";
     string selectedSize   = ViewBag.SelectedSize ?? "";
     string selectedSort   = ViewBag.SelectedSort ?? "";
+    decimal? selectedMinPrice = ViewBag.SelectedMinPrice as decimal?;
+    decimal? selectedMaxPrice = ViewBag.SelectedMaxPrice as decimal?;
+    bool inStockOnly = ViewBag.InStockOnly as bool? ?? false;
+    bool onSaleOnly  = ViewBag.OnSaleOnly as bool? ?? false;
+
+    string Inv(decimal v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
     bool hasFilters = !string.IsNullOrEmpty(selectedCat) || !string.IsNullOrEmpty(selectedSeason)
-        || !string.IsNullOrEmpty(selectedFabric) || !string.IsNullOrEmpty(selectedSize) || !string.IsNullOrEmpty(selectedSort);
+        || !string.IsNullOrEmpty(selectedFabric) || !string.IsNullOrEmpty(selectedSize) || !string.IsNullOrEmpty(selectedSort)
+        || selectedMinPrice.HasValue || selectedMaxPrice.HasValue || inStockOnly || onSaleOnly;
 
     int activeFilterCount = 0;
     if (!string.IsNullOrEmpty(selectedCat)) activeFilterCount++;
@@ -24,6 +32,9 @@
     if (!string.IsNullOrEmpty(selectedFabric)) activeFilterCount++;
     if (!string.IsNullOrEmpty(selectedSize)) activeFilterCount++;
     if (!string.IsNullOrEmpty(selectedSort)) activeFilterCount++;
+    if (selectedMinPrice.HasValue || selectedMaxPrice.HasValue) activeFilterCount++;
+    if (inStockOnly) activeFilterCount++;
+    if (onSaleOnly) activeFilterCount++;
 
     var sortOptions = new (string Value, string Label)[]
     {
@@ -32,7 +43,8 @@
         ("price_desc", "Price: High to Low")
     };
 
-    string BuildFilterUrl(string? cat = null, string? season = null, string? fabric = null, string? size = null, string? sort = null)
+    string BuildFilterUrl(string? cat = null, string? season = null, string? fabric = null, string? size = null, string? sort = null,
+        string? min = null, string? max = null, string? stock = null, string? sale = null)
     {
         var p = new List<string>();
         var c = cat != null ? (cat == "__CLEAR__" ? "" : cat) : selectedCat;
@@ -40,12 +52,20 @@
         var f = fabric != null ? (fabric == "__CLEAR__" ? "" : fabric) : selectedFabric;
         var sz = size != null ? (size == "__CLEAR__" ? "" : size) : selectedSize;
         var so = sort != null ? (sort == "__CLEAR__" ? "" : sort) : selectedSort;
+        var mn = min != null ? (min == "__CLEAR__" ? "" : min) : (selectedMinPrice.HasValue ? Inv(selectedMinPrice.Value) : "");
+        var mx = max != null ? (max == "__CLEAR__" ? "" : max) : (selectedMaxPrice.HasValue ? Inv(selectedMaxPrice.Value) : "");
+        var st = stock != null ? (stock == "__CLEAR__" ? "" : stock) : (inStockOnly ? "true" : "");
+        var sl = sale != null ? (sale == "__CLEAR__" ? "" : sale) : (onSaleOnly ? "true" : "");
 
         if (!string.IsNullOrEmpty(c)) p.Add("category=" + Uri.EscapeDataString(c));
         if (!string.IsNullOrEmpty(s)) p.Add("season=" + Uri.EscapeDataString(s));
         if (!string.IsNullOrEmpty(f)) p.Add("fabric=" + Uri.EscapeDataString(f));
         if (!string.IsNullOrEmpty(sz)) p.Add("size=" + Uri.EscapeDataString(sz));
         if (!string.IsNullOrEmpty(so)) p.Add("sort=" + Uri.EscapeDataString(so));
+        if (!string.IsNullOrEmpty(mn)) p.Add("minPrice=" + Uri.EscapeDataString(mn));
+        if (!string.IsNullOrEmpty(mx)) p.Add("maxPrice=" + Uri.EscapeDataString(mx));
+        if (!string.IsNullOrEmpty(st)) p.Add("inStock=" + Uri.EscapeDataString(st));
+        if (!string.IsNullOrEmpty(sl)) p.Add("onSale=" + Uri.EscapeDataString(sl));
 
         return p.Count > 0 ? "/?" + string.Join("&", p) + "#products" : "/#products";
     }
@@ -62,6 +82,10 @@
         if (!string.IsNullOrEmpty(selectedFabric)) q.Add("fabric=" + Uri.EscapeDataString(selectedFabric));
         if (!string.IsNullOrEmpty(selectedSize))   q.Add("size=" + Uri.EscapeDataString(selectedSize));
         if (!string.IsNullOrEmpty(selectedSort))   q.Add("sort=" + Uri.EscapeDataString(selectedSort));
+        if (selectedMinPrice.HasValue)             q.Add("minPrice=" + Uri.EscapeDataString(Inv(selectedMinPrice.Value)));
+        if (selectedMaxPrice.HasValue)             q.Add("maxPrice=" + Uri.EscapeDataString(Inv(selectedMaxPrice.Value)));
+        if (inStockOnly)                           q.Add("inStock=true");
+        if (onSaleOnly)                            q.Add("onSale=true");
         if (pg > 1) q.Add("page=" + pg);
         return q.Count > 0 ? "/?" + string.Join("&", q) + "#products" : "/#products";
     }
@@ -337,6 +361,10 @@
                             @if (!string.IsNullOrEmpty(selectedSeason)) { <input type="hidden" name="season" value="@selectedSeason" /> }
                             @if (!string.IsNullOrEmpty(selectedFabric)) { <input type="hidden" name="fabric" value="@selectedFabric" /> }
                             @if (!string.IsNullOrEmpty(selectedSize)) { <input type="hidden" name="size" value="@selectedSize" /> }
+                            @if (selectedMinPrice.HasValue) { <input type="hidden" name="minPrice" value="@Inv(selectedMinPrice.Value)" /> }
+                            @if (selectedMaxPrice.HasValue) { <input type="hidden" name="maxPrice" value="@Inv(selectedMaxPrice.Value)" /> }
+                            @if (inStockOnly) { <input type="hidden" name="inStock" value="true" /> }
+                            @if (onSaleOnly) { <input type="hidden" name="onSale" value="true" /> }
                             <select name="sort" class="sort-select" onchange="this.form.requestSubmit()">
                                 @foreach (var opt in sortOptions)
                                 {
@@ -383,6 +411,29 @@
                     {
                         <a href="@BuildFilterUrl(sort: "__CLEAR__")" class="active-filter-pill">
                             Sort: @(sortOptions.FirstOrDefault(o => o.Value == selectedSort).Label ?? selectedSort) <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
+                        </a>
+                    }
+                    @if (selectedMinPrice.HasValue || selectedMaxPrice.HasValue)
+                    {
+                        <a href="@BuildFilterUrl(min: "__CLEAR__", max: "__CLEAR__")" class="active-filter-pill">
+                            @(selectedMinPrice.HasValue && selectedMaxPrice.HasValue
+                                ? $"PKR {selectedMinPrice.Value:N0} – {selectedMaxPrice.Value:N0}"
+                                : selectedMinPrice.HasValue
+                                    ? $"PKR {selectedMinPrice.Value:N0}+"
+                                    : $"Under PKR {selectedMaxPrice!.Value:N0}")
+                            <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
+                        </a>
+                    }
+                    @if (inStockOnly)
+                    {
+                        <a href="@BuildFilterUrl(stock: "__CLEAR__")" class="active-filter-pill">
+                            In stock <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
+                        </a>
+                    }
+                    @if (onSaleOnly)
+                    {
+                        <a href="@BuildFilterUrl(sale: "__CLEAR__")" class="active-filter-pill">
+                            On sale <span class="pill-remove"><i class="bi bi-x-lg"></i></span>
                         </a>
                     }
                     <a href="/" class="active-filter-clear">Clear All</a>
@@ -474,6 +525,33 @@
                             </div>
                         </div>
                     }
+
+                    <!-- Price range -->
+                    <div class="filter-group">
+                        <div class="filter-group-label">Price (PKR)</div>
+                        <div class="price-range">
+                            <input type="number" name="minPrice" min="0" step="100" inputmode="numeric"
+                                   value="@(selectedMinPrice.HasValue ? Inv(selectedMinPrice.Value) : "")"
+                                   placeholder="Min" aria-label="Minimum price" />
+                            <span class="price-range-sep" aria-hidden="true">–</span>
+                            <input type="number" name="maxPrice" min="0" step="100" inputmode="numeric"
+                                   value="@(selectedMaxPrice.HasValue ? Inv(selectedMaxPrice.Value) : "")"
+                                   placeholder="Max" aria-label="Maximum price" />
+                        </div>
+                    </div>
+
+                    <!-- Availability -->
+                    <div class="filter-group">
+                        <div class="filter-group-label">Availability</div>
+                        <div class="filter-chip-row">
+                            <label class="filter-chip-item @(inStockOnly ? "checked" : "")">
+                                <input type="checkbox" name="inStock" value="true" @(inStockOnly ? "checked" : "") /> In stock only
+                            </label>
+                            <label class="filter-chip-item @(onSaleOnly ? "checked" : "")">
+                                <input type="checkbox" name="onSale" value="true" @(onSaleOnly ? "checked" : "") /> On sale
+                            </label>
+                        </div>
+                    </div>
 
                     <!-- Sort -->
                     <div class="filter-group">

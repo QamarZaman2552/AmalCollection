@@ -22,7 +22,8 @@ namespace ShoppingApp.Controllers
         // ─── Homepage / Product List ──────────────────────────────────────
         private const int PageSize = 24;
 
-        public async Task<IActionResult> Index(string? category, string? season, string? fabric, string? size, string? sort, int page = 1)
+        public async Task<IActionResult> Index(string? category, string? season, string? fabric, string? size, string? sort,
+            decimal? minPrice = null, decimal? maxPrice = null, bool inStock = false, bool onSale = false, int page = 1)
         {
             var query = _db.Products.AsNoTracking();
             if (!string.IsNullOrEmpty(category)) query = query.Where(p => p.Category != null && p.Category.ToLower() == category.ToLower());
@@ -38,6 +39,16 @@ namespace ShoppingApp.Controllers
                      p.Sizes.Contains("," + s + ",")
                  ));
              }
+
+            // Price range (uses the discounted final price)
+            if (minPrice.HasValue && minPrice.Value > 0)
+                query = query.Where(p => p.Price - (p.Price * p.Discount / 100m) >= minPrice.Value);
+            if (maxPrice.HasValue && maxPrice.Value > 0)
+                query = query.Where(p => p.Price - (p.Price * p.Discount / 100m) <= maxPrice.Value);
+
+            // Availability / offers
+            if (inStock) query = query.Where(p => p.Stock > 0);
+            if (onSale)  query = query.Where(p => p.Discount > 0);
 
             // Sort by price
             query = sort switch
@@ -83,6 +94,10 @@ namespace ShoppingApp.Controllers
             ViewBag.SelectedFabric   = fabric;
             ViewBag.SelectedSize     = size;
             ViewBag.SelectedSort     = sort ?? "";
+            ViewBag.SelectedMinPrice = minPrice;
+            ViewBag.SelectedMaxPrice = maxPrice;
+            ViewBag.InStockOnly      = inStock;
+            ViewBag.OnSaleOnly       = onSale;
             ViewBag.TotalCount = totalCount;
             ViewBag.PageCount  = pageCount;
             ViewBag.Page       = page;

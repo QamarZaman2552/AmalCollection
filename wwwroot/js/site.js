@@ -554,6 +554,12 @@ function initFilterDrawer() {
       this.closest('.filter-chip-item')?.classList.add('checked');
     });
   });
+
+  drawer.querySelectorAll('input[type="checkbox"]').forEach(box => {
+    box.addEventListener('change', function () {
+      this.closest('.filter-chip-item')?.classList.toggle('checked', this.checked);
+    });
+  });
 }
 pageInit(initFilterDrawer);
 
