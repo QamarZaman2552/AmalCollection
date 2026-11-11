@@ -13,5 +13,10 @@ namespace ShoppingApp.Models
         public string? ContactPhone { get; set; }
         public string? ContactWhatsapp { get; set; }
         public string? ContactEmail { get; set; }
+
+        // Social profiles (leave blank to hide the icon in the footer)
+        public string? InstagramUrl { get; set; }
+        public string? FacebookUrl { get; set; }
+        public string? TikTokUrl { get; set; }
     }
 }

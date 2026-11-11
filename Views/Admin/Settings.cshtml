@@ -56,6 +56,23 @@
             </div>
         </div>
 
+        <h3 style="margin:1.2rem 0 1rem;font-size:1rem;">Social links</h3>
+        <p style="font-size:0.8rem;color:var(--text-3);margin:-0.4rem 0 0.9rem;">Leave blank to hide an icon in the footer.</p>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label>Instagram URL</label>
+                <input type="url" name="InstagramUrl" value="@Model.InstagramUrl" placeholder="https://instagram.com/yourpage" />
+            </div>
+            <div class="form-group">
+                <label>Facebook URL</label>
+                <input type="url" name="FacebookUrl" value="@Model.FacebookUrl" placeholder="https://facebook.com/yourpage" />
+            </div>
+            <div class="form-group">
+                <label>TikTok URL</label>
+                <input type="url" name="TikTokUrl" value="@Model.TikTokUrl" placeholder="https://tiktok.com/@@yourpage" />
+            </div>
+        </div>
+
         <button type="submit" class="btn-primary">Save Settings</button>
     </form>
 </div>

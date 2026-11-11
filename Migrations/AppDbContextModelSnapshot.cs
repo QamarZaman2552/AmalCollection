@@ -884,11 +884,20 @@ namespace ShoppingApp.Migrations
                     b.Property<decimal>("DeliveryCharge")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("FacebookUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("FreeDeliveryThreshold")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("InstagramUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsFreeDelivery")
                         .HasColumnType("bit");
+
+                    b.Property<string>("TikTokUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

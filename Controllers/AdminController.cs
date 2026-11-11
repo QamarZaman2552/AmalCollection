@@ -336,6 +336,9 @@ namespace ShoppingApp.Controllers
             s.ContactPhone = model.ContactPhone;
             s.ContactWhatsapp = model.ContactWhatsapp;
             s.ContactEmail = model.ContactEmail;
+            s.InstagramUrl = model.InstagramUrl;
+            s.FacebookUrl = model.FacebookUrl;
+            s.TikTokUrl = model.TikTokUrl;
             _db.SaveChanges();
             TempData["Success"] = "Settings saved.";
             return RedirectToAction("Settings");

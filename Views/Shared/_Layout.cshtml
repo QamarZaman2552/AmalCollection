@@ -251,13 +251,22 @@
                     <div class="footer-brand">Amal<em>Collection</em></div>
                     <p class="footer-about">Ladies suits for summer &amp; winter – crafted with care, delivered locally. Quality fabrics, honest prices.</p>
                     <div class="footer-social d-flex gap-2">
-                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        @if (!string.IsNullOrWhiteSpace(siteSettings?.InstagramUrl))
+                        {
+                            <a href="@siteSettings!.InstagramUrl" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(siteSettings?.FacebookUrl))
+                        {
+                            <a href="@siteSettings!.FacebookUrl" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        }
                         @if (!string.IsNullOrWhiteSpace(waDigits))
                         {
                             <a href="https://wa.me/@waDigits" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
                         }
-                        <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                        @if (!string.IsNullOrWhiteSpace(siteSettings?.TikTokUrl))
+                        {
+                            <a href="@siteSettings!.TikTokUrl" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                        }
                     </div>
                 </div>
                 <div class="col-6 col-lg-2">
