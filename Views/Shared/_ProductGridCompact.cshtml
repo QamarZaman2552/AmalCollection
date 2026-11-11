@@ -1,0 +1,41 @@
+@model List<ShoppingApp.Models.Product>
+@{
+    var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
+        ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
+}
+@if (Model.Any())
+{
+    <div class="row g-3 g-md-4">
+        @foreach (var p in Model)
+        {
+            <div class="col-6 col-md-3">
+                <div class="product-card h-100">
+                    <div class="product-media">
+                        <a href="/Products/Detail/@p.Id" class="product-media-link">
+                            <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                                 alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
+                        </a>
+                        @if (p.Discount > 0)
+                        {
+                            <span class="badge-discount">-@p.Discount%</span>
+                        }
+                        <span class="badge-tag">@p.Season</span>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-cat">@p.Season · @p.Category</div>
+                        <h3 class="product-name"><a href="/Products/Detail/@p.Id">@p.Name</a></h3>
+                        @await Html.PartialAsync("_ProductRating", ratingSummaries.GetValueOrDefault(p.Id))
+                        <div class="product-pricing">
+                            <span class="price-final">PKR @p.FinalPrice.ToString("N0")</span>
+                            @if (p.Discount > 0)
+                            {
+                                <span class="price-original">PKR @p.Price.ToString("N0")</span>
+                            }
+                        </div>
+                        @await Html.PartialAsync("_ProductStockBadge", p.Stock)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

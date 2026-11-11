@@ -12,13 +12,16 @@ namespace ShoppingApp.Controllers
         private readonly GuestWishlistService _guestWish;
         private readonly GuestCartService _guestCart;
         private readonly ReviewSummaryService _reviews;
+        private readonly RecommendationService _rec;
 
-        public WishlistController(AppDbContext db, GuestWishlistService guestWish, GuestCartService guestCart, ReviewSummaryService reviews)
+        public WishlistController(AppDbContext db, GuestWishlistService guestWish, GuestCartService guestCart,
+            ReviewSummaryService reviews, RecommendationService rec)
         {
             _db = db;
             _guestWish = guestWish;
             _guestCart = guestCart;
             _reviews = reviews;
+            _rec = rec;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
@@ -60,6 +63,8 @@ namespace ShoppingApp.Controllers
                 var guestItems = HydrateGuest(guest);
                 ViewBag.RatingSummaries = await _reviews.GetAsync(
                     guestItems.Where(i => i.Product != null).Select(i => i.ProductId));
+                if (guestItems.Count == 0)
+                    await LoadRecommendationsAsync();
                 return View(guestItems);
             }
 
@@ -73,7 +78,22 @@ namespace ShoppingApp.Controllers
             ViewBag.RatingSummaries = await _reviews.GetAsync(
                 items.Where(i => i.Product != null).Select(i => i.ProductId));
 
+            if (items.Count == 0)
+                await LoadRecommendationsAsync();
+
             return View(items);
+        }
+
+        // Empty wishlist is a dead end — surface a few products to save.
+        private async Task LoadRecommendationsAsync()
+        {
+            var recs = await _rec.GetRecommendationsAsync(UserId, 4);
+            ViewBag.Recommendations = recs;
+            var summaries = ViewBag.RatingSummaries as Dictionary<int, RatingSummary>
+                ?? new Dictionary<int, RatingSummary>();
+            foreach (var kv in await _reviews.GetAsync(recs.Select(p => p.Id)))
+                summaries[kv.Key] = kv.Value;
+            ViewBag.RatingSummaries = summaries;
         }
 
         // ─── Toggle (Add/Remove) ──────────────────────────────

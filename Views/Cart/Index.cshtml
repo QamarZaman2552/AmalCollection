@@ -9,6 +9,7 @@
     bool freeQualified = freeThreshold > 0 && total >= freeThreshold;
     decimal freeRemaining = freeThreshold > total ? freeThreshold - total : 0m;
     int freePct = freeThreshold > 0 ? (int)Math.Min(100m, Math.Round(total / freeThreshold * 100m)) : 0;
+    var recommendations = ViewBag.Recommendations as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
 }
 
 <section class="section">
@@ -37,6 +38,15 @@
                 <p>Add some beautiful suits to get started.</p>
                 <a href="/" class="btn btn-gold">Start Shopping</a>
             </div>
+
+            @if (recommendations.Any())
+            {
+                <div class="empty-recos">
+                    <div class="section-kicker text-center">Popular Right Now</div>
+                    <h2 class="section-title text-center mb-4">You May Also Like</h2>
+                    @await Html.PartialAsync("_ProductGridCompact", recommendations)
+                </div>
+            }
         }
         else
         {

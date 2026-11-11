@@ -3,6 +3,8 @@
     ViewData["Title"] = "My Wishlist";
     var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
         ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
+    var recommendations = ViewBag.Recommendations as List<ShoppingApp.Models.Product>
+        ?? new List<ShoppingApp.Models.Product>();
 }
 
 <section class="section">
@@ -22,6 +24,15 @@
                 <p>Your wishlist is empty! Explore products and save your favourites.</p>
                 <a href="/" class="btn btn-gold">Discover Products</a>
             </div>
+
+            @if (recommendations.Any())
+            {
+                <div class="empty-recos">
+                    <div class="section-kicker text-center">Popular Right Now</div>
+                    <h2 class="section-title text-center mb-4">Start Your Favourites</h2>
+                    @await Html.PartialAsync("_ProductGridCompact", recommendations)
+                </div>
+            }
         }
         else
         {

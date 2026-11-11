@@ -10,11 +10,15 @@ namespace ShoppingApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly GuestCartService _guestCart;
+        private readonly RecommendationService _rec;
+        private readonly ReviewSummaryService _reviews;
 
-        public CartController(AppDbContext db, GuestCartService guestCart)
+        public CartController(AppDbContext db, GuestCartService guestCart, RecommendationService rec, ReviewSummaryService reviews)
         {
             _db = db;
             _guestCart = guestCart;
+            _rec = rec;
+            _reviews = reviews;
         }
 
         private int? UserId => HttpContext.Session.GetInt32("UserId");
@@ -54,7 +58,7 @@ namespace ShoppingApp.Controllers
         }
 
         // ─── View Cart ───────────────────────────────────────────
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (IsAdmin)
             {
@@ -81,6 +85,14 @@ namespace ShoppingApp.Controllers
             ViewBag.DeliveryCharge = CheckoutService.ComputeDeliveryCharge(items, settings);
             ViewBag.GrandTotal = cartTotal + CheckoutService.ComputeDeliveryCharge(items, settings);
             ViewBag.FreeDeliveryThreshold = settings?.FreeDeliveryThreshold ?? 0m;
+
+            // Empty cart is a dead end — offer a few products to restart the journey.
+            if (items.Count == 0)
+            {
+                var recs = await _rec.GetRecommendationsAsync(UserId, 4);
+                ViewBag.Recommendations = recs;
+                ViewBag.RatingSummaries = await _reviews.GetAsync(recs.Select(p => p.Id));
+            }
 
             return View(items);
         }
