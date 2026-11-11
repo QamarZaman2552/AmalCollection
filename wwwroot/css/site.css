@@ -121,6 +121,13 @@ body.light-mode .cart-summary h2,
 body.light-mode .checkout-summary h2 { color: #1c1b19; }
 body.light-mode .summary-row { color: #6f6a62; }
 body.light-mode .summary-total { border-top-color: #e6e0d6; color: #1c1b19; }
+body.light-mode .checkout-steps li.is-done .cs-link { color: #17804d; }
+body.light-mode .checkout-steps li.is-done .cs-dot {
+  background: rgba(23, 128, 77, 0.1);
+  border-color: rgba(23, 128, 77, 0.35);
+  color: #17804d;
+}
+body.light-mode .checkout-steps li.is-done:not(:last-child)::after { background: rgba(23, 128, 77, 0.35); }
 body.light-mode .order-card { background: #ffffff; border-color: #e6e0d6; }
 body.light-mode .order-id { color: #1c1b19; }
 body.light-mode .admin-table th { background: #faf8f5; color: #6f6a62; border-bottom-color: #e6e0d6; }
@@ -873,6 +880,53 @@ body.light-mode .pw-match.no { color: #b91c1c; }
 }
 .cart-trust span { display: inline-flex; align-items: center; gap: 0.3rem; }
 .cart-trust i { color: var(--gold); font-size: 0.8rem; }
+
+/* Checkout step indicator: Cart → Details → Confirm */
+.checkout-steps { max-width: 620px; margin: 0 auto 1.75rem; }
+.checkout-steps ol { display: flex; align-items: center; gap: 0.4rem; list-style: none; margin: 0; padding: 0; }
+.checkout-steps li { display: flex; align-items: center; gap: 0.4rem; flex: 1; min-width: 0; }
+.checkout-steps li:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.checkout-steps li.is-done:not(:last-child)::after { background: rgba(34, 197, 94, 0.4); }
+.checkout-steps .cs-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.checkout-steps .cs-dot {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-3);
+  font-size: 0.72rem;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.checkout-steps li.is-current .cs-link { color: var(--text); }
+.checkout-steps li.is-current .cs-dot { background: var(--accent); border-color: var(--accent); color: #1c1b19; }
+.checkout-steps li.is-done .cs-link { color: #4ade80; }
+.checkout-steps li.is-done .cs-dot {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #4ade80;
+}
+.checkout-steps a.cs-link:hover .cs-label { text-decoration: underline; }
 
 /* Free-delivery progress (cart + checkout) */
 .cart-free {

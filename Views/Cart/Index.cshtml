@@ -51,6 +51,7 @@
         }
         else
         {
+            @await Html.PartialAsync("_CheckoutSteps", 1)
             <div class="cart-layout">
                 <div class="cart-items">
                     @foreach (var item in Model)
