@@ -55,13 +55,58 @@ a { text-decoration: none; }
 
 /* ─── Announcement Bar ─────────────────────────────── */
 .announce {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--accent);
   color: #f5f2ec;
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 9px 16px;
+  padding: 9px 42px;
+  min-height: 36px;
 }
+.announce-track {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 940px;
+  height: 1.3em;
+}
+.announce-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+.announce-msg.is-active { opacity: 1; transform: none; pointer-events: auto; }
+.announce-close {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+.announce-close:hover,
+.announce-close:focus-visible { opacity: 1; background: rgba(255, 255, 255, 0.18); }
+html.announce-dismissed .announce { display: none; }
 
 /* ─── Navbar (Bootstrap) ───────────────────────────── */
 .ac-nav {
@@ -2836,11 +2881,12 @@ body.pd-lb-open { overflow: hidden; }
 
   /* ── Announce ── */
   .announce {
-    padding: 8px 10px;
+    padding: 8px 40px 8px 12px;
     line-height: 1.5;
     letter-spacing: 0.04em;
     font-size: 0.7rem;
   }
+  .announce-close { right: 4px; width: 30px; height: 30px; }
 
   /* ── Checkout sticky bar clearance ── */
   .checkout-page { padding-bottom: 100px; }
@@ -3220,6 +3266,7 @@ textarea:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .main-content { animation: none !important; }
+  .announce-msg { transition: none !important; transform: none !important; }
   .btn-filter-trigger,
   .btn-filter-trigger::before,
   .btn-filter-trigger i,

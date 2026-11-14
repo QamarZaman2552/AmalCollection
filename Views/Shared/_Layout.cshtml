@@ -85,6 +85,14 @@
             }
         })();
     </script>
+    <script>
+        // Applied before paint so a dismissed announcement bar never flashes.
+        try {
+            if (localStorage.getItem('amal.announce.dismissed') === '1') {
+                document.documentElement.classList.add('announce-dismissed');
+            }
+        } catch (e) { /* private mode: keep the bar visible */ }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -99,9 +107,18 @@
     <a href="#mainContent" class="skip-link">Skip to content</a>
 
     <!-- ─── Announcement Bar ─────────────────────────────── -->
-    <div class="announce text-center">
-        Cash on Delivery available &nbsp;·&nbsp; No login needed to order &nbsp;·&nbsp; 7-Day Exchange &nbsp;·&nbsp; Track your order anytime — check your email after ordering
+    <div class="announce" id="announceBar" role="region" aria-label="Store announcements">
+        <div class="announce-track" id="announceTrack">
+            <span class="announce-msg is-active">Cash on Delivery available</span>
+            <span class="announce-msg">No login needed to order</span>
+            <span class="announce-msg">7-Day exchange on all suits</span>
+            <span class="announce-msg">Track your order anytime</span>
+        </div>
+        <button type="button" class="announce-close" id="announceClose" aria-label="Dismiss announcements">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
     </div>
+    <p class="visually-hidden" id="announceStatus" role="status" aria-live="polite"></p>
 
     <!-- ─── Navbar ───────────────────────────────────────── -->
     <nav class="navbar navbar-expand-xl sticky-top ac-nav" aria-label="Main navigation">

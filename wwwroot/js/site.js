@@ -637,6 +637,54 @@ function initFilterDrawer() {
 }
 pageInit(initFilterDrawer);
 
+// ─── Announcement bar: rotating messages + dismiss ──────────
+(function () {
+  const bar = document.getElementById('announceBar');
+  const closeBtn = document.getElementById('announceClose');
+  if (!bar || !closeBtn) return;
+
+  const msgs = Array.from(bar.querySelectorAll('.announce-msg'));
+  const status = document.getElementById('announceStatus');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let index = 0;
+  let timer = null;
+
+  function isDismissed() {
+    return document.documentElement.classList.contains('announce-dismissed');
+  }
+  function show(i) {
+    msgs.forEach((m, n) => m.classList.toggle('is-active', n === i));
+    index = i;
+  }
+  function start() {
+    if (timer || reduceMotion || isDismissed() || msgs.length < 2) return;
+    timer = setInterval(() => show((index + 1) % msgs.length), 5000);
+  }
+  function stop() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = null;
+  }
+
+  // Hold the current message while the pointer, keyboard focus or tab is active.
+  bar.addEventListener('mouseenter', stop);
+  bar.addEventListener('mouseleave', start);
+  bar.addEventListener('focusin', stop);
+  bar.addEventListener('focusout', start);
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+
+  start();
+
+  closeBtn.addEventListener('click', function () {
+    stop();
+    document.documentElement.classList.add('announce-dismissed');
+    try { localStorage.setItem('amal.announce.dismissed', '1'); } catch (e) { /* private mode */ }
+    if (status) status.textContent = 'Announcements hidden';
+    const brand = document.querySelector('.ac-brand');
+    if (brand && typeof brand.focus === 'function') brand.focus();
+  });
+})();
+
 // ─── Mini Cart Drawer ────────────────────────────────────────
 (function () {
   const link = document.getElementById('cartLink');
