@@ -96,13 +96,15 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@ViewData["BodyClass"]">
+    <a href="#mainContent" class="skip-link">Skip to content</a>
+
     <!-- ─── Announcement Bar ─────────────────────────────── -->
     <div class="announce text-center">
         Cash on Delivery available &nbsp;·&nbsp; No login needed to order &nbsp;·&nbsp; 7-Day Exchange &nbsp;·&nbsp; Track your order anytime — check your email after ordering
     </div>
 
     <!-- ─── Navbar ───────────────────────────────────────── -->
-    <nav class="navbar navbar-expand-xl sticky-top ac-nav">
+    <nav class="navbar navbar-expand-xl sticky-top ac-nav" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand ac-brand" href="/">Amal<em>Collection</em></a>
 
@@ -233,15 +235,15 @@
     <!-- ─── Toast Notifications ──────────────────────────── -->
     @if (TempData["Success"] != null)
     {
-        <div class="toast toast-success" id="toast-success"><i class="bi bi-check-circle-fill"></i> @TempData["Success"]</div>
+        <div class="toast toast-success" id="toast-success" role="status" aria-live="polite"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> @TempData["Success"]</div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="toast toast-error" id="toast-error"><i class="bi bi-x-circle"></i> @TempData["Error"]</div>
+        <div class="toast toast-error" id="toast-error" role="alert"><i class="bi bi-x-circle" aria-hidden="true"></i> @TempData["Error"]</div>
     }
 
     <!-- ─── Main Content ─────────────────────────────────── -->
-    <main class="main-content">
+    <main class="main-content" id="mainContent" tabindex="-1">
         @RenderBody()
     </main>
 
@@ -336,7 +338,7 @@
         <span class="chatbot-ping"></span>
     </div>
 
-    <div class="chatbot-window" id="chatWindow">
+    <div class="chatbot-window" id="chatWindow" role="dialog" aria-label="Amal Stylist Assistant" aria-hidden="true">
         <div class="chatbot-header">
             <div class="chatbot-avatar"><i class="bi bi-stars"></i></div>
             <div>
@@ -345,7 +347,7 @@
             </div>
             <button class="chatbot-close" id="chatClose" aria-label="Close Chat"><i class="bi bi-x-lg"></i></button>
         </div>
-        <div class="chatbot-messages" id="chatMessages">
+        <div class="chatbot-messages" id="chatMessages" role="log" aria-live="polite" aria-relevant="additions">
             <div class="chat-msg bot">
                 <div class="chat-bubble">Hello! I'm your Amal Collection assistant. How may I help you with suits, fabric details, sizing, or ordering today?</div>
             </div>
@@ -358,7 +360,7 @@
 
     <!-- ─── Mini Cart Drawer ─────────────────────────────── -->
     <div class="mc-backdrop" id="mcBackdrop"></div>
-    <aside class="mc-drawer" id="mcDrawer" aria-hidden="true" aria-label="Shopping cart">
+    <aside class="mc-drawer" id="mcDrawer" role="dialog" aria-modal="true" aria-label="Shopping cart" aria-hidden="true" inert>
         <div class="mc-head">
             <span class="mc-title"><i class="bi bi-bag"></i> Shopping Cart <span class="mc-count" id="mcCount"></span></span>
             <button class="mc-close" id="mcClose" aria-label="Close cart"><i class="bi bi-x-lg"></i></button>

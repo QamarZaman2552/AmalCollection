@@ -79,6 +79,7 @@ if (bubble && chatWin) {
 
   function openChat() {
     chatWin.classList.add('open');
+    chatWin.setAttribute('aria-hidden', 'false');
     bubble.style.display = 'none';
     chatInput.focus();
     if (!starterShown) {
@@ -88,8 +89,11 @@ if (bubble && chatWin) {
   }
 
   function closeChat() {
+    const hadFocus = chatWin.contains(document.activeElement);
     chatWin.classList.remove('open');
+    chatWin.setAttribute('aria-hidden', 'true');
     bubble.style.display = 'flex';
+    if (hadFocus) bubble.focus();
   }
 
   bubble.addEventListener('click', () => {
@@ -529,17 +533,24 @@ pageInit(initOrderSummary);
 document.addEventListener('click', function (e) {
   const sizeBtn = e.target.closest('.size-opt:not(.disabled)');
   if (sizeBtn) {
-    sizeBtn.parentElement?.querySelectorAll('.size-opt').forEach(x => x.classList.remove('active'));
+    sizeBtn.parentElement?.querySelectorAll('.size-opt').forEach(x => {
+      x.classList.remove('active');
+      x.setAttribute('aria-pressed', 'false');
+    });
     sizeBtn.classList.add('active');
+    sizeBtn.setAttribute('aria-pressed', 'true');
   }
   const colorBtn = e.target.closest('.color-opt');
   if (colorBtn) {
-    colorBtn.parentElement?.querySelectorAll('.color-opt').forEach(x => x.classList.remove('active'));
+    colorBtn.parentElement?.querySelectorAll('.color-opt').forEach(x => {
+      x.classList.remove('active');
+      x.setAttribute('aria-pressed', 'false');
+    });
     colorBtn.classList.add('active');
+    colorBtn.setAttribute('aria-pressed', 'true');
   }
 });
 
-// â”€â”€â”€ Filter Drawer (Offcanvas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Wishlist heart pop: runs on tap so the heart reacts before the round-trip finishes.
 document.addEventListener('click', function (e) {
   const btn = e.target.closest ? e.target.closest('.wish-btn, .pd-wish') : null;
@@ -550,6 +561,7 @@ document.addEventListener('click', function (e) {
   btn.addEventListener('animationend', function () { btn.classList.remove('is-pop'); }, { once: true });
 });
 
+// ─── Filter Drawer (Offcanvas) ───────────────────────────────
 function initFilterDrawer() {
   const toggle   = document.getElementById('filterDrawerToggle');
   const drawer   = document.getElementById('filterDrawer');
@@ -557,17 +569,27 @@ function initFilterDrawer() {
   const closeBtn = document.getElementById('filterDrawerClose');
   if (!toggle || !drawer) return;
 
+  let lastFocus = null;
+
   function openDrawer() {
+    lastFocus = document.activeElement;
     drawer.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
     document.body.style.overflowY = 'hidden';
     toggle.setAttribute('aria-expanded', 'true');
+    drawer.setAttribute('aria-hidden', 'false');
+    drawer.removeAttribute('inert');
+    if (closeBtn) setTimeout(() => closeBtn.focus(), 30);
   }
   function closeDrawer() {
+    const wasOpen = drawer.classList.contains('open');
     drawer.classList.remove('open');
     if (backdrop) backdrop.classList.remove('open');
     document.body.style.overflowY = '';
     toggle.setAttribute('aria-expanded', 'false');
+    drawer.setAttribute('aria-hidden', 'true');
+    drawer.setAttribute('inert', '');
+    if (wasOpen && lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
   }
 
   let toggling = false;
@@ -581,6 +603,19 @@ function initFilterDrawer() {
   });
   if (closeBtn)   closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
   if (backdrop)   backdrop.addEventListener('click', (e) => { e.stopPropagation(); closeDrawer(); });
+
+  // Keep Tab inside the open filter drawer.
+  drawer.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    const items = drawer.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   if (window.__fdEscHandler) document.removeEventListener('keydown', window.__fdEscHandler);
   window.__fdEscHandler = (e) => { if (e.key === 'Escape') closeDrawer(); };
   document.addEventListener('keydown', window.__fdEscHandler);
@@ -617,16 +652,24 @@ pageInit(initFilterDrawer);
   const money = n => 'PKR ' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
   const esc = s => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
 
+  let lastFocus = null;
+
   function openDrawer() {
+    lastFocus = document.activeElement;
     drawer.classList.add('open');
     backdrop.classList.add('show');
     drawer.setAttribute('aria-hidden', 'false');
+    drawer.removeAttribute('inert');
     loadCart();
+    setTimeout(() => closeBtn.focus(), 30);
   }
   function closeDrawer() {
+    const wasOpen = drawer.classList.contains('open');
     drawer.classList.remove('open');
     backdrop.classList.remove('show');
     drawer.setAttribute('aria-hidden', 'true');
+    drawer.setAttribute('inert', '');
+    if (wasOpen && lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
   }
 
   async function loadCart() {
@@ -707,6 +750,19 @@ pageInit(initFilterDrawer);
   if (cont) cont.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
   drawer.addEventListener('click', e => { if (e.target.closest('a')) closeDrawer(); });
+
+  // Keep Tab inside the open drawer so keyboard users cannot land behind it.
+  drawer.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    const items = drawer.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   // Exposed so add-to-cart can show the fresh cart right after an AJAX add.
   window.__openMiniCart = openDrawer;

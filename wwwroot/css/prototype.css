@@ -1255,7 +1255,7 @@ a { text-decoration: none; }
   place-items: center;
   color: var(--text-2, #6f6a62);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   flex-shrink: 0;
 }
 .filter-drawer-close:hover {
@@ -3183,6 +3183,33 @@ body.light-mode .btn-primary:hover {
 .link-more i { display: inline-block; transition: transform 0.2s ease; }
 .link-more:hover i { transform: translateX(4px); }
 
+/* ── Accessibility: skip link + keyboard focus ─────────────── */
+.skip-link {
+  position: fixed; top: -100px; left: 12px; z-index: 3000;
+  padding: 0.65rem 1.1rem;
+  background: var(--gold); color: #fff;
+  font-weight: 700; font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  transition: top 0.18s ease;
+}
+.skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: -4px; }
+
+a:focus-visible,
+.btn:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.form-control:focus-visible {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(184, 150, 79, 0.3) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .main-content { animation: none !important; }
@@ -3214,4 +3241,5 @@ body.light-mode .btn-primary:hover {
 
   .link-more i { transition: none !important; }
   .link-more:hover i { transform: none !important; }
+  .skip-link { transition: none !important; }
 }

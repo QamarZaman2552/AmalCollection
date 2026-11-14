@@ -156,10 +156,10 @@
                                 <span>Select Size</span>
                                 <button type="button" class="size-guide" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">Size Guide</button>
                             </div>
-                            <div class="size-options mb-4" id="sizeOptions">
+                            <div class="size-options mb-4" id="sizeOptions" role="group" aria-label="Select size">
                                 @foreach (var s in sizeList)
                                 {
-                                    <button class="size-opt @(sizeList.Count == 1 ? "active" : "")" type="button" data-value="@s">@s</button>
+                                    <button class="size-opt @(sizeList.Count == 1 ? "active" : "")" type="button" data-value="@s" aria-pressed="@(sizeList.Count == 1 ? "true" : "false")">@s</button>
                                 }
                             </div>
                             <input type="hidden" name="size" id="sizeInput" value="@(sizeList.Count == 1 ? sizeList[0] : "")" />
@@ -172,10 +172,10 @@
                         @if (colorList.Count > 0)
                         {
                             <div class="opt-label mb-3"><span>Select Color · <span id="colorLabelName">@(colorList.Count == 1 ? colorList[0] : "Choose one")</span></span></div>
-                            <div class="color-options mb-4" id="colorOptions">
+                            <div class="color-options mb-4" id="colorOptions" role="group" aria-label="Select color">
                                 @foreach (var c in colorList)
                                 {
-                                    <button class="color-opt @(colorList.Count == 1 ? "active" : "")" type="button" data-name="@c" aria-label="@c" style="background:@GetColorHex(c)"></button>
+                                    <button class="color-opt @(colorList.Count == 1 ? "active" : "")" type="button" data-name="@c" aria-label="@c" aria-pressed="@(colorList.Count == 1 ? "true" : "false")" style="background:@GetColorHex(c)"></button>
                                 }
                             </div>
                             <input type="hidden" name="color" id="colorInput" value="@(colorList.Count == 1 ? colorList[0] : "")" />
@@ -190,9 +190,9 @@
                         <div class="d-flex align-items-center gap-3 mb-4">
                             <span class="opt-label mb-0">Quantity</span>
                             <div class="input-group qty-ctrl" style="width:auto;">
-                                <button class="btn" type="button" id="qtyMinus"><i class="bi bi-dash"></i></button>
-                                <input type="number" name="quantity" id="qtyInput" class="form-control text-center" value="1" min="1" max="@Model.Stock" />
-                                <button class="btn" type="button" id="qtyPlus"><i class="bi bi-plus"></i></button>
+                                <button class="btn" type="button" id="qtyMinus" aria-label="Decrease quantity" aria-controls="qtyInput"><i class="bi bi-dash" aria-hidden="true"></i></button>
+                                <input type="number" name="quantity" id="qtyInput" class="form-control text-center" value="1" min="1" max="@Model.Stock" aria-label="Quantity" />
+                                <button class="btn" type="button" id="qtyPlus" aria-label="Increase quantity" aria-controls="qtyInput"><i class="bi bi-plus" aria-hidden="true"></i></button>
                             </div>
                         </div>
 
