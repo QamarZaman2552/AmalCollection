@@ -123,7 +123,15 @@
         @foreach (var slide in heroSlides)
         {
             <div class="hero-slide @(slideIdx == 0 ? "active" : "")">
-                <div class="hero-img" style="background-image:url('@(string.IsNullOrEmpty(slide.ImagePath) ? "/images/placeholder.jpg" : slide.ImagePath)')"></div>
+                <div class="hero-img">
+                    <img src="@ImageUrl.Src(slide.ImagePath, 1440)"
+                         srcset="@ImageUrl.SrcSet(slide.ImagePath, ImageUrl.BannerWidths)"
+                         sizes="100vw"
+                         alt="@slide.Title"
+                         loading="@(slideIdx == 0 ? "eager" : "lazy")"
+                         fetchpriority="@(slideIdx == 0 ? "high" : "auto")"
+                         decoding="async" />
+                </div>
                 <div class="hero-panel">
                     <div class="hero-text">
                         <div class="hero-kicker">@(string.IsNullOrEmpty(slide.Tagline) ? slide.CategoryLabel : slide.Tagline)</div>
@@ -198,7 +206,9 @@
                         <a class="promo-card" data-index="@i" href="@promoHref">
 
                             <img class="promo-card__img"
-                                 src="@(string.IsNullOrEmpty(card.ImagePath) ? "/images/placeholder.jpg" : card.ImagePath)"
+                                 src="@ImageUrl.Src(card.ImagePath, 480)"
+                                 srcset="@ImageUrl.SrcSet(card.ImagePath, ImageUrl.CardWidths)"
+                                 sizes="(max-width: 767px) 60vw, 240px"
                                  alt="@card.BrandName"
                                  loading="lazy" decoding="async"
                                  draggable="false" />
@@ -597,7 +607,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                                    <img src="@ImageUrl.Src(p.ImagePath, 480)" srcset="@ImageUrl.SrcSet(p.ImagePath, ImageUrl.CardWidths)" sizes="(max-width: 575px) 50vw, (max-width: 991px) 33vw, 25vw"
                                          alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0)
@@ -794,7 +804,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "/images/placeholder.jpg" : p.ImagePath)"
+                                    <img src="@ImageUrl.Src(p.ImagePath, 480)" srcset="@ImageUrl.SrcSet(p.ImagePath, ImageUrl.CardWidths)" sizes="(max-width: 575px) 50vw, (max-width: 991px) 33vw, 25vw"
                                          alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 <span class="badge-tag">@p.Season</span>

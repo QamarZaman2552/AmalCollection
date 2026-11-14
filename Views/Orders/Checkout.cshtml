@@ -56,7 +56,7 @@
                         @foreach (var item in Model)
                         {
                             <div class="co-item">
-                                <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")"
+                                <img src="@ImageUrl.Src(item.Product?.ImagePath, 160)"
                                      alt="@item.Product?.Name"
                                      loading="lazy" decoding="async"
                                      onerror="this.src='/images/placeholder.jpg'" />

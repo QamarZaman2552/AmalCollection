@@ -76,7 +76,7 @@
                                            aria-label="Select @p.Name" />
                                 </label>
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")"
+                                    <img src="@ImageUrl.Src(p.ImagePath, 480)" srcset="@ImageUrl.SrcSet(p.ImagePath, ImageUrl.CardWidths)" sizes="(max-width: 575px) 50vw, (max-width: 991px) 33vw, 25vw"
                                          alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0)

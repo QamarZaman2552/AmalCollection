@@ -18,6 +18,7 @@
     var galleryPaths = gallery
         .Select(g => g.ImagePath)
         .Where(p => !string.IsNullOrWhiteSpace(p))
+        .Select(p => ImageUrl.Src(p, 1200))
         .ToList();
 
     var sizeList = (Model.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
@@ -52,7 +53,9 @@
         <div class="col-12 col-lg-6">
             <div class="pd-gallery">
                 <div class="pd-main-img" id="pdMainBox" role="button" tabindex="0" aria-label="View a larger image of @Model.Name">
-                    <img id="mainImage" src="@(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath ?? "/images/placeholder.jpg")"
+                    <img id="mainImage" src="@ImageUrl.Src(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath, 800)"
+                         srcset="@ImageUrl.SrcSet(gallery.FirstOrDefault()?.ImagePath ?? Model.ImagePath, ImageUrl.DetailWidths)"
+                         sizes="(max-width: 991px) 92vw, 600px"
                          alt="@Model.Name" decoding="async" fetchpriority="high" onerror="this.src='/images/placeholder.jpg'" />
                     <span class="pd-zoom-hint" aria-hidden="true"><i class="bi bi-zoom-in"></i> Click to zoom</span>
                 </div>
@@ -61,8 +64,8 @@
                     <div class="pd-thumbs" id="pdThumbs">
                         @foreach (var img in gallery)
                         {
-                            <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@img.ImagePath">
-                                <img src="@img.ImagePath" alt="@Model.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
+                            <button type="button" class="pd-thumb @(img == gallery.First() ? "active" : "")" data-src="@ImageUrl.Src(img.ImagePath, 800)" data-srcset="@ImageUrl.SrcSet(img.ImagePath, ImageUrl.DetailWidths)">
+                                <img src="@ImageUrl.Src(img.ImagePath, 160)" alt="@Model.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                             </button>
                         }
                     </div>
@@ -526,7 +529,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
+                                    <img src="@ImageUrl.Src(p.ImagePath, 480)" srcset="@ImageUrl.SrcSet(p.ImagePath, ImageUrl.CardWidths)" sizes="(max-width: 575px) 50vw, (max-width: 991px) 33vw, 25vw" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                                 <span class="badge-tag">@p.Season</span>
@@ -562,7 +565,7 @@
                         <div class="product-card h-100">
                             <div class="product-media">
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
-                                    <img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
+                                    <img src="@ImageUrl.Src(p.ImagePath, 480)" srcset="@ImageUrl.SrcSet(p.ImagePath, ImageUrl.CardWidths)" sizes="(max-width: 575px) 50vw, (max-width: 991px) 33vw, 25vw" alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
                                 </a>
                                 @if (p.Discount > 0) { <span class="badge-discount">-@p.Discount%</span> }
                                 <span class="badge-tag">@p.Season</span>
@@ -638,7 +641,10 @@ document.querySelectorAll('.pd-thumb').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var src = btn.getAttribute('data-src');
         var main = document.getElementById('mainImage');
-        if (main && src) main.src = src;
+        if (main && src) {
+            main.src = src;
+            main.srcset = btn.getAttribute('data-srcset') || '';
+        }
         document.querySelectorAll('.pd-thumb').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
     });

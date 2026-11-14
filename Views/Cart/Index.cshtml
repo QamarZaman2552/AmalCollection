@@ -57,7 +57,7 @@
                     @foreach (var item in Model)
                     {
                         <div class="cart-item">
-                            <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@item.Product?.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
+                            <img src="@ImageUrl.Src(item.Product?.ImagePath, 160)" alt="@item.Product?.Name" width="80" height="80" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
                             <div class="cart-item-info">
                                 <h3>@item.Product?.Name</h3>
                                 <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Fabric</div>

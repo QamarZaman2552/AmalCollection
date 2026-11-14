@@ -433,6 +433,13 @@ a { text-decoration: none; }
   transform: scale(1.04);
   transition: transform 6s ease-out;
 }
+.hero-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
 .hero-slide.active .hero-img { transform: scale(1); }
 .hero-img::after {
   content: '';
