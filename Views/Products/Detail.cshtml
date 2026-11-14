@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = Model.Name;
     var related        = ViewBag.Related as List<ShoppingApp.Models.Product>;
+    var completeLook   = ViewBag.CompleteLook as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
+    ViewData["GridColClass"] = "col-6 col-md-4";
     var reviews        = ViewBag.Reviews as List<Review> ?? new List<Review>();
     var userId         = Context.Session.GetInt32("UserId");
     var reviewCount    = (int)(ViewBag.ReviewCount ?? 0);
@@ -496,6 +498,19 @@
         </div>
     </div>
 </section>
+
+<!-- ═══ Complete the Look ═══ -->
+@if (completeLook.Any())
+{
+    <section class="section">
+        <div class="container">
+            <div class="section-kicker">Styled Together</div>
+            <h2 class="section-title mb-2">Complete the Look</h2>
+            <p class="section-sub mb-4">Pieces that pair beautifully with the @Model.Name.</p>
+            @await Html.PartialAsync("_ProductGridCompact", completeLook)
+        </div>
+    </section>
+}
 
 <!-- ═══ Related Products ═══ -->
 @if (related != null && related.Any())

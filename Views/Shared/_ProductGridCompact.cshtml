@@ -2,13 +2,14 @@
 @{
     var ratingSummaries = ViewBag.RatingSummaries as Dictionary<int, ShoppingApp.Services.RatingSummary>
         ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
+    var colClass = ViewData["GridColClass"] as string ?? "col-6 col-md-3";
 }
 @if (Model.Any())
 {
     <div class="row g-3 g-md-4">
         @foreach (var p in Model)
         {
-            <div class="col-6 col-md-3">
+            <div class="@colClass">
                 <div class="product-card h-100">
                     <div class="product-media">
                         <a href="/Products/Detail/@p.Id" class="product-media-link">

@@ -237,15 +237,38 @@ namespace ShoppingApp.Controllers
             ViewBag.RecentlyViewed = recentlyViewed;
 
             var cat = product.Category;
-            var related = await _db.Products
+
+            // Same-season pieces, different fabric first: those become the "Complete the Look" pairing.
+            var sameSeasonQuery = _db.Products
                 .AsNoTracking()
-                .Where(p => p.Category == cat && p.Id != id && p.Stock > 0)
-                .Take(4).ToListAsync();
+                .Where(p => p.Season == product.Season && p.Id != id && p.Stock > 0);
+            if (!string.IsNullOrWhiteSpace(cat))
+                sameSeasonQuery = sameSeasonQuery.Where(p => p.Category == cat);
+
+            var sameSeason = await sameSeasonQuery
+                .OrderBy(p => p.Fabric == product.Fabric)
+                .ThenByDescending(p => p.Discount)
+                .ThenBy(p => p.Price)
+                .ToListAsync();
+
+            var completeLook = sameSeason
+                .Where(p => !string.Equals(p.Fabric, product.Fabric, StringComparison.OrdinalIgnoreCase))
+                .Take(2)
+                .ToList();
+            ViewBag.CompleteLook = completeLook;
+
+            // Keep Related free of anything already shown as a pairing.
+            var related = sameSeason
+                .Where(p => completeLook.All(c => c.Id != p.Id))
+                .Take(4)
+                .ToList();
             ViewBag.Related = related;
 
-            // Ratings for the "Related" and "Recently viewed" cards
+            // Ratings for the "Complete the Look", "Related" and "Recently viewed" cards
             ViewBag.RatingSummaries = await _reviews.GetAsync(
-                related.Select(p => p.Id).Concat(recentlyViewed.Select(p => p!.Id)));
+                completeLook.Select(p => p.Id)
+                    .Concat(related.Select(p => p.Id))
+                    .Concat(recentlyViewed.Select(p => p!.Id)));
 
             // Load reviews with user names
             var reviews = await _db.Reviews
