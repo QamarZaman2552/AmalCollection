@@ -40,15 +40,18 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 100,
-                Window = TimeSpan.FromMinutes(1),
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 10
-            }));
+        // Resized images are fetched in bursts by every page load — never throttle them.
+        ctx.Request.Path.StartsWithSegments("/img", StringComparison.OrdinalIgnoreCase)
+            ? RateLimitPartition.GetNoLimiter("img")
+            : RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 10
+                }));
 
     // Stricter limit for auth endpoints
     options.AddFixedWindowLimiter("AuthPolicy", opt =>
@@ -115,6 +118,7 @@ builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<ChatbotService>();
 builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddScoped<ReviewSummaryService>();
+builder.Services.AddSingleton<IImageResizer, ImageResizer>();
 
 // Image Storage — Cloudinary (free) or local fallback
 var cloudinarySettings = builder.Configuration.GetSection("Cloudinary").Get<CloudinarySettings>() ?? new CloudinarySettings();

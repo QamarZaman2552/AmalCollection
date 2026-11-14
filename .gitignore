@@ -388,3 +388,6 @@ db_update.txt
 migration_out.txt
 original_sitejs.txt
 filelist.txt
+
+# Generated on-demand image cache
+wwwroot/imgcache/
