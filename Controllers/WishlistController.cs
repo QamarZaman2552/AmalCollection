@@ -178,11 +178,153 @@ namespace ShoppingApp.Controllers
             return RedirectToAction("Index");
         }
 
+        // ─── Bulk Remove ──────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BulkRemove(int[] productIds)
+        {
+            if (IsAdmin)
+            {
+                TempData["Error"] = "Admins do not use the wishlist.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var ids = (productIds ?? Array.Empty<int>()).Where(i => i > 0).Distinct().ToList();
+            if (ids.Count == 0)
+            {
+                TempData["Error"] = "Select at least one item first.";
+                return RedirectToAction("Index");
+            }
+
+            if (UserId == null)
+            {
+                var guest = _guestWish.Get(HttpContext.Session);
+                var removed = guest.RemoveAll(ids.Contains);
+                _guestWish.Save(HttpContext.Session, guest);
+                TempData["Success"] = removed == 1
+                    ? "Removed 1 item from your wishlist."
+                    : $"Removed {removed} items from your wishlist.";
+                return RedirectToAction("Index");
+            }
+
+            var uid = UserId.Value;
+            var items = _db.WishlistItems
+                .Where(w => w.UserId == uid && ids.Contains(w.ProductId))
+                .ToList();
+            _db.WishlistItems.RemoveRange(items);
+            _db.SaveChanges();
+
+            TempData["Success"] = items.Count == 1
+                ? "Removed 1 item from your wishlist."
+                : $"Removed {items.Count} items from your wishlist.";
+            return RedirectToAction("Index");
+        }
+
+        // ─── Bulk Move to Cart ────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult BulkMoveToCart(int[] productIds)
+        {
+            if (IsAdmin)
+            {
+                TempData["Error"] = "Admins do not use the wishlist.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var ids = (productIds ?? Array.Empty<int>()).Where(i => i > 0).Distinct().ToList();
+            if (ids.Count == 0)
+            {
+                TempData["Error"] = "Select at least one item first.";
+                return RedirectToAction("Index");
+            }
+
+            var products = _db.Products.Where(p => ids.Contains(p.Id)).ToList();
+
+            // Variant products need an explicit size/colour choice, and sold-out items cannot move.
+            var movable = products
+                .Where(p => p.Stock > 0
+                    && string.IsNullOrWhiteSpace(p.Sizes)
+                    && string.IsNullOrWhiteSpace(p.Colors))
+                .ToList();
+            var needsOptions = products.Count - movable.Count;
+
+            if (movable.Count == 0)
+            {
+                TempData["Error"] = needsOptions > 0
+                    ? "Those items need a size or colour — open each one to choose."
+                    : "The selected items are out of stock.";
+                return RedirectToAction("Index");
+            }
+
+            if (UserId == null)
+            {
+                var guestCart = _guestCart.Get(HttpContext.Session);
+                foreach (var p in movable)
+                {
+                    var existing = guestCart.FirstOrDefault(g => g.ProductId == p.Id);
+                    if (existing != null)
+                    {
+                        if (existing.Quantity < p.Stock) existing.Quantity++;
+                    }
+                    else
+                    {
+                        guestCart.Add(new GuestCartItem { ProductId = p.Id, Quantity = 1, Size = "", Color = "" });
+                    }
+                }
+                _guestCart.Save(HttpContext.Session, guestCart);
+
+                var movedIds = movable.Select(p => p.Id).ToHashSet();
+                var guestWish = _guestWish.Get(HttpContext.Session);
+                guestWish.RemoveAll(movedIds.Contains);
+                _guestWish.Save(HttpContext.Session, guestWish);
+            }
+            else
+            {
+                var uid = UserId.Value;
+                foreach (var p in movable)
+                {
+                    var cartItem = _db.CartItems.FirstOrDefault(c =>
+                        c.UserId == uid && c.ProductId == p.Id && c.Size == "" && c.Color == "");
+                    if (cartItem != null)
+                    {
+                        if (cartItem.Quantity < p.Stock) cartItem.Quantity++;
+                    }
+                    else
+                    {
+                        _db.CartItems.Add(new CartItem
+                        {
+                            UserId = uid,
+                            ProductId = p.Id,
+                            Quantity = 1,
+                            Size = "",
+                            Color = ""
+                        });
+                    }
+                }
+
+                var movedIds = movable.Select(p => p.Id).ToHashSet();
+                var wish = _db.WishlistItems
+                    .Where(w => w.UserId == uid && movedIds.Contains(w.ProductId))
+                    .ToList();
+                _db.WishlistItems.RemoveRange(wish);
+                _db.SaveChanges();
+            }
+
+            TempData["Success"] = movable.Count == 1
+                ? "1 item moved to your cart."
+                : $"{movable.Count} items moved to your cart.";
+            if (needsOptions > 0)
+                TempData["Error"] = needsOptions == 1
+                    ? "1 item needs a size or colour, so it stayed in your wishlist."
+                    : $"{needsOptions} items need a size or colour, so they stayed in your wishlist.";
+
+            return RedirectToAction("Index", "Cart");
+        }
+
         // ─── Move to Cart ─────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult MoveToCart(int productId)
-        {
+        public IActionResult MoveToCart(int productId)        {
             var product = _db.Products.FirstOrDefault(p => p.Id == productId);
             if (product == null || product.Stock <= 0)
             {
@@ -222,6 +364,39 @@ namespace ShoppingApp.Controllers
             _db.SaveChanges();
             TempData["Success"] = $"{product.Name} moved to cart!";
             return RedirectToAction("Index", "Cart");
+        }
+
+        // ─── Public shared wishlist ───────────────────────────
+        [HttpGet]
+        public async Task<IActionResult> Shared(string? ids)
+        {
+            var idList = (ids ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => int.TryParse(s, out var n) ? n : 0)
+                .Where(n => n > 0)
+                .Distinct()
+                .Take(50)
+                .ToList();
+
+            ViewData["Title"] = "Shared Wishlist";
+
+            if (idList.Count == 0)
+                return View(new List<Product>());
+
+            var products = await _db.Products
+                .AsNoTracking()
+                .Where(p => idList.Contains(p.Id))
+                .ToListAsync();
+
+            // Preserve the order the sender saved them in.
+            var ordered = idList
+                .Select(fid => products.FirstOrDefault(p => p.Id == fid))
+                .Where(p => p != null)
+                .Select(p => p!)
+                .ToList();
+
+            ViewBag.RatingSummaries = await _reviews.GetAsync(ordered.Select(p => p.Id));
+            return View(ordered);
         }
 
         // ─── Count (for badge) ────────────────────────────────

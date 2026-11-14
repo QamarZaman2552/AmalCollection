@@ -881,6 +881,71 @@ body.light-mode .pw-match.no { color: #b91c1c; }
 .cart-trust span { display: inline-flex; align-items: center; gap: 0.3rem; }
 .cart-trust i { color: var(--gold); font-size: 0.8rem; }
 
+/* Wishlist bulk toolbar */
+.wishlist-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+.wl-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.wl-select-all input,
+.wl-item-check {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+.wl-selected-count { font-size: 0.78rem; color: var(--text-3); }
+.wl-bulk-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.wl-bulk-form { margin: 0; }
+.wl-share-status { font-size: 0.75rem; font-weight: 600; color: #4ade80; }
+
+/* Select checkbox on wishlist cards */
+.wl-check {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border-radius: 50%;
+  background: rgba(10, 13, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+.wl-check .wl-item-check { width: 16px; height: 16px; }
+
+body.light-mode .wishlist-toolbar { background: #ffffff; border-color: #e6e0d6; }
+body.light-mode .wl-select-all { color: #4a4a4a; }
+body.light-mode .wl-share-status { color: #17804d; }
+
 /* Checkout step indicator: Cart → Details → Confirm */
 .checkout-steps { max-width: 620px; margin: 0 auto 1.75rem; }
 .checkout-steps ol { display: flex; align-items: center; gap: 0.4rem; list-style: none; margin: 0; padding: 0; }

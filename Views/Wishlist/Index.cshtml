@@ -36,6 +36,32 @@
         }
         else
         {
+            <div class="wishlist-toolbar" id="wishlistToolbar">
+                <label class="wl-select-all">
+                    <input type="checkbox" id="wlSelectAll" />
+                    <span>Select all</span>
+                </label>
+                <span class="wl-selected-count" id="wlSelectedCount" aria-live="polite">0 selected</span>
+                <div class="wl-bulk-actions">
+                    <form method="post" action="/Wishlist/BulkMoveToCart" class="wl-bulk-form" id="wlBulkMoveForm">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-gold btn-sm" id="wlMoveBtn" disabled>
+                            <i class="bi bi-bag-plus"></i> Move to cart
+                        </button>
+                    </form>
+                    <form method="post" action="/Wishlist/BulkRemove" class="wl-bulk-form" id="wlBulkRemoveForm">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-dark btn-sm" id="wlRemoveBtn" disabled>
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-outline-dark btn-sm" id="wlShareBtn">
+                        <i class="bi bi-share"></i> Share
+                    </button>
+                    <span class="wl-share-status" id="wlShareStatus" role="status"></span>
+                </div>
+            </div>
+
             <div class="row g-3 g-md-4">
                 @foreach (var item in Model)
                 {
@@ -44,6 +70,11 @@
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="product-card h-100">
                             <div class="product-media">
+                                <label class="wl-check" title="Select @p.Name">
+                                    <input type="checkbox" class="wl-item-check" value="@p.Id"
+                                           data-movable="@(hasOptions || p.Stock == 0 ? "false" : "true")"
+                                           aria-label="Select @p.Name" />
+                                </label>
                                 <a href="/Products/Detail/@p.Id" class="product-media-link">
                                     <img src="@(p.ImagePath ?? "/images/placeholder.jpg")"
                                          alt="@p.Name" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" />
@@ -105,3 +136,87 @@
         }
     </div>
 </section>
+
+@section Scripts {
+<script>
+(function () {
+    var checks = Array.prototype.slice.call(document.querySelectorAll('.wl-item-check'));
+    if (!checks.length) return;
+
+    var selectAll = document.getElementById('wlSelectAll');
+    var countEl = document.getElementById('wlSelectedCount');
+    var moveBtn = document.getElementById('wlMoveBtn');
+    var removeBtn = document.getElementById('wlRemoveBtn');
+    var moveForm = document.getElementById('wlBulkMoveForm');
+    var removeForm = document.getElementById('wlBulkRemoveForm');
+    var shareBtn = document.getElementById('wlShareBtn');
+    var shareStatus = document.getElementById('wlShareStatus');
+
+    function selected() {
+        return checks.filter(function (c) { return c.checked; });
+    }
+
+    function refresh() {
+        var n = selected().length;
+        var movable = selected().filter(function (c) { return c.dataset.movable === 'true'; }).length;
+        var needs = n - movable;
+        countEl.textContent = n + ' selected' + (needs > 0 ? ' · ' + needs + ' need size/colour' : '');
+        moveBtn.disabled = movable === 0;
+        removeBtn.disabled = n === 0;
+        selectAll.checked = n > 0 && n === checks.length;
+        selectAll.indeterminate = n > 0 && n < checks.length;
+    }
+
+    selectAll.addEventListener('change', function () {
+        checks.forEach(function (c) { c.checked = selectAll.checked; });
+        refresh();
+    });
+
+    checks.forEach(function (c) { c.addEventListener('change', refresh); });
+
+    function fillSelection(form, list) {
+        form.querySelectorAll('input[name="productIds"]').forEach(function (i) { i.remove(); });
+        list.forEach(function (c) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'productIds';
+            input.value = c.value;
+            form.appendChild(input);
+        });
+    }
+
+    moveForm.addEventListener('submit', function (e) {
+        var movable = selected().filter(function (c) { return c.dataset.movable === 'true'; });
+        if (!movable.length) { e.preventDefault(); return; }
+        fillSelection(moveForm, movable);
+    });
+
+    removeForm.addEventListener('submit', function (e) {
+        if (!selected().length) { e.preventDefault(); return; }
+        fillSelection(removeForm, selected());
+    });
+
+    function shareUrl() {
+        var ids = selected().map(function (c) { return c.value; });
+        if (!ids.length) ids = checks.map(function (c) { return c.value; });
+        return location.origin + '/Wishlist/Shared?ids=' + ids.join(',');
+    }
+
+    shareBtn.addEventListener('click', async function () {
+        var url = shareUrl();
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'My Amal Collection wishlist', url: url });
+                return;
+            }
+            await navigator.clipboard.writeText(url);
+            shareStatus.textContent = 'Link copied!';
+            setTimeout(function () { shareStatus.textContent = ''; }, 2500);
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            window.prompt('Copy this wishlist link:', url);
+        }
+    });
+})();
+</script>
+}

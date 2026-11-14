@@ -1,0 +1,41 @@
+@model List<ShoppingApp.Models.Product>
+@{
+    ViewData["Title"] = "Shared Wishlist";
+}
+
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-4">
+            <div class="section-kicker">Shared With You</div>
+            <h1 class="section-title">A Shared Wishlist</h1>
+            <p class="section-sub">
+                @if (Model.Any())
+                {
+                    <text>@Model.Count @(Model.Count == 1 ? "piece" : "pieces") someone wanted you to see.</text>
+                }
+                else
+                {
+                    <text>This wishlist link is empty or no longer valid.</text>
+                }
+            </p>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon" style="font-size:2.5rem;color:var(--gold);"><i class="bi bi-link-45deg"></i></div>
+                <p>Nothing to show here. Explore the collection and start your own wishlist.</p>
+                <a href="/" class="btn btn-gold">Browse Products</a>
+            </div>
+        }
+        else
+        {
+            @await Html.PartialAsync("_ProductGridCompact", Model)
+
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-gold">Shop the Collection</a>
+                <a href="/Wishlist" class="btn btn-outline-dark ms-2">Start My Wishlist</a>
+            </div>
+        }
+    </div>
+</section>
