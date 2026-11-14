@@ -764,8 +764,28 @@ document.querySelectorAll('#colorOptions .color-opt').forEach(function (btn) {
     if (!qty) return;
     var minus = document.getElementById('qtyMinus');
     var plus = document.getElementById('qtyPlus');
-    if (minus) minus.addEventListener('click', function () { qty.value = Math.max(1, parseInt(qty.value) - 1); });
-    if (plus) plus.addEventListener('click', function () { qty.value = Math.min(parseInt(qty.max) || 99, parseInt(qty.value) + 1); });
+
+    function bump(cls) {
+        qty.classList.remove('qty-pulse', 'qty-limit');
+        void qty.offsetWidth;
+        qty.classList.add(cls);
+    }
+    qty.addEventListener('animationend', function () {
+        qty.classList.remove('qty-pulse', 'qty-limit');
+    });
+
+    function step(delta) {
+        var max = parseInt(qty.max, 10) || 99;
+        var next = (parseInt(qty.value, 10) || 1) + delta;
+        if (next < 1) { qty.value = 1; bump('qty-limit'); return; }
+        if (next > max) { qty.value = max; bump('qty-limit'); return; }
+        qty.value = next;
+        bump('qty-pulse');
+    }
+
+    if (minus) minus.addEventListener('click', function () { step(-1); });
+    if (plus) plus.addEventListener('click', function () { step(1); });
+    qty.addEventListener('change', function () { bump('qty-pulse'); });
 })();
 
 // Share product (native share → copy link → WhatsApp)

@@ -540,6 +540,16 @@ document.addEventListener('click', function (e) {
 });
 
 // â”€â”€â”€ Filter Drawer (Offcanvas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Wishlist heart pop: runs on tap so the heart reacts before the round-trip finishes.
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest ? e.target.closest('.wish-btn, .pd-wish') : null;
+  if (!btn) return;
+  btn.classList.remove('is-pop');
+  void btn.offsetWidth;
+  btn.classList.add('is-pop');
+  btn.addEventListener('animationend', function () { btn.classList.remove('is-pop'); }, { once: true });
+});
+
 function initFilterDrawer() {
   const toggle   = document.getElementById('filterDrawerToggle');
   const drawer   = document.getElementById('filterDrawer');
