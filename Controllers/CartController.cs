@@ -57,6 +57,76 @@ namespace ShoppingApp.Controllers
             return items;
         }
 
+        // One add-to-cart rulebook shared by the quick-add link, the PDP form and
+        // the AJAX endpoint, so stock/option checks can never drift apart.
+        private (bool Ok, string Message, bool ProductMissing) TryAddToCart(
+            int productId, int quantity, string? size, string? color)
+        {
+            if (IsAdmin)
+                return (false, "Admins cannot purchase products.", false);
+
+            var product = _db.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
+                return (false, "That product is no longer available.", true);
+
+            if (quantity <= 0) quantity = 1;
+
+            size ??= "";
+            color ??= "";
+
+            var optionError = MissingOptionMessage(product, size, color);
+            if (optionError != null) return (false, optionError, false);
+
+            if (UserId == null)
+            {
+                var guest = _guestCart.Get(HttpContext.Session);
+                var existing = guest.FirstOrDefault(g =>
+                    g.ProductId == productId && g.Size == size && g.Color == color);
+                var newQty = (existing?.Quantity ?? 0) + quantity;
+                if (newQty > product.Stock)
+                    return (false, StockMessage(product.Stock), false);
+
+                if (existing != null)
+                    existing.Quantity = newQty;
+                else
+                    guest.Add(new GuestCartItem { ProductId = productId, Quantity = quantity, Size = size, Color = color });
+
+                _guestCart.Save(HttpContext.Session, guest);
+                return (true, $"{product.Name} added to cart!", false);
+            }
+
+            var dbExisting = _db.CartItems.FirstOrDefault(c =>
+                c.UserId == UserId && c.ProductId == productId && c.Size == size && c.Color == color);
+            var dbNewQty = (dbExisting?.Quantity ?? 0) + quantity;
+            if (dbNewQty > product.Stock)
+                return (false, StockMessage(product.Stock), false);
+
+            if (dbExisting != null)
+                dbExisting.Quantity = dbNewQty;
+            else
+                _db.CartItems.Add(new CartItem
+                {
+                    UserId = UserId.Value,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Size = size,
+                    Color = color
+                });
+
+            _db.SaveChanges();
+            return (true, $"{product.Name} added to cart!", false);
+        }
+
+        private static string StockMessage(int stock) =>
+            $"Not enough stock available. Only {stock} unit(s) left.";
+
+        private int CartCount()
+        {
+            if (UserId == null)
+                return _guestCart.Count(HttpContext.Session);
+            return _db.CartItems.Where(c => c.UserId == UserId).Sum(c => c.Quantity);
+        }
+
         // ─── View Cart ───────────────────────────────────────────
         public async Task<IActionResult> Index()
         {
@@ -98,154 +168,58 @@ namespace ShoppingApp.Controllers
             return View(items);
         }
 
-        // ─── Add to Cart (GET redirects, POST processes) ─────────
+        // ─── Add to Cart (GET quick-add) ─────────────────────────
         [HttpGet]
         public IActionResult Add(int productId, int quantity = 1, string? size = null, string? color = null)
         {
-            if (IsAdmin)
+            var result = TryAddToCart(productId, quantity, size, color);
+            if (result.ProductMissing) return RedirectToAction("Index", "Products");
+
+            if (!result.Ok)
             {
-                TempData["Error"] = "Admins cannot purchase products.";
+                TempData["Error"] = result.Message;
                 return RedirectToAction("Detail", "Products", new { id = productId });
             }
 
-            var product = _db.Products.FirstOrDefault(p => p.Id == productId);
-            if (product == null) return RedirectToAction("Index", "Products");
-
-            if (quantity <= 0) quantity = 1;
-            size ??= "";
-            color ??= "";
-
-            var optionError = MissingOptionMessage(product, size, color);
-            if (optionError != null)
-            {
-                TempData["Error"] = optionError;
-                return RedirectToAction("Detail", "Products", new { id = productId });
-            }
-
-            if (UserId == null)
-            {
-                var guest = _guestCart.Get(HttpContext.Session);
-                var existing = guest.FirstOrDefault(g =>
-                    g.ProductId == productId && g.Size == size && g.Color == color);
-                var newQty = (existing?.Quantity ?? 0) + quantity;
-                if (newQty > product.Stock)
-                {
-                    TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
-                    return RedirectToAction("Detail", "Products", new { id = productId });
-                }
-
-                if (existing != null)
-                    existing.Quantity = newQty;
-                else
-                    guest.Add(new GuestCartItem { ProductId = productId, Quantity = quantity, Size = size, Color = color });
-
-                _guestCart.Save(HttpContext.Session, guest);
-                TempData["Success"] = $"{product.Name} added to cart!";
-                return RedirectToAction("Index", "Cart");
-            }
-
-            var dbExisting = _db.CartItems.FirstOrDefault(c =>
-                c.UserId == UserId && c.ProductId == productId && c.Size == size && c.Color == color);
-            var dbNewQty = (dbExisting?.Quantity ?? 0) + quantity;
-            if (dbNewQty > product.Stock)
-            {
-                TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
-                return RedirectToAction("Detail", "Products", new { id = productId });
-            }
-
-            if (dbExisting != null)
-                dbExisting.Quantity = dbNewQty;
-            else
-                _db.CartItems.Add(new CartItem
-                {
-                    UserId = UserId.Value,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    Size = size,
-                    Color = color
-                });
-
-            _db.SaveChanges();
-            TempData["Success"] = $"{product.Name} added to cart!";
+            TempData["Success"] = result.Message;
             return RedirectToAction("Index", "Cart");
         }
 
+        // ─── Add to Cart (form post) ─────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddPost(int productId, int quantity = 1, string? size = null, string? color = null)
         {
-            if (IsAdmin)
-            {
-                TempData["Error"] = "Admins cannot purchase products.";
-                return RedirectToAction("Detail", "Products", new { id = productId });
-            }
-
-            var product = _db.Products.FirstOrDefault(p => p.Id == productId);
-            if (product == null) return NotFound();
-
             if (quantity <= 0)
             {
                 TempData["Error"] = "Quantity must be at least 1.";
                 return RedirectToAction("Detail", "Products", new { id = productId });
             }
 
-            size ??= "";
-            color ??= "";
+            var result = TryAddToCart(productId, quantity, size, color);
+            if (result.ProductMissing) return NotFound();
 
-            var optionError = MissingOptionMessage(product, size, color);
-            if (optionError != null)
+            if (!result.Ok)
             {
-                TempData["Error"] = optionError;
+                TempData["Error"] = result.Message;
                 return RedirectToAction("Detail", "Products", new { id = productId });
             }
 
-            if (UserId == null)
-            {
-                // Guest cart in session
-                var guest = _guestCart.Get(HttpContext.Session);
-                var existing = guest.FirstOrDefault(g =>
-                    g.ProductId == productId && g.Size == size && g.Color == color);
-                var newQty = (existing?.Quantity ?? 0) + quantity;
-                if (newQty > product.Stock)
-                {
-                    TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
-                    return RedirectToAction("Detail", "Products", new { id = productId });
-                }
-
-                if (existing != null)
-                    existing.Quantity = newQty;
-                else
-                    guest.Add(new GuestCartItem { ProductId = productId, Quantity = quantity, Size = size, Color = color });
-
-                _guestCart.Save(HttpContext.Session, guest);
-                TempData["Success"] = $"{product.Name} added to cart!";
-                return RedirectToAction("Index");
-            }
-
-            var dbExisting = _db.CartItems.FirstOrDefault(c =>
-                c.UserId == UserId && c.ProductId == productId && c.Size == size && c.Color == color);
-            var dbNewQty = (dbExisting?.Quantity ?? 0) + quantity;
-            if (dbNewQty > product.Stock)
-            {
-                TempData["Error"] = $"Not enough stock available. Only {product.Stock} unit(s) left.";
-                return RedirectToAction("Detail", "Products", new { id = productId });
-            }
-
-            if (dbExisting != null)
-                dbExisting.Quantity = dbNewQty;
-            else
-                _db.CartItems.Add(new CartItem
-                {
-                    UserId = UserId.Value,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    Size = size,
-                    Color = color
-                });
-
-            _db.SaveChanges();
-            TempData["Success"] = $"{product.Name} added to cart!";
+            TempData["Success"] = result.Message;
             return RedirectToAction("Index");
+        }
+
+        // ─── Add to Cart (AJAX) ──────────────────────────────────
+        // JSON response lets the page stay put: { ok, message, cartCount }.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddJson(int productId, int quantity = 1, string? size = null, string? color = null)
+        {
+            if (quantity <= 0)
+                return Json(new { ok = false, message = "Quantity must be at least 1.", cartCount = CartCount() });
+
+            var result = TryAddToCart(productId, quantity, size, color);
+            return Json(new { ok = result.Ok, message = result.Message, cartCount = CartCount() });
         }
 
         // ─── Update Quantity ─────────────────────────────────────
@@ -325,13 +299,7 @@ namespace ShoppingApp.Controllers
         }
 
         // ─── Cart Count (for header badge) ───────────────────────
-        public IActionResult Count()
-        {
-            if (UserId == null)
-                return Json(_guestCart.Count(HttpContext.Session));
-            var count = _db.CartItems.Where(c => c.UserId == UserId).Sum(c => c.Quantity);
-            return Json(count);
-        }
+        public IActionResult Count() => Json(CartCount());
 
         // ─── Mini-cart payload (drawer in navbar) ────────────────
         [HttpGet]

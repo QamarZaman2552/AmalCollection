@@ -697,6 +697,163 @@ pageInit(initFilterDrawer);
   if (cont) cont.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
   drawer.addEventListener('click', e => { if (e.target.closest('a')) closeDrawer(); });
+
+  // Exposed so add-to-cart can show the fresh cart right after an AJAX add.
+  window.__openMiniCart = openDrawer;
+})();
+
+// ═══════════ AJAX Add to Cart (page stays put) ═════════════════════
+// PDP form, sticky bar and Quick Add links post to /Cart/AddJson so the
+// shopper never loses their place: thin top progress bar, badge bump and
+// the mini cart drawer with the new item.
+(function () {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  let bar = null;
+  let fill = null;
+  let tick = null;
+
+  function token() {
+    return (meta && meta.getAttribute('content')) || '';
+  }
+
+  function startBar() {
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'ajax-progress';
+      bar.setAttribute('aria-hidden', 'true');
+      fill = document.createElement('span');
+      bar.appendChild(fill);
+      document.body.appendChild(bar);
+    }
+    clearInterval(tick);
+    bar.classList.add('active');
+    fill.style.transition = 'none';
+    fill.style.width = '8%';
+    void fill.offsetWidth;
+    fill.style.transition = 'width 0.35s ease';
+    fill.style.width = '38%';
+    let pct = 38;
+    tick = setInterval(function () {
+      pct = Math.min(92, pct + Math.random() * 7);
+      fill.style.width = pct + '%';
+    }, 200);
+  }
+
+  function endBar() {
+    clearInterval(tick);
+    if (!bar) return;
+    fill.style.width = '100%';
+    setTimeout(function () {
+      bar.classList.remove('active');
+      setTimeout(function () { fill.style.width = '0%'; }, 260);
+    }, 220);
+  }
+
+  function toast(message, ok) {
+    const old = document.getElementById('ajaxToast');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.id = 'ajaxToast';
+    el.className = 'toast ' + (ok ? 'toast-success' : 'toast-error');
+    el.setAttribute('role', 'status');
+    const icon = document.createElement('i');
+    icon.className = ok ? 'bi bi-check-circle-fill' : 'bi bi-x-circle';
+    el.appendChild(icon);
+    el.appendChild(document.createTextNode(' ' + message));
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 4000);
+  }
+
+  function bumpBadge(count) {
+    const badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    badge.textContent = count > 0 ? count : '0';
+    badge.classList.remove('bump');
+    void badge.offsetWidth;
+    badge.classList.add('bump');
+  }
+
+  async function add(payload, trigger) {
+    if (trigger) trigger.classList.add('is-loading');
+    startBar();
+    try {
+      const body = new URLSearchParams();
+      body.set('productId', payload.productId || '');
+      body.set('quantity', payload.quantity || '1');
+      body.set('size', payload.size || '');
+      body.set('color', payload.color || '');
+      body.set('__RequestVerificationToken', token());
+
+      const res = await fetch('/Cart/AddJson', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: body.toString()
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (data.ok) {
+        bumpBadge(data.cartCount);
+        if (window.__openMiniCart) window.__openMiniCart();
+        else toast(data.message, true);
+      } else {
+        toast(data.message || 'Could not add to cart.', false);
+      }
+      return data;
+    } catch (err) {
+      toast('Could not add to cart. Please try again.', false);
+      return { ok: false };
+    } finally {
+      endBar();
+      if (trigger) trigger.classList.remove('is-loading');
+    }
+  }
+
+  // PDP form (the sticky bar submits this same form). Registered before
+  // ajax-nav, which then backs off because the event is already handled.
+  // The inline size/colour check runs first and cancels, so we respect it.
+  document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (!form || !form.classList || !form.classList.contains('add-cart-form')) return;
+    if (e.defaultPrevented) return;
+    e.preventDefault();
+    if (form.dataset.busy === '1') return;
+    form.dataset.busy = '1';
+
+    const data = new FormData(form);
+    const btn = e.submitter || form.querySelector('button[type="submit"]');
+    add({
+      productId: data.get('productId'),
+      quantity: data.get('quantity'),
+      size: data.get('size'),
+      color: data.get('color')
+    }, btn).finally(function () { delete form.dataset.busy; });
+  });
+
+  // Quick Add links on product cards (non-variant products only).
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = e.target.closest ? e.target.closest('a.quick-add[href]') : null;
+    if (!link) return;
+    let url;
+    try { url = new URL(link.href, location.origin); } catch (err) { return; }
+    if (url.pathname.replace(/\/+$/, '').toLowerCase() !== '/cart/add') return;
+
+    e.preventDefault();
+    if (link.getAttribute('data-busy') === '1') return;
+    link.setAttribute('data-busy', '1');
+    add({
+      productId: url.searchParams.get('productId'),
+      quantity: url.searchParams.get('quantity'),
+      size: url.searchParams.get('size'),
+      color: url.searchParams.get('color')
+    }, link).finally(function () { link.removeAttribute('data-busy'); });
+  });
 })();
 
 // ═══════════ Live Search Suggestions ═══════════════════════════════

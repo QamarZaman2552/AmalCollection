@@ -1,5 +1,6 @@
 ﻿@using ShoppingApp.Data
 @inject AppDbContext _db
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var isAdmin = Context.Session.GetString("UserRole") == "admin";
     var userId = Context.Session.GetInt32("UserId");
@@ -60,6 +61,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
     <meta name="description" content="@ogDescription" />
     <link rel="canonical" href="@ogUrl" />
     <meta property="og:site_name" content="Amal Collection" />

@@ -258,8 +258,9 @@
         try { u = new URL(a.href, location.href); } catch (err) { return; }
         if (u.origin !== location.origin) return;
 
-        // Quick Add: navigate mat karo — AJAX se add karke badge/toast dikhao
-        if (a.classList.contains('quick-add')) {
+        // Quick Add: navigate mat karo — AJAX add (site.js) handle karta hai.
+        // Sirf /Cart/Add links; "Select Options" wale Detail links normal chalte hain.
+        if (a.classList.contains('quick-add') && u.pathname.replace(/\/+$/, '').toLowerCase() === '/cart/add') {
             e.preventDefault();
             quickAdd(a, u);
             return;
