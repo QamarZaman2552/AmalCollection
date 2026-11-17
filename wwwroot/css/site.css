@@ -1,53 +1,9 @@
 /*
-   Amal Collection – Premium Dark Mode Design System
+   Amal Collection - Design System (light theme)
 */
 
 :root {
   --pdp-bar-h:    0px;
-  --bg:          #0a0d14;
-  --bg-2:        #111827;
-  --bg-3:        #1a2235;
-  --card:        rgba(255,255,255,0.04);
-  --card-hover:  rgba(255,255,255,0.08);
-  --border:      rgba(255,255,255,0.08);
-  --accent:      #b8964f;
-  --accent-2:    #d4af6a;
-  --accent-3:    #8a7340;
-  --green:       #2f9e63;
-  --red:         #d64545;
-  --orange:      #f97316;
-  --text:        #f1f5f9;
-  --text-2:      #94a3b8;
-  --text-3:      #64748b;
-  --radius:      14px;
-  --radius-sm:   8px;
-  --shadow:      0 8px 32px rgba(0,0,0,0.4);
-  --shadow-lg:   0 20px 60px rgba(0,0,0,0.5);
-  --font:        'Inter', system-ui, sans-serif;
-  --font-head:   'Playfair Display', Georgia, serif;
-  --transition:  0.25s ease;
-  --glow-accent: 0 0 24px rgba(var(--gold-rgb),0.35);
-  --glow-green:  0 0 18px rgba(47,158,99,0.4);
-  --gold:        #b8964f;
-  --gold-rgb:    184, 150, 79;
-  --gold-soft:   #f4ecdd;
-  --nav-bg:      rgba(10, 13, 20, 0.9);
-  --line:        rgba(255, 255, 255, 0.10);
-  --surface:        rgba(255, 255, 255, 0.06);
-  --surface-raise:  rgba(255, 255, 255, 0.09);
-  --surface-sunken: rgba(255, 255, 255, 0.03);
-  --chip-active-bg: #f1f5f9;
-  --chip-active-fg: #0a0d14;
-  --danger:         #f87171;
-  --danger-soft:    rgba(214, 69, 69, 0.15);
-  --cta-gradient:   linear-gradient(135deg, var(--gold) 0%, #8a7340 100%);
-  --cta-gradient-hover: linear-gradient(135deg, #8a7340 0%, var(--gold) 100%);
-  --cta-fg:         #0a0d14;
-  --cta-fg-hover:   #0a0d14;
-}
-
-/* ─── Light Mode (Amal Collection · cream + gold) ─────── */
-body.light-mode {
   --bg:          #faf8f5;
   --bg-2:        #f2eee7;
   --bg-3:        #e9e3d9;
@@ -57,14 +13,23 @@ body.light-mode {
   --accent:      #1c1b19;
   --accent-2:    #6f6a62;
   --accent-3:    #b8964f;
+  --green:       #2f9e63;
+  --red:         #d64545;
+  --orange:      #f97316;
   --text:        #1c1b19;
   --text-2:      #6f6a62;
   --text-3:      #9d978d;
+  --radius:      14px;
+  --radius-sm:   8px;
   --shadow:      0 6px 24px rgba(28, 27, 25, 0.07);
   --shadow-lg:   0 18px 48px rgba(28, 27, 25, 0.12);
+  --font:        'Inter', system-ui, sans-serif;
+  --font-head:   'Playfair Display', Georgia, serif;
+  --transition:  0.25s ease;
   --glow-accent: 0 0 0 3px rgba(var(--gold-rgb), 0.18);
   --glow-green:  none;
   --gold:        #b8964f;
+  --gold-rgb:    184, 150, 79;
   --gold-soft:   #f4ecdd;
   --nav-bg:      rgba(250, 248, 245, 0.94);
   --line:        #e8e2d8;
@@ -79,8 +44,6 @@ body.light-mode {
   --cta-gradient-hover: linear-gradient(135deg, #2e2820 0%, #1c1b19 100%);
   --cta-fg:         #f5f2ec;
   --cta-fg-hover:   #ffffff;
-  --font-head:   'Playfair Display', Georgia, serif;
-  --font:        'Inter', system-ui, sans-serif;
 }
 
 /* Light mode specific overrides */

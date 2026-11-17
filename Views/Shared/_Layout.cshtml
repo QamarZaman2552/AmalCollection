@@ -76,16 +76,6 @@
     <meta name="twitter:image" content="@ogImage" />
     <title>@ViewData["Title"] – Amal Collection</title>
     <script>
-        (function () {
-            var t = localStorage.getItem('theme');
-            if (t !== 'dark') {
-                function applyLight() { document.body.classList.add('light-mode'); }
-                if (document.body) { applyLight(); }
-                else { document.addEventListener('DOMContentLoaded', applyLight); }
-            }
-        })();
-    </script>
-    <script>
         // Applied before paint so a dismissed announcement bar never flashes.
         try {
             if (localStorage.getItem('amal.announce.dismissed') === '1') {
@@ -103,7 +93,7 @@
     <link rel="stylesheet" href="~/css/prototype.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="@ViewData["BodyClass"]">
+<body class="light-mode @ViewData["BodyClass"]">
     <a href="#mainContent" class="skip-link">Skip to content</a>
 
     <!-- ─── Announcement Bar ─────────────────────────────── -->

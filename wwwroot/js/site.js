@@ -1,4 +1,4 @@
-﻿// â”€â”€â”€ Mobile Hamburger Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ Mobile Hamburger Menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function () {
   const btn  = document.getElementById('hamburgerBtn');
   const menu = document.getElementById('mobileMenu');
@@ -413,30 +413,6 @@ if (!document.getElementById('rippleStyle')) {
   if (!authPage) return;
   document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 })();
-
-// â”€â”€â”€ Light/Dark Theme Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function toggleTheme() {
-  var body = document.body;
-  if (body.classList.contains('light-mode')) {
-    body.classList.remove('light-mode');
-    localStorage.setItem('theme', 'dark');
-  } else {
-    body.classList.add('light-mode');
-    localStorage.setItem('theme', 'light');
-  }
-}
-window.addEventListener('DOMContentLoaded', function () {
-  var saved = localStorage.getItem('theme');
-  if (saved === 'dark') {
-    document.body.classList.remove('light-mode');
-  } else {
-    document.body.classList.add('light-mode');
-  }
-  var btn = document.getElementById('themeToggle');
-  var mobileBtn = document.getElementById('mobileThemeToggle');
-  if (btn) btn.addEventListener('click', toggleTheme);
-  if (mobileBtn) mobileBtn.addEventListener('click', toggleTheme);
-});
 
 // â”€â”€â”€ Prototype Hero Slider (#heroSlider) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function initHeroSlider() {
