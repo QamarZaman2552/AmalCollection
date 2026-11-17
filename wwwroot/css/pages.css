@@ -437,6 +437,8 @@
 }
 .order-track-card:hover { border-color: rgba(var(--gold-rgb),0.35); }
 .otc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
+.otc-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.otc-actions .otc-print { font-size: 0.78rem; padding: 0.32rem 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; }
 .otc-id   { font-weight: 700; font-size: 1.05rem; }
 .otc-date { font-size: 0.8rem; color: var(--text-3); margin-left: 0.75rem; }
 

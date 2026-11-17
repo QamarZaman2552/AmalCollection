@@ -136,9 +136,14 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/prototype.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/print.css" media="print" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="light-mode @ViewData["BodyClass"]">
+    <div class="print-only print-header">
+        <div class="print-brand">Amal Collection</div>
+        <div class="print-meta">amalcollection.pk &middot; @contactPhone &middot; @contactEmail</div>
+    </div>
     <a href="#mainContent" class="skip-link">Skip to content</a>
 
     <!-- ─── Announcement Bar ─────────────────────────────── -->

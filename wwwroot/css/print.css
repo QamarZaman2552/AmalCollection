@@ -1,0 +1,230 @@
+/* ═══════════════════════════════════════════════════════════
+   Amal Collection – Print stylesheet
+   Loaded with media="print", so nothing here affects screen.
+   Goal: order confirmations and invoices print on plain white
+   paper without nav, footer, buttons, chat widgets or dark
+   surfaces, and without cards splitting across pages.
+   ═══════════════════════════════════════════════════════════ */
+
+@page {
+    margin: 14mm;
+}
+
+html,
+body {
+    background: #fff !important;
+    color: #111 !important;
+}
+
+/* ─── App chrome that makes no sense on paper ───────────── */
+.ac-nav,
+.announce,
+.footer,
+.skip-link,
+.breadcrumb,
+.pager-chips,
+.pager,
+.newsletter,
+.shop-hero-slider,
+.hero,
+.chatbot-bubble,
+.chatbot-window,
+.chatbot-ping,
+.mc-drawer,
+.mc-backdrop,
+.mini-cart,
+.filter-drawer,
+.filter-drawer-overlay,
+.filter-toolbar,
+.quick-filter-scroll,
+.active-filters-bar,
+.sort-count-wrap,
+.pdp-sticky-bar,
+.co-mobile-bar,
+.wa-float,
+.chatbot-bubble,
+.toast,
+.admin-sidebar,
+.admin-topbar,
+.admin-nav,
+.modal,
+.modal-backdrop {
+    display: none !important;
+}
+
+/* Action controls: nothing clickable is useful on paper */
+button,
+.btn,
+.btn-primary,
+.btn-glass,
+.btn-gold,
+.btn-outline,
+.btn-outline-dark,
+.btn-filter-trigger,
+.quick-add,
+.wish-btn,
+.pill-remove,
+.img-remove-btn {
+    display: none !important;
+}
+
+/* ─── Flatten the design system ─────────────────────────── */
+*,
+*::before,
+*::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+a,
+a:visited {
+    color: #111 !important;
+    text-decoration: none !important;
+}
+
+.product-card,
+.order-track-card,
+.order-card,
+.otc-item,
+.co-item,
+.cart-item,
+.confirmation-box,
+.empty-state,
+.promo-card,
+.pd-gallery,
+.pd-info,
+.card {
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    color: #111 !important;
+}
+
+.section-title,
+.section-title i {
+    color: #111 !important;
+    font-size: 1.4rem;
+    margin-bottom: 0.9rem;
+}
+
+/* Paper does not need 3rem of breathing room at the top */
+.section,
+.main-content {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.section {
+    padding-bottom: 1rem !important;
+}
+
+.text-gold,
+.price-final,
+.price-old,
+.otc-item-price,
+.otc-total {
+    color: #111 !important;
+}
+
+/* Status pills and timeline dots stay visible on paper */
+.order-status,
+.otc-step-dot,
+.badge-tag,
+.badge-discount,
+.status-pending,
+.status-confirmed,
+.status-shipped,
+.status-delivered {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* ─── Images ────────────────────────────────────────────── */
+img {
+    max-width: 100% !important;
+}
+
+.otc-item img,
+.cart-item-img,
+.admin-thumb {
+    width: 44px !important;
+    height: 44px !important;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* ─── Pagination of content ─────────────────────────────── */
+h1,
+h2,
+h3,
+.otc-header,
+.order-header {
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.order-track-card,
+.order-card,
+.otc-item,
+.co-item,
+.cart-item,
+.confirmation-box,
+.empty-state,
+.promo-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.order-track-card + .order-track-card {
+    break-before: page;
+    page-break-before: always;
+}
+
+/* ─── Admin tables ──────────────────────────────────────── */
+table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+th,
+td {
+    border: 1px solid #cfcfcf !important;
+    padding: 6px 8px !important;
+    font-size: 0.78rem !important;
+    color: #111 !important;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* ─── Letterhead ────────────────────────────────────────── */
+.print-header {
+    display: block !important;
+    border-bottom: 2px solid #b8964f;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+}
+
+.print-brand {
+    font-family: var(--font-head);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #111;
+}
+
+.print-meta {
+    font-size: 0.76rem;
+    color: #555;
+    margin-top: 2px;
+}

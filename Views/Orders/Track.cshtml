@@ -18,7 +18,10 @@
                     <span class="otc-id">Order #@Model.Id</span>
                     <span class="otc-date">@Model.CreatedAt.AddHours(5).ToString("dd MMM yyyy, hh:mm tt") (PKT)</span>
                 </div>
-                <span class="order-status status-@Model.Status">@Model.Status.ToUpper()</span>
+                <div class="otc-actions">
+                    <span class="order-status status-@Model.Status">@Model.Status.ToUpper()</span>
+                    <button type="button" class="btn-glass otc-print" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+                </div>
             </div>
 
             <div class="otc-timeline">

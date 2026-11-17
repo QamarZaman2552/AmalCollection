@@ -2510,3 +2510,6 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
   .ac-badge.bump { animation: none; }
   .ajax-progress { transition: none; }
 }
+
+/* Print letterhead is only revealed by print.css */
+.print-only { display: none !important; }
