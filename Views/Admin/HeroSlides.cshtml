@@ -47,7 +47,7 @@ else
                         <td>
                             @if (!string.IsNullOrEmpty(s.ImagePath))
                             {
-                                <img src="@s.ImagePath" onerror="this.src='/images/placeholder.jpg'"
+                                <img src="@s.ImagePath" alt="@s.Title" onerror="this.src='/images/placeholder.jpg'"
                                      style="width:80px;height:48px;object-fit:cover;border-radius:6px;" />
                             }
                             else

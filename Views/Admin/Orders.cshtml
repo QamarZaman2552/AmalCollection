@@ -136,7 +136,7 @@ else
                                         <tr>
                                             <td>
                                                 <div style="display:flex; align-items:center; gap:6px;">
-                                                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" onerror="this.src='/images/placeholder.jpg'" style="width:24px; height:24px; object-fit:cover; border-radius:4px;" />
+                                                    <img src="@(item.Product?.ImagePath ?? "/images/placeholder.jpg")" alt="@(item.Product?.Name ?? "Product")" onerror="this.src='/images/placeholder.jpg'" style="width:24px; height:24px; object-fit:cover; border-radius:4px;" />
                                                     <span style="font-size:0.85rem;">@item.Product?.Name</span>
                                                 </div>
                                             </td>

@@ -140,7 +140,7 @@
                         @foreach (var img in images)
                         {
                             <div style="position:relative; text-align:center;">
-                                <img src="@img.ImagePath" style="height:70px;border-radius:6px;border:2px solid @(img.SortOrder == 0 ? "var(--gold)" : "var(--border)");" onerror="this.style.display='none'" />
+                                <img src="@img.ImagePath" alt="@(img.SortOrder == 0 ? "Cover image" : "Gallery image " + (img.SortOrder + 1))" style="height:70px;border-radius:6px;border:2px solid @(img.SortOrder == 0 ? "var(--gold)" : "var(--border)");" onerror="this.style.display='none'" />
                                 <div style="font-size:0.65rem;color:var(--text-3);">@(img.SortOrder == 0 ? "Cover" : "#" + (img.SortOrder + 1))</div>
                                 <button type="submit" formaction="/Admin/DeleteProductImage" name="imageId" value="@img.Id" onclick="return confirm('Delete this image?')" style="position:absolute;top:-4px;right:-4px;background:#d64545;color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:0.7rem;line-height:1;cursor:pointer;padding:0;">×</button>
                             </div>

@@ -28,7 +28,7 @@
             @foreach (var p in Model)
             {
                 <tr>
-                    <td><img src="@(p.ImagePath ?? "/images/placeholder.jpg")" class="admin-thumb" onerror="this.src='/images/placeholder.jpg'" /></td>
+                    <td><img src="@(p.ImagePath ?? "/images/placeholder.jpg")" alt="@p.Name" class="admin-thumb" onerror="this.src='/images/placeholder.jpg'" /></td>
                     <td><strong>@p.Name</strong></td>
                     <td>@p.Category</td>
                     <td>@p.Brand</td>
