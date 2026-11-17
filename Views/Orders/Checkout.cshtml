@@ -137,7 +137,7 @@
                     <div class="checkout-alert checkout-alert-error"><i class="bi bi-exclamation-triangle-fill me-1"></i>@TempData["Error"]</div>
                 }
 
-                <form method="post" action="/Orders/Checkout" class="co-form" id="guestCheckoutForm">
+                <form method="post" action="/Orders/Checkout" class="co-form" id="guestCheckoutForm" data-submit-guard data-guard-label="Placing order…">
                     @Html.AntiForgeryToken()
 
                     <!-- Contact -->
@@ -245,7 +245,7 @@
         <span class="co-mb-label">Total</span>
         <span class="co-mb-price">PKR @grand.ToString("N0")</span>
     </div>
-    <button class="btn btn-gold" type="button" onclick="document.getElementById('guestCheckoutForm').requestSubmit()">
+    <button class="btn btn-gold" type="button" data-guard-proxy data-guard-label="Placing order…" onclick="document.getElementById('guestCheckoutForm').requestSubmit()">
         <i class="bi bi-bag-check me-1"></i> Place Order
     </button>
 </div>

@@ -81,7 +81,7 @@
             {
                 <div class="alert-success contact-alert">@TempData["Success"]</div>
             }
-            <form action="/Contact/Submit" method="POST">
+            <form action="/Contact/Submit" method="POST" data-submit-guard data-guard-label="Sending…">
                 @Html.AntiForgeryToken()
                 <div class="form-group">
                     <label for="name">Full Name</label>

@@ -2513,3 +2513,7 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
 
 /* Print letterhead is only revealed by print.css */
 .print-only { display: none !important; }
+
+/* Buttons that are mid-submit (see the double-submit guard in site.js) */
+.is-submitting { cursor: progress; opacity: 0.85; }
+.is-submitting .spinner-border { vertical-align: -0.125em; }

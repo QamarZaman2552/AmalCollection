@@ -465,7 +465,7 @@
             {
                 <div class="write-review-box">
                     <h3 class="write-review-title">Write a Review <span class="verified-buyer-tag">Verified Buyer</span></h3>
-                    <form method="post" action="/Products/SubmitReview" id="reviewForm">
+                    <form method="post" action="/Products/SubmitReview" id="reviewForm" data-submit-guard data-guard-label="Posting…">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="productId" value="@Model.Id" />
                         <div class="star-picker" id="starPicker">
@@ -494,7 +494,7 @@
                     <p style="color:var(--text-3);font-size:0.85rem;margin:-0.3rem 0 0.9rem;">
                         <i class="bi bi-shield-check"></i> No account needed — just verify the order you received.
                     </p>
-                    <form method="post" action="/Products/SubmitReview" id="reviewForm">
+                    <form method="post" action="/Products/SubmitReview" id="reviewForm" data-submit-guard data-guard-label="Posting…">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="productId" value="@Model.Id" />
                         <div class="star-picker" id="starPicker">
