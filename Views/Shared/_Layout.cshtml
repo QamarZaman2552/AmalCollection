@@ -55,6 +55,50 @@
     var navOrdersActive  = NavStarts("/Orders/History");
     var navMessagesActive = NavStarts("/Admin/Messages");
     var navAdminActive    = NavStarts("/Admin") && !navMessagesActive;
+
+    // ─── Structured data (schema.org) ─────────────────────────
+    var socialProfiles = new List<string>();
+    if (!string.IsNullOrWhiteSpace(siteSettings?.InstagramUrl)) socialProfiles.Add(siteSettings!.InstagramUrl!);
+    if (!string.IsNullOrWhiteSpace(siteSettings?.FacebookUrl))  socialProfiles.Add(siteSettings!.FacebookUrl!);
+    if (!string.IsNullOrWhiteSpace(siteSettings?.TikTokUrl))    socialProfiles.Add(siteSettings!.TikTokUrl!);
+
+    var orgId = siteUrl + "/#organization";
+    var siteLd = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@graph"] = new object[]
+        {
+            new Dictionary<string, object?>
+            {
+                ["@type"] = "Organization",
+                ["@id"] = orgId,
+                ["name"] = "Amal Collection",
+                ["url"] = siteUrl,
+                ["email"] = contactEmail,
+                ["telephone"] = contactPhone,
+                ["sameAs"] = socialProfiles
+            },
+            new Dictionary<string, object?>
+            {
+                ["@type"] = "WebSite",
+                ["@id"] = siteUrl + "/#website",
+                ["name"] = "Amal Collection",
+                ["url"] = siteUrl,
+                ["publisher"] = new Dictionary<string, object?> { ["@id"] = orgId },
+                ["potentialAction"] = new Dictionary<string, object?>
+                {
+                    ["@type"] = "SearchAction",
+                    ["target"] = new Dictionary<string, object?>
+                    {
+                        ["@type"] = "EntryPoint",
+                        ["urlTemplate"] = siteUrl + "/Products/Search?q={search_term_string}"
+                    },
+                    ["query-input"] = "required name=search_term_string"
+                }
+            }
+        }
+    };
+    var siteLdJson = System.Text.Json.JsonSerializer.Serialize(siteLd);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -74,7 +118,8 @@
     <meta name="twitter:title" content="@ogTitle" />
     <meta name="twitter:description" content="@ogDescription" />
     <meta name="twitter:image" content="@ogImage" />
-    <title>@ViewData["Title"] – Amal Collection</title>
+    <title>@ViewData["Title"] - Amal Collection</title>
+    @Html.Raw("<script type=\"application/ld+json\">" + siteLdJson + "</script>")
     <script>
         // Applied before paint so a dismissed announcement bar never flashes.
         try {
