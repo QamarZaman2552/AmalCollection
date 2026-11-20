@@ -6,6 +6,8 @@
 }
 
 <section class="section">
+    <partial name="_Breadcrumb" model="@(new List<BreadcrumbItem> { new("Track Order") })" />
+
     <h1 class="section-title"><i class="bi bi-search me-2"></i>Track Your Order</h1>
 
     @if (Model != null)

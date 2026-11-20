@@ -8,6 +8,12 @@
 
 <section class="section">
     <div class="container">
+        <partial name="_Breadcrumb" model="@(new List<BreadcrumbItem>
+        {
+            new("Shop", "/"),
+            new("Search")
+        })" />
+
         <div class="section-kicker">Search Results</div>
         <h2 class="section-title mb-4">"@(ViewBag.Query)" <span class="badge">@Model.Count found</span></h2>
         @if (!Model.Any())

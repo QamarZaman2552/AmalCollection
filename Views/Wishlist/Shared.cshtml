@@ -5,6 +5,12 @@
 
 <section class="section">
     <div class="container">
+        <partial name="_Breadcrumb" model="@(new List<BreadcrumbItem>
+        {
+            new("Wishlist", "/Wishlist"),
+            new("Shared")
+        })" />
+
         <div class="text-center mb-4">
             <div class="section-kicker">Shared With You</div>
             <h1 class="section-title">A Shared Wishlist</h1>

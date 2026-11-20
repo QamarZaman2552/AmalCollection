@@ -3,6 +3,13 @@
 }
 
 <section class="section">
+    <partial name="_Breadcrumb" model="@(new List<BreadcrumbItem>
+    {
+        ViewBag.IsGuest as bool? == true
+            ? new("Track Order", "/Orders/Track")
+            : new("My Orders", "/Orders/History"),
+        new("Order Confirmed")
+    })" />
     <div class="confirmation-box">
         <div class="confirm-icon"><i class="bi bi-emoji-smile-fill"></i></div>
         @if (ViewBag.OrderId == null)

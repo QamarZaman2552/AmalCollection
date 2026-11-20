@@ -294,6 +294,24 @@
 <!-- ═══ Products + Filters ═══ -->
 <section class="section" id="products">
     <div class="container">
+        @if (hasFilters)
+        {
+            var shopCrumbs = new List<BreadcrumbItem> { new("Shop", "/#products") };
+            if (!string.IsNullOrEmpty(selectedCat))
+            {
+                shopCrumbs.Add(new(selectedCat));
+            }
+            else if (!string.IsNullOrEmpty(selectedSeason))
+            {
+                shopCrumbs.Add(new(selectedSeason));
+            }
+            else
+            {
+                shopCrumbs.Add(new("Filtered results"));
+            }
+            <partial name="_Breadcrumb" model="shopCrumbs" />
+        }
+
         <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
             <div>
                 <div class="section-kicker">Curated For You</div>

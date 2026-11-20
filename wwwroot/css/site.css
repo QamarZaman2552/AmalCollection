@@ -2514,6 +2514,33 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
 /* Print letterhead is only revealed by print.css */
 .print-only { display: none !important; }
 
+/* ─── Breadcrumbs (Views/Shared/_Breadcrumb.cshtml) ───────── */
+.ac-breadcrumb { padding: 1.05rem 0 0.15rem; }
+/* Inside a padded .section the padding is already there */
+.section > .ac-breadcrumb:first-child,
+.section .container > .ac-breadcrumb:first-child,
+.section-header > .ac-breadcrumb:first-child,
+.about-hero .container > .ac-breadcrumb:first-child { padding-top: 0; }
+.section-header > .ac-breadcrumb:first-child { padding-bottom: 0.9rem; }
+.ac-breadcrumb ol {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+  list-style: none; margin: 0; padding: 0;
+  font-size: 0.79rem; line-height: 1.35;
+}
+.ac-breadcrumb li { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
+.ac-breadcrumb li + li::before { content: "/"; color: var(--text-3); opacity: 0.6; }
+.ac-breadcrumb a { color: var(--text-2); text-decoration: none; }
+.ac-breadcrumb a:hover { color: var(--gold); text-decoration: underline; }
+.ac-breadcrumb a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 3px; }
+.ac-breadcrumb [aria-current="page"] {
+  color: var(--text); font-weight: 600;
+  max-width: 44ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Phones: keep Home, the parent section and the current page */
+@media (max-width: 575.98px) {
+  .ac-breadcrumb li:not(:first-child):not(:nth-last-child(2)):not(:last-child) { display: none; }
+}
+
 /* Buttons that are mid-submit (see the double-submit guard in site.js) */
 .is-submitting { cursor: progress; opacity: 0.85; }
 .is-submitting .spinner-border { vertical-align: -0.125em; }

@@ -86,46 +86,19 @@
         };
     }
 
-    var breadcrumbLd = new Dictionary<string, object?>
-    {
-        ["@context"] = "https://schema.org",
-        ["@type"] = "BreadcrumbList",
-        ["itemListElement"] = new object[]
-        {
-            new Dictionary<string, object?>
-            {
-                ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Home", ["item"] = origin + "/"
-            },
-            new Dictionary<string, object?>
-            {
-                ["@type"] = "ListItem", ["position"] = 2,
-                ["name"] = string.IsNullOrWhiteSpace(Model.Category) ? "Ladies Suits" : Model.Category,
-                ["item"] = origin + "/?category=" + Uri.EscapeDataString(Model.Category ?? "")
-            },
-            new Dictionary<string, object?>
-            {
-                ["@type"] = "ListItem", ["position"] = 3, ["name"] = Model.Name, ["item"] = detailUrl
-            }
-        }
-    };
-
     var productLdJson = System.Text.Json.JsonSerializer.Serialize(productLd);
-    var breadcrumbLdJson = System.Text.Json.JsonSerializer.Serialize(breadcrumbLd);
 }
 
 @Html.Raw("<script type=\"application/ld+json\">" + productLdJson + "</script>")
-@Html.Raw("<script type=\"application/ld+json\">" + breadcrumbLdJson + "</script>")
 
 <div class="container">
     <!-- Breadcrumb -->
-    <nav class="breadcrumb pt-3" aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/?season=@Model.Season">@Model.Season</a></li>
-            <li class="breadcrumb-item"><a href="/?category=@Model.Category">@Model.Category</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
-        </ol>
-    </nav>
+    <partial name="_Breadcrumb" model="@(new List<BreadcrumbItem>
+    {
+        new(Model.Season ?? "", "/?season=" + Uri.EscapeDataString(Model.Season ?? "")),
+        new(Model.Category ?? "", "/?category=" + Uri.EscapeDataString(Model.Category ?? "")),
+        new(Model.Name)
+    })" />
 
     <!-- ═══ Product Detail ═══ -->
     <div class="row g-4 g-lg-5 py-4 pb-5">
