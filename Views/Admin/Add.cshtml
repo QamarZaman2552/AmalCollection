@@ -9,7 +9,7 @@
 
 <h1 class="section-title"><i class="bi bi-plus-circle"></i> Add New Product</h1>
 <div class="form-card">
-    <form method="post" action="/Admin/Add" enctype="multipart/form-data" class="admin-form">
+    <form method="post" action="/Admin/Add" enctype="multipart/form-data" class="admin-form" data-submit-guard data-guard-label="Saving product…">
         @Html.AntiForgeryToken()
 
         <div class="form-grid-2">

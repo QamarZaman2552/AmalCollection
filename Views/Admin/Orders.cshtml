@@ -166,7 +166,7 @@ else
 
                         <!-- Update Status -->
                         <td>
-                            <form method="post" action="/Admin/UpdateStatus/@order.Id" class="status-update-form">
+                            <form method="post" action="/Admin/UpdateStatus/@order.Id" class="status-update-form" data-submit-guard data-guard-label="Saving…">
                                 @Html.AntiForgeryToken()
                                 @{ var st2 = order.Status; }
                                 <select name="status" class="aorder-status-select">

@@ -14,7 +14,7 @@
 </div>
 
 <div class="form-card">
-    <form method="post" action="/Admin/Settings" class="admin-form">
+    <form method="post" action="/Admin/Settings" class="admin-form" data-submit-guard data-guard-label="Saving settings…">
         @Html.AntiForgeryToken()
         <input type="hidden" name="Id" value="@Model.Id" />
 

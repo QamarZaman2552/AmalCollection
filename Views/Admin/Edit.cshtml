@@ -11,7 +11,7 @@
 
 <h1 class="section-title"><i class="bi bi-pencil"></i> Edit Product</h1>
 <div class="form-card">
-    <form method="post" action="/Admin/Edit/@Model.Id" enctype="multipart/form-data" class="admin-form">
+    <form method="post" action="/Admin/Edit/@Model.Id" enctype="multipart/form-data" class="admin-form" data-submit-guard data-guard-label="Updating product…">
         @Html.AntiForgeryToken()
         <input type="hidden" name="Id" value="@Model.Id" />
 

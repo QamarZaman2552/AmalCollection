@@ -15,7 +15,7 @@
 
 <div class="form-card" style="margin-bottom:1.5rem;">
     <h3 style="margin-bottom:1rem;font-size:1rem;">Add Category</h3>
-    <form method="post" action="/Admin/AddCategory" class="admin-form">
+    <form method="post" action="/Admin/AddCategory" class="admin-form" data-submit-guard data-guard-label="Adding category…">
         @Html.AntiForgeryToken()
         <div class="form-grid-2">
             <div class="form-group">
@@ -50,7 +50,7 @@
                 <tr>
                     <td>@c.Id</td>
                     <td>
-                        <form method="post" action="/Admin/EditCategory/@c.Id" class="admin-form" style="display:flex;gap:0.5rem;align-items:center;">
+                        <form method="post" action="/Admin/EditCategory/@c.Id" class="admin-form" style="display:flex;gap:0.5rem;align-items:center;" data-submit-guard data-guard-quiet>
                             @Html.AntiForgeryToken()
                             <input type="text" name="name" value="@c.Name" style="max-width:180px;" />
                             <input type="number" name="sortOrder" value="@c.SortOrder" style="width:60px;" />
@@ -74,7 +74,7 @@
                     </td>
                     <td>@(ViewBag.ProductCounts != null && ViewBag.ProductCounts.ContainsKey(c.Name) ? ViewBag.ProductCounts[c.Name] : 0)</td>
                     <td class="admin-actions">
-                        <form method="post" action="/Admin/DeleteCategory/@c.Id" onsubmit="return confirm('Delete this category? Products using it will have category cleared.')">
+                        <form method="post" action="/Admin/DeleteCategory/@c.Id" data-submit-guard data-guard-quiet onsubmit="return confirm('Delete this category? Products using it will have category cleared.')">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>
                         </form>

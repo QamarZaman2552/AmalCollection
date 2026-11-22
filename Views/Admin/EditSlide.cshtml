@@ -13,7 +13,7 @@
 </div>
 
 <div class="form-card">
-    <form method="post" action="/Admin/EditSlide" enctype="multipart/form-data" class="admin-form">
+    <form method="post" action="/Admin/EditSlide" enctype="multipart/form-data" class="admin-form" data-submit-guard data-guard-label="Updating slide…">
         @Html.AntiForgeryToken()
         <input type="hidden" name="Id" value="@Model.Id" />
 

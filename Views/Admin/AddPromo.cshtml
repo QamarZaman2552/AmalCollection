@@ -11,7 +11,7 @@
 </div>
 
 <div class="form-card">
-    <form method="post" action="/Admin/AddPromo" enctype="multipart/form-data" class="admin-form">
+    <form method="post" action="/Admin/AddPromo" enctype="multipart/form-data" class="admin-form" data-submit-guard data-guard-label="Saving card…">
         @Html.AntiForgeryToken()
         <div class="form-grid-2">
             <div class="form-group">

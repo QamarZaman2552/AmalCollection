@@ -64,7 +64,7 @@ else
                         <td style="font-size:0.8rem;color:var(--text-3);">@c.PlatformName</td>
                         <td style="text-align:center;">@c.SortOrder</td>
                         <td>
-                            <form method="post" action="/Admin/TogglePromo/@c.Id" style="display:inline">
+                            <form method="post" action="/Admin/TogglePromo/@c.Id" style="display:inline" data-submit-guard data-guard-quiet>
                                 @Html.AntiForgeryToken()
                                 @if (c.IsActive)
                                 {
@@ -77,12 +77,12 @@ else
                             </form>
                         </td>
                         <td class="admin-actions" style="gap:4px;">
-                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=up" style="display:inline">
+                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=up" style="display:inline" data-submit-guard data-guard-quiet>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="dir" value="up" />
                                 <button type="submit" class="btn-edit" title="Move up" aria-label="Move up" style="width:28px;height:28px;"><i class="bi bi-arrow-up"></i></button>
                             </form>
-                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=down" style="display:inline">
+                            <form method="post" action="/Admin/MovePromo/@c.Id?dir=down" style="display:inline" data-submit-guard data-guard-quiet>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="dir" value="down" />
                                 <button type="submit" class="btn-edit" title="Move down" aria-label="Move down" style="width:28px;height:28px;"><i class="bi bi-arrow-down"></i></button>
@@ -90,7 +90,7 @@ else
                         </td>
                         <td class="admin-actions">
                             <a href="/Admin/EditPromo/@c.Id" class="btn-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
-                            <form method="post" action="/Admin/DeletePromo/@c.Id" style="display:inline"
+                            <form method="post" action="/Admin/DeletePromo/@c.Id" style="display:inline" data-submit-guard data-guard-quiet
                                   onsubmit="return confirm('Delete promo card @c.BrandName?')">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>

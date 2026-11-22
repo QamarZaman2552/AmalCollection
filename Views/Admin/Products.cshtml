@@ -38,7 +38,7 @@
                     <td class="@(p.Stock < 5 ? "stock-low" : "")">@p.Stock</td>
                     <td class="admin-actions">
                         <a href="/Admin/Edit/@p.Id" class="btn-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
-                        <form method="post" action="/Admin/Delete/@p.Id" style="display:inline"
+                        <form method="post" action="/Admin/Delete/@p.Id" style="display:inline" data-submit-guard data-guard-quiet
                               onsubmit="return confirm('Delete @p.Name?')">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>

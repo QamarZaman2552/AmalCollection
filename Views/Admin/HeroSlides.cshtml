@@ -63,7 +63,7 @@ else
                         <td style="font-size:0.8rem;color:var(--text-3);">@s.LinkUrl</td>
                         <td style="text-align:center;">@s.SortOrder</td>
                         <td>
-                            <form method="post" action="/Admin/ToggleSlide/@s.Id" style="display:inline">
+                            <form method="post" action="/Admin/ToggleSlide/@s.Id" style="display:inline" data-submit-guard data-guard-quiet>
                                 @Html.AntiForgeryToken()
                                 @if (s.IsActive)
                                 {
@@ -77,7 +77,7 @@ else
                         </td>
                         <td class="admin-actions">
                             <a href="/Admin/EditSlide/@s.Id" class="btn-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
-                            <form method="post" action="/Admin/DeleteSlide/@s.Id" style="display:inline"
+                            <form method="post" action="/Admin/DeleteSlide/@s.Id" style="display:inline" data-submit-guard data-guard-quiet
                                   onsubmit="return confirm('Delete slide @s.Title?')">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-remove" title="Delete" aria-label="Delete"><i class="bi bi-trash3"></i></button>

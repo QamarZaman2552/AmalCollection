@@ -69,7 +69,7 @@ else
                     <div class="msg-actions">
                         @if (!msg.IsRead)
                         {
-                            <form action="/Admin/MarkMessageRead" method="post" class="d-inline">
+                            <form action="/Admin/MarkMessageRead" method="post" class="d-inline" data-submit-guard data-guard-quiet>
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@msg.Id" />
                                 <button type="submit" class="btn-msg-read"><i class="bi bi-check2"></i> Mark as Read</button>
@@ -79,7 +79,7 @@ else
                         {
                             <span class="msg-read-label"><i class="bi bi-check2"></i> Read</span>
                         }
-                        <form action="/Admin/DeleteMessage" method="post" class="d-inline"
+                        <form action="/Admin/DeleteMessage" method="post" class="d-inline" data-submit-guard data-guard-quiet
                               onsubmit="return confirm('Delete this message from @msg.Name?')">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@msg.Id" />

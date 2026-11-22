@@ -14,6 +14,56 @@
     // Fragment of the link being followed: fetch() never sees "#..." so it has to be carried over
     var pendingHash = '';
 
+    // ─── Shared top progress bar ───────────────────────────────────────
+    // One bar for every background request (page swaps here, add-to-cart in
+    // site.js). Ref-counted so overlapping requests keep it visible.
+    var progress = (function () {
+        var bar = null, fill = null, tick = null, active = 0;
+
+        function ensure() {
+            if (bar) return;
+            bar = document.createElement('div');
+            bar.className = 'ajax-progress';
+            bar.setAttribute('aria-hidden', 'true');
+            fill = document.createElement('span');
+            bar.appendChild(fill);
+            document.body.appendChild(bar);
+        }
+
+        function start() {
+            ensure();
+            active++;
+            if (active > 1) return;
+            clearInterval(tick);
+            bar.classList.add('active');
+            fill.style.transition = 'none';
+            fill.style.width = '8%';
+            void fill.offsetWidth;
+            fill.style.transition = 'width 0.35s ease';
+            fill.style.width = '38%';
+            var pct = 38;
+            tick = setInterval(function () {
+                pct = Math.min(92, pct + Math.random() * 7);
+                fill.style.width = pct + '%';
+            }, 200);
+        }
+
+        function end() {
+            if (active === 0) return;
+            active--;
+            if (active > 0) return;
+            clearInterval(tick);
+            fill.style.width = '100%';
+            setTimeout(function () {
+                bar.classList.remove('active');
+                setTimeout(function () { fill.style.width = '0%'; }, 260);
+            }, 220);
+        }
+
+        return { start: start, end: end };
+    })();
+    window.acProgress = progress;
+
     function rootInfo(doc) {
         for (var i = 0; i < ROOT_SELECTORS.length; i++) {
             var el = doc.querySelector(ROOT_SELECTORS[i]);
@@ -135,11 +185,14 @@
     function navigate(method, url, body, push, fallback) {
         var prevPath = location.pathname;
         chain = chain.then(function () {
+            progress.start();
             return doFetch(method, url, body).then(function (r) {
                 if (!r) return;
                 if (!swap(r.doc, r.url, { push: push, prevPath: prevPath })) fallback();
             }).catch(function () {
                 try { fallback(); } catch (e) { location.href = url; }
+            }).then(function () {
+                progress.end();
             });
         });
         return chain;
