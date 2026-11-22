@@ -2514,6 +2514,9 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
 /* Print letterhead is only revealed by print.css */
 .print-only { display: none !important; }
 
+/* Admin: the skip link lands here, so focus it without a giant outline */
+.admin-content:focus { outline: none; }
+
 /* ─── Breadcrumbs (Views/Shared/_Breadcrumb.cshtml) ───────── */
 .ac-breadcrumb { padding: 1.05rem 0 0.15rem; }
 /* Inside a padded .section the padding is already there */

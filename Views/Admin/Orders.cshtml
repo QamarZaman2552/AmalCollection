@@ -74,20 +74,21 @@ else
     <!-- Main Orders Table -->
     <div class="admin-table-wrap">
         <table class="admin-table orders-master-table">
+            <caption class="visually-hidden">All orders</caption>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Date (PKT)</th>
-                    <th>Customer</th>
-                    <th>Phone</th>
-                    <th>Delivery Address</th>
-                    <th>Payment</th>
-                    <th>Items Ordered</th>
-                    <th>Subtotal</th>
-                    <th>Delivery</th>
-                    <th>Total (PKR)</th>
-                    <th>Status</th>
-                    <th>Update</th>
+                    <th scope="col">#</th>
+                    <th scope="col">Date (PKT)</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Delivery Address</th>
+                    <th scope="col">Payment</th>
+                    <th scope="col">Items Ordered</th>
+                    <th scope="col">Subtotal</th>
+                    <th scope="col">Delivery</th>
+                    <th scope="col">Total (PKR)</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Update</th>
                 </tr>
             </thead>
             <tbody>
@@ -123,11 +124,12 @@ else
                         <!-- Items -->
                         <td>
                             <table class="order-detail-table">
+                            <caption class="visually-hidden">Items in this order</caption>
                                 <thead>
                                     <tr>
-                                        <th>Item</th>
-                                        <th>Qty</th>
-                                        <th>Price</th>
+                                        <th scope="col">Item</th>
+                                        <th scope="col">Qty</th>
+                                        <th scope="col">Price</th>
                                     </tr>
                                 </thead>
                                 <tbody>

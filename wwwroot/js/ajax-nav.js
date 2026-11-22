@@ -11,6 +11,8 @@
 
     var ROOT_SELECTORS = ['main.main-content', '.admin-content'];
     var chain = Promise.resolve();
+    // Fragment of the link being followed: fetch() never sees "#..." so it has to be carried over
+    var pendingHash = '';
 
     function rootInfo(doc) {
         for (var i = 0; i < ROOT_SELECTORS.length; i++) {
@@ -41,7 +43,13 @@
         var fa = fresh.querySelectorAll('[data-active]');
         var ca = cur.querySelectorAll('[data-active]');
         if (!fa.length || fa.length !== ca.length) return;
-        for (var i = 0; i < fa.length; i++) ca[i].className = fa[i].className;
+        for (var i = 0; i < fa.length; i++) {
+            ca[i].className = fa[i].className;
+            // Keep the screen-reader "you are here" in step with the visual highlight
+            var current = fa[i].getAttribute('aria-current');
+            if (current) ca[i].setAttribute('aria-current', current);
+            else ca[i].removeAttribute('aria-current');
+        }
     }
 
     function afterSwap(doc, finalUrl, opts) {
@@ -63,13 +71,21 @@
 
         var u;
         try { u = new URL(finalUrl, location.href); } catch (e) { return; }
-        var target = u.pathname + u.search + u.hash;
+        var hash = pendingHash || u.hash;
+        pendingHash = '';
+        var target = u.pathname + u.search + hash;
         if (opts.push) history.pushState({ an: 1 }, '', target);
         else history.replaceState({ an: 1 }, '', target);
 
-        if (u.hash) {
-            var anchor = document.getElementById(decodeURIComponent(u.hash.substring(1)));
-            if (anchor) { anchor.scrollIntoView(); return; }
+        if (hash) {
+            var anchor = document.getElementById(decodeURIComponent(hash.substring(1)));
+            if (anchor) {
+                anchor.scrollIntoView();
+                // Keep keyboard users moving: a skip link must move focus, not just scroll
+                if (!anchor.hasAttribute('tabindex')) anchor.setAttribute('tabindex', '-1');
+                try { anchor.focus({ preventScroll: true }); } catch (e) { anchor.focus(); }
+                return;
+            }
         }
         if (u.pathname !== opts.prevPath) window.scrollTo(0, 0);
     }
@@ -273,6 +289,10 @@
                     e.preventDefault();
                     history.replaceState({ an: 1 }, '', u.pathname + u.search + u.hash);
                     anchor.scrollIntoView();
+                    // Skip links and in-page anchors: move focus too, otherwise Tab
+                    // continues from the top of the page again
+                    if (!anchor.hasAttribute('tabindex')) anchor.setAttribute('tabindex', '-1');
+                    try { anchor.focus({ preventScroll: true }); } catch (err2) { anchor.focus(); }
                 }
             }
             return;
@@ -281,6 +301,7 @@
         if (!a.closest(ROOT_SELECTORS.join(', '))) return;
 
         e.preventDefault();
+        pendingHash = u.hash || '';
         navigate('GET', u.href, null, true, function () { location.href = u.href; });
     });
 

@@ -31,63 +31,64 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="light-mode @ViewData["BodyClass"]">
+    <a href="#adminContent" class="skip-link">Skip to content</a>
     <div class="admin-layout">
         <!-- ─── Sidebar ──────────────────────────────────── -->
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-header">
                 <a href="/" class="admin-brand">Amal<em>Collection</em></a>
-                <button class="admin-sidebar-close" id="sidebarClose" aria-label="Close menu">
-                    <i class="bi bi-x-lg"></i>
+                <button class="admin-sidebar-close" id="sidebarClose" aria-label="Close menu" aria-controls="adminSidebar" aria-expanded="false">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
                 </button>
             </div>
-            <nav class="admin-sidebar-nav">
+            <nav class="admin-sidebar-nav" aria-label="Admin">
                 <ul class="admin-nav-list">
                     <li class="admin-nav-section">Management</li>
                     <li>
-                        <a href="/Admin/Products" class="@(sidebarActive == "products" ? "active" : "")" data-active="products">
+                        <a href="/Admin/Products" class="@(sidebarActive == "products" ? "active" : "")" data-active="products" aria-current="@(sidebarActive == "products" ? "page" : null)">
                             <i class="bi bi-box"></i>
                             <span>Products</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/Add" class="@(sidebarActive == "add" ? "active" : "")" data-active="add">
+                        <a href="/Admin/Add" class="@(sidebarActive == "add" ? "active" : "")" data-active="add" aria-current="@(sidebarActive == "add" ? "page" : null)">
                             <i class="bi bi-plus-circle"></i>
                             <span>Add Product</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/Categories" class="@(sidebarActive == "categories" ? "active" : "")" data-active="categories">
+                        <a href="/Admin/Categories" class="@(sidebarActive == "categories" ? "active" : "")" data-active="categories" aria-current="@(sidebarActive == "categories" ? "page" : null)">
                             <i class="bi bi-folder"></i>
                             <span>Categories</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/HeroSlides" class="@(sidebarActive == "slides" ? "active" : "")" data-active="slides">
+                        <a href="/Admin/HeroSlides" class="@(sidebarActive == "slides" ? "active" : "")" data-active="slides" aria-current="@(sidebarActive == "slides" ? "page" : null)">
                             <i class="bi bi-image"></i>
                             <span>Hero Slides</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/PromoCards" class="@(sidebarActive == "promo" ? "active" : "")" data-active="promo">
+                        <a href="/Admin/PromoCards" class="@(sidebarActive == "promo" ? "active" : "")" data-active="promo" aria-current="@(sidebarActive == "promo" ? "page" : null)">
                             <i class="bi bi-tags"></i>
                             <span>Promo Cards</span>
                         </a>
                     </li>
-                    <li class="admin-nav-section">Management</li>
+                    <li class="admin-nav-section">Store</li>
                     <li>
-                        <a href="/Admin/Orders" class="@(sidebarActive == "orders" ? "active" : "")" data-active="orders">
+                        <a href="/Admin/Orders" class="@(sidebarActive == "orders" ? "active" : "")" data-active="orders" aria-current="@(sidebarActive == "orders" ? "page" : null)">
                             <i class="bi bi-truck"></i>
                             <span>Orders</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/Users" class="@(sidebarActive == "users" ? "active" : "")" data-active="users">
+                        <a href="/Admin/Users" class="@(sidebarActive == "users" ? "active" : "")" data-active="users" aria-current="@(sidebarActive == "users" ? "page" : null)">
                             <i class="bi bi-people"></i>
                             <span>Users</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/Messages" class="@(sidebarActive == "messages" ? "active" : "")" data-active="messages">
+                        <a href="/Admin/Messages" class="@(sidebarActive == "messages" ? "active" : "")" data-active="messages" aria-current="@(sidebarActive == "messages" ? "page" : null)">
                             <i class="bi bi-envelope"></i>
                             <span>Messages</span>
                             @if (unreadMsgs > 0)
@@ -98,19 +99,19 @@
                     </li>
                     <li class="admin-nav-section">Tools</li>
                     <li>
-                        <a href="/Admin/Analytics" class="@(sidebarActive == "analytics" ? "active" : "")" data-active="analytics">
+                        <a href="/Admin/Analytics" class="@(sidebarActive == "analytics" ? "active" : "")" data-active="analytics" aria-current="@(sidebarActive == "analytics" ? "page" : null)">
                             <i class="bi bi-graph-up"></i>
                             <span>Analytics</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/ChatLogs" class="@(sidebarActive == "chatlogs" ? "active" : "")" data-active="chatlogs">
+                        <a href="/Admin/ChatLogs" class="@(sidebarActive == "chatlogs" ? "active" : "")" data-active="chatlogs" aria-current="@(sidebarActive == "chatlogs" ? "page" : null)">
                             <i class="bi bi-chat-left"></i>
                             <span>Chat Logs</span>
                         </a>
                     </li>
                     <li>
-                        <a href="/Admin/Settings" class="@(sidebarActive == "settings" ? "active" : "")" data-active="settings">
+                        <a href="/Admin/Settings" class="@(sidebarActive == "settings" ? "active" : "")" data-active="settings" aria-current="@(sidebarActive == "settings" ? "page" : null)">
                             <i class="bi bi-gear"></i>
                             <span>Settings</span>
                         </a>
@@ -127,24 +128,24 @@
                         <div class="admin-user-role">Administrator</div>
                     </div>
                 </div>
-                <a href="/Auth/Logout" class="admin-logout-link" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
+                <a href="/Auth/Logout" class="admin-logout-link" title="Logout" aria-label="Log out">
+                    <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
                 </a>
             </div>
         </aside>
 
         <!-- ─── Sidebar Overlay (mobile) ──────────────────── -->
-        <div class="admin-sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="admin-sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
         <!-- ─── Main Area ────────────────────────────────── -->
         <div class="admin-main-wrap">
             <!-- Topbar -->
             <header class="admin-topbar">
                 <div class="admin-topbar-left">
-                    <button class="admin-menu-btn" id="sidebarOpen" aria-label="Open menu">
-                        <i class="bi bi-list"></i>
+                    <button class="admin-menu-btn" id="sidebarOpen" aria-label="Open menu" aria-controls="adminSidebar" aria-expanded="false">
+                        <i class="bi bi-list" aria-hidden="true"></i>
                     </button>
-                    <h1 class="admin-page-title">@ViewData["Title"]</h1>
+                    <h1 class="admin-page-title" id="adminPageTitle">@ViewData["Title"]</h1>
                 </div>
                 <div class="admin-topbar-right">
                     @if (isAdmin)
@@ -156,21 +157,21 @@
             </header>
 
             <!-- Content -->
-            <div class="admin-content">
+            <main class="admin-content" id="adminContent" tabindex="-1" aria-labelledby="adminPageTitle">
                 @if (TempData["Success"] != null)
                 {
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                    <div class="alert alert-success" role="status">
+                        <i class="bi bi-check-circle-fill" aria-hidden="true"></i> @TempData["Success"]
                     </div>
                 }
                 @if (TempData["Error"] != null)
                 {
-                    <div class="alert alert-error">
-                        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+                    <div class="alert alert-error" role="alert">
+                        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i> @TempData["Error"]
                     </div>
                 }
                 @RenderBody()
-            </div>
+            </main>
         </div>
     </div>
 
@@ -183,9 +184,30 @@
         })();
         var sidebar = document.getElementById('adminSidebar');
         var overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('sidebarOpen').addEventListener('click', function () { sidebar.classList.add('open'); overlay.classList.add('open'); });
-        document.getElementById('sidebarClose').addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
-        overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+        var openBtn = document.getElementById('sidebarOpen');
+        var closeBtn = document.getElementById('sidebarClose');
+        function setSidebar(open) {
+            sidebar.classList.toggle('open', open);
+            overlay.classList.toggle('open', open);
+            openBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            closeBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) { closeBtn.focus(); } else { openBtn.focus(); }
+        }
+        openBtn.addEventListener('click', function () { setSidebar(true); });
+        closeBtn.addEventListener('click', function () { setSidebar(false); });
+        overlay.addEventListener('click', function () { setSidebar(false); });
+        document.addEventListener('keydown', function (e) {
+            if (!sidebar.classList.contains('open')) return;
+            if (e.key === 'Escape') { setSidebar(false); return; }
+            if (e.key !== 'Tab') return;
+            // Keep Tab inside the open drawer instead of wandering into the page behind it
+            var items = sidebar.querySelectorAll('a[href], button:not([disabled])');
+            if (!items.length) return;
+            var first = items[0];
+            var last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        });
     </script>
     <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
     <div id="pageScripts">@await RenderSectionAsync("Scripts", required: false)</div>

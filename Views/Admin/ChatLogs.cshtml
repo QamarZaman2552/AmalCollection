@@ -11,8 +11,9 @@
 </div>
 <div class="admin-table-wrap">
     <table class="admin-table">
+        <caption class="visually-hidden">Chatbot conversations</caption>
         <thead>
-            <tr><th>ID</th><th>User ID</th><th>Query</th><th>Response</th><th>Timestamp</th></tr>
+            <tr><th scope="col">ID</th><th scope="col">User ID</th><th scope="col">Query</th><th scope="col">Response</th><th scope="col">Timestamp</th></tr>
         </thead>
         <tbody>
             @foreach (var log in Model)
