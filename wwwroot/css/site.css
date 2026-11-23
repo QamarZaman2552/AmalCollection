@@ -1119,9 +1119,33 @@ body.light-mode .wl-share-status { color: #17804d; }
 .error-links a:hover { color: var(--gold); }
 .error-ref { position: relative; margin: 1.5rem 0 0; font-size: 0.75rem; color: var(--text-3); }
 .error-ref code { color: var(--text-3); }
+
+/* Search + shortcuts so a dead end still leads somewhere */
+.error-card .error-search { position: relative; max-width: 420px; margin: 0 auto 1.25rem; }
+.error-chips {
+  position: relative; display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center; justify-content: center; margin-bottom: 1.75rem;
+}
+.error-chips-label {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3);
+}
+.error-support {
+  position: relative; margin-top: 1.25rem; padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.error-support-title { font-size: 0.85rem; color: var(--text-2); margin-bottom: 0.5rem; }
+.error-support-links {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem;
+  justify-content: center; font-size: 0.85rem;
+}
+.error-support-links a { color: var(--text-2); font-weight: 500; }
+.error-support-links a:hover { color: var(--gold); }
+
 @media (max-width: 575.98px) {
   .error-card { padding: 2.25rem 1.25rem; }
   .error-actions .btn { flex: 1 1 100%; }
+  .error-support-links { flex-direction: column; align-items: center; }
 }
 
 /* ─── Toast ───────────────────────────────────────────── */

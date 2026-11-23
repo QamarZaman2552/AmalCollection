@@ -87,11 +87,36 @@ namespace ShoppingApp.Controllers
             var code = statusCode is >= 400 and <= 599 ? statusCode.Value : 500;
             if (Response.StatusCode < 400) Response.StatusCode = code;
 
-            return View(new ErrorViewModel
+            var model = new ErrorViewModel
             {
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                 StatusCode = code
-            });
+            };
+
+            // Support details so a stuck visitor can reach a human from the error page.
+            // Never let a broken database turn the error page into another error.
+            try
+            {
+                var settings = _db.SiteSettings.FirstOrDefault(s => s.Id == 1);
+                if (settings != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(settings.ContactPhone) && !settings.ContactPhone.Contains("0000000"))
+                        model.SupportPhone = settings.ContactPhone;
+                    if (!string.IsNullOrWhiteSpace(settings.ContactEmail))
+                        model.SupportEmail = settings.ContactEmail;
+
+                    var digits = new string((settings.ContactWhatsapp ?? "").Where(char.IsDigit).ToArray());
+                    if (digits.Length == 0) digits = new string(model.SupportPhone.Where(char.IsDigit).ToArray());
+                    if (digits.StartsWith("0") && !digits.StartsWith("92")) digits = "92" + digits[1..];
+                    model.SupportWhatsapp = digits;
+                }
+            }
+            catch
+            {
+                // Keep the default contact details.
+            }
+
+            return View(model);
         }
     }
 }

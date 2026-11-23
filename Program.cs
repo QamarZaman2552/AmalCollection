@@ -288,8 +288,13 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 }
+
+// Friendly 404/403 pages in every environment: development used to answer with an
+// empty body. File requests are skipped so a missing .css/.jpg stays a plain 404.
+app.UseWhen(
+    ctx => !System.IO.Path.HasExtension(ctx.Request.Path),
+    branch => branch.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}"));
 
 app.UseStaticFiles(new StaticFileOptions
 {

@@ -12,17 +12,34 @@
             <div class="error-icon" aria-hidden="true">
                 <i class="bi @(isNotFound ? "bi-compass" : "bi-exclamation-triangle")"></i>
             </div>
-            <h1 class="error-title">@(isNotFound ? "Page not found" : "Something went wrong")</h1>
+            <h1 class="error-title" id="errorTitle" tabindex="-1">@(isNotFound ? "Page not found" : "Something went wrong")</h1>
             <p class="error-text">
                 @if (isNotFound)
                 {
-                    <text>The page you are looking for may have been moved, renamed, or no longer exists. Let us help you find your next suit.</text>
+                    <text>The page you are looking for may have been moved, renamed, or no longer exists. Search below or start from one of our most-loved edits.</text>
                 }
                 else
                 {
-                    <text>We hit an unexpected error while processing your request. Please try again in a moment, or reach out to us if it keeps happening.</text>
+                    <text>We hit an unexpected error while processing your request. Your cart and account are safe — please try again in a moment.</text>
                 }
             </p>
+
+            <form class="ac-search error-search" action="/Products/Search" method="get" role="search">
+                <label class="visually-hidden" for="errorSearch">Search products</label>
+                <input class="form-control" type="search" id="errorSearch" name="q"
+                       placeholder="Search lawn suits, khaddar…" autocomplete="off"
+                       @(isNotFound ? "autofocus" : "") />
+                <button class="btn ac-search-btn" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+            </form>
+
+            <div class="error-chips">
+                <span class="error-chips-label">Popular</span>
+                <a class="popular-chip" href="/Products/Search?q=lawn">Lawn</a>
+                <a class="popular-chip" href="/Products/Search?q=chiffon">Chiffon</a>
+                <a class="popular-chip" href="/Products/Search?q=khaddar">Khaddar</a>
+                <a class="popular-chip" href="/?season=Winter#products">Winter</a>
+                <a class="popular-chip" href="/?category=Unstitched#products">Unstitched</a>
+            </div>
 
             <div class="error-actions">
                 <a href="/" class="btn btn-gold"><i class="bi bi-house me-1"></i> Back to Home</a>
@@ -35,9 +52,25 @@
                 <a href="/About#faqs"><i class="bi bi-question-circle me-1"></i> FAQs</a>
             </div>
 
+            <div class="error-support">
+                <p class="error-support-title">Still stuck? We are happy to help.</p>
+                <div class="error-support-links">
+                    <a href="tel:@Model.SupportPhone"><i class="bi bi-telephone me-1"></i> @Model.SupportPhone</a>
+                    <a href="mailto:@Model.SupportEmail"><i class="bi bi-envelope me-1"></i> @Model.SupportEmail</a>
+                    @if (Model.HasWhatsapp)
+                    {
+                        <a href="https://wa.me/@Model.SupportWhatsapp" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                        </a>
+                    }
+                </div>
+            </div>
+
             @if (Model.ShowRequestId)
             {
-                <p class="error-ref">Reference: <code>@Model.RequestId</code></p>
+                <p class="error-ref">
+                    If you contact us, quote this reference: <code>@Model.RequestId</code>
+                </p>
             }
         </div>
     </div>
