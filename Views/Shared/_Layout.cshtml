@@ -56,6 +56,11 @@
     var navMessagesActive = NavStarts("/Admin/Messages");
     var navAdminActive    = NavStarts("/Admin") && !navMessagesActive;
 
+    // Account, cart and checkout pages should never appear in search results.
+    // Search result pages are noindexed too: they are thin duplicates of the catalogue.
+    var noIndexPage = NavStarts("/Cart") || NavStarts("/Orders") || NavStarts("/Profile")
+        || NavStarts("/Auth") || NavStarts("/Wishlist") || NavStarts("/Products/Search");
+
     // ─── Structured data (schema.org) ─────────────────────────
     var socialProfiles = new List<string>();
     if (!string.IsNullOrWhiteSpace(siteSettings?.InstagramUrl)) socialProfiles.Add(siteSettings!.InstagramUrl!);
@@ -108,6 +113,10 @@
     <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
     <meta name="description" content="@ogDescription" />
     <link rel="canonical" href="@ogUrl" />
+    @if (noIndexPage)
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
     <meta property="og:site_name" content="Amal Collection" />
     <meta property="og:type" content="@ogType" />
     <meta property="og:title" content="@ogTitle" />
