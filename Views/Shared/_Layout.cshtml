@@ -111,6 +111,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <meta name="theme-color" content="#202841" />
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="~/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Amal" />
     <meta name="description" content="@ogDescription" />
     <link rel="canonical" href="@ogUrl" />
     @if (noIndexPage)
@@ -446,6 +450,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/submit-guard.js" asp-append-version="true"></script>
     <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
+    <script src="~/js/pwa.js" asp-append-version="true"></script>
 
     <script>
         // Lock pinch zoom only — do NOT block normal touch scroll

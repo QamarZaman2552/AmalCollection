@@ -300,8 +300,16 @@ app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        // Cache static assets for 1 year
-        ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=31536000, immutable";
+        // Cache static assets for 1 year, except the files that must be able to
+        // change: a service worker, the manifest and the offline page.
+        var path = ctx.Context.Request.Path.Value ?? "";
+        var mustRevalidate = path.EndsWith("/sw.js", StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith("/manifest.webmanifest", StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith("/offline.html", StringComparison.OrdinalIgnoreCase);
+
+        ctx.Context.Response.Headers["Cache-Control"] = mustRevalidate
+            ? "no-cache"
+            : "public, max-age=31536000, immutable";
     }
 });
 
