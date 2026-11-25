@@ -90,6 +90,37 @@ namespace ShoppingApp.Controllers
                 .ThenBy(c => c.Id)
                 .ToListAsync();
 
+            // Home social proof: real reviews when they exist, plus a style feed
+            // built from the latest product photos.
+            ViewBag.HomeReviews = await _db.Reviews
+                .AsNoTracking()
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .Where(r => r.Comment != null && r.Comment.Trim() != "")
+                .OrderByDescending(r => r.IsVerified)
+                .ThenByDescending(r => r.CreatedAt)
+                .Take(9)
+                .ToListAsync();
+
+            var reviewStats = await _db.Reviews
+                .AsNoTracking()
+                .GroupBy(r => 1)
+                .Select(g => new { Count = g.Count(), Average = g.Average(r => (double)r.Rating) })
+                .FirstOrDefaultAsync();
+            ViewBag.HomeReviewCount   = reviewStats?.Count ?? 0;
+            ViewBag.HomeReviewAverage = reviewStats?.Average ?? 0d;
+
+            ViewBag.FeedProducts = await _db.Products
+                .AsNoTracking()
+                .Where(p => p.ImagePath != null && p.ImagePath != "")
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(6)
+                .ToListAsync();
+
+            ViewBag.InstagramUrl = (await _db.SiteSettings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == 1))?.InstagramUrl;
+
             ViewBag.Categories = await GetFilterValuesAsync(p => p.Category);
             ViewBag.Seasons    = await GetFilterValuesAsync(p => p.Season);
             ViewBag.Fabrics    = await GetFilterValuesAsync(p => p.Fabric);

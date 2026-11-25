@@ -12,6 +12,16 @@
         ?? new Dictionary<int, ShoppingApp.Services.RatingSummary>();
     var heroSlides  = ViewBag.HeroSlides as List<ShoppingApp.Models.HeroSlide> ?? new List<ShoppingApp.Models.HeroSlide>();
     var promoCards = ViewBag.PromotionalCards as List<ShoppingApp.Models.PromotionalCard> ?? new List<ShoppingApp.Models.PromotionalCard>();
+    var homeReviews = ViewBag.HomeReviews as List<ShoppingApp.Models.Review> ?? new List<ShoppingApp.Models.Review>();
+    var homeReviewCount = ViewBag.HomeReviewCount as int? ?? 0;
+    var homeReviewAverage = ViewBag.HomeReviewAverage as double? ?? 0d;
+    var feedProducts = ViewBag.FeedProducts as List<ShoppingApp.Models.Product> ?? new List<ShoppingApp.Models.Product>();
+    var instagramUrl = ViewBag.InstagramUrl as string;
+
+    string ReviewName(ShoppingApp.Models.Review review) =>
+        !string.IsNullOrWhiteSpace(review.User?.FullName) ? review.User!.FullName
+        : !string.IsNullOrWhiteSpace(review.GuestName) ? review.GuestName!
+        : "Amal customer";
     string selectedCat    = ViewBag.SelectedCategory ?? "";
     string selectedSeason = ViewBag.SelectedSeason ?? "";
     string selectedFabric = ViewBag.SelectedFabric ?? "";
@@ -861,50 +871,155 @@
 }
 
 <!-- ═══ Testimonials ═══ -->
-<section class="section">
+<section class="section" id="reviews">
     <div class="container">
-        <div class="mb-4">
-            <div class="section-kicker">Customer Love</div>
-            <h2 class="section-title">What Locals Say</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-12 col-md-4">
-                <div class="testi-card h-100">
-                    <div class="testi-stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        @if (homeReviews.Any())
+        {
+            <div class="testi-head">
+                <div class="testi-head__copy">
+                    <div class="section-kicker">Customer Love</div>
+                    <h2 class="section-title">What Locals Say</h2>
+                    @if (homeReviewCount > 0)
+                    {
+                        <p class="testi-summary">
+                            <i class="bi bi-star-fill" aria-hidden="true"></i>
+                            <strong>@homeReviewAverage.ToString("0.0")</strong>
+                            <span class="testi-summary__max">/ 5</span>
+                            <span class="testi-summary__dot" aria-hidden="true">·</span>
+                            <span>@homeReviewCount @(homeReviewCount == 1 ? "review" : "reviews")</span>
+                        </p>
+                    }
+                </div>
+                <div class="testi-nav" data-testi-nav>
+                    <button type="button" class="testi-nav__btn" data-testi-prev aria-label="Previous reviews">
+                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="testi-nav__btn" data-testi-next aria-label="Next reviews">
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="testi-track" data-testi-track role="region" aria-label="Customer reviews" tabindex="0">
+                @foreach (var review in homeReviews)
+                {
+                    var reviewName = ReviewName(review);
+                    var reviewInitial = reviewName.Trim().Substring(0, 1).ToUpperInvariant();
+                    <article class="testi-card testi-card--review">
+                        <div class="testi-stars" role="img" aria-label="Rated @review.Rating out of 5">
+                            @for (int star = 1; star <= 5; star++)
+                            {
+                                <i class="bi @(star <= review.Rating ? "bi-star-fill" : "bi-star")" aria-hidden="true"></i>
+                            }
+                        </div>
+                        <p class="testi-text">“@review.Comment!.Trim()”</p>
+                        <div class="testi-author">
+                            <div class="testi-avatar" aria-hidden="true">@reviewInitial</div>
+                            <div>
+                                <div class="testi-name">@reviewName</div>
+                                <div class="testi-city">
+                                    @review.CreatedAt.AddHours(5).ToString("MMM yyyy")
+                                    @if (review.IsVerified)
+                                    {
+                                        <span class="testi-verified"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verified buyer</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @if (review.Product != null)
+                        {
+                            <a class="testi-product" href="/Products/Detail/@review.Product.Id">
+                                <i class="bi bi-bag" aria-hidden="true"></i>
+                                <span>@review.Product.Name</span>
+                            </a>
+                        }
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="mb-4">
+                <div class="section-kicker">Customer Love</div>
+                <h2 class="section-title">What Locals Say</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <div class="testi-card h-100">
+                        <div class="testi-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="testi-text">"The lawn suit quality far exceeded my expectations. I ordered as a guest and delivery arrived in just two days!"</p>
+                        <div class="testi-author">
+                            <div class="testi-avatar">S</div>
+                            <div><div class="testi-name">Sana Khan</div><div class="testi-city">Lahore</div></div>
+                        </div>
                     </div>
-                    <p class="testi-text">"The lawn suit quality far exceeded my expectations. I ordered as a guest and delivery arrived in just two days!"</p>
-                    <div class="testi-author">
-                        <div class="testi-avatar">S</div>
-                        <div><div class="testi-name">Sana Khan</div><div class="testi-city">Lahore</div></div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="testi-card h-100">
+                        <div class="testi-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="testi-text">"The khaddar winter suit is wonderfully warm and the fit was true to size. The COD option made the whole experience effortless."</p>
+                        <div class="testi-author">
+                            <div class="testi-avatar">A</div>
+                            <div><div class="testi-name">Ayesha Raza</div><div class="testi-city">Karachi</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="testi-card h-100">
+                        <div class="testi-stars">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                        </div>
+                        <p class="testi-text">"The exchange process was refreshingly smooth — no drama, no hassle. Now I shop here every season without hesitation."</p>
+                        <div class="testi-author">
+                            <div class="testi-avatar">F</div>
+                            <div><div class="testi-name">Fatima Ali</div><div class="testi-city">Islamabad</div></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
-                <div class="testi-card h-100">
-                    <div class="testi-stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testi-text">"The khaddar winter suit is wonderfully warm and the fit was true to size. The COD option made the whole experience effortless."</p>
-                    <div class="testi-author">
-                        <div class="testi-avatar">A</div>
-                        <div><div class="testi-name">Ayesha Raza</div><div class="testi-city">Karachi</div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="testi-card h-100">
-                    <div class="testi-stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
-                    </div>
-                    <p class="testi-text">"The exchange process was refreshingly smooth — no drama, no hassle. Now I shop here every season without hesitation."</p>
-                    <div class="testi-author">
-                        <div class="testi-avatar">F</div>
-                        <div><div class="testi-name">Fatima Ali</div><div class="testi-city">Islamabad</div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
+
+@if (feedProducts.Any())
+{
+    <!-- ═══ Style feed ═══ -->
+    <section class="section section-alt" id="style-feed">
+        <div class="container">
+            <div class="feed-head">
+                <div>
+                    <div class="section-kicker">Style Feed</div>
+                    <h2 class="section-title">From the Lookbook</h2>
+                    <p class="section-sub">A little inspiration from our latest suits — tap a photo to shop the piece.</p>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(instagramUrl))
+                {
+                    <a href="@instagramUrl" class="btn-follow" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-instagram" aria-hidden="true"></i> Follow on Instagram
+                    </a>
+                }
+            </div>
+            <div class="feed-grid">
+                @foreach (var product in feedProducts)
+                {
+                    <a class="feed-tile" href="/Products/Detail/@product.Id" aria-label="Shop @product.Name">
+                        <img src="@ImageUrl.Src(product.ImagePath, 480)"
+                             srcset="@ImageUrl.SrcSet(product.ImagePath, ImageUrl.CardWidths)"
+                             sizes="(max-width: 575px) 44vw, (max-width: 991px) 30vw, 190px"
+                             alt="@product.Name" loading="lazy" decoding="async"
+                             onerror="this.src='/images/placeholder.jpg'" />
+                        <span class="feed-tile__overlay" aria-hidden="true"><i class="bi bi-bag"></i> Shop this look</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script src="~/js/home-social.js" asp-append-version="true"></script>
+}
 
