@@ -1,0 +1,75 @@
+@model List<ShoppingApp.Models.NewsletterSubscriber>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin – Newsletter";
+    ViewData["SidebarActive"] = "subscribers";
+    var pktNow = DateTime.UtcNow.AddHours(5);
+    var thisMonth = Model.Count(s => s.CreatedAt.AddHours(5).Year == pktNow.Year
+        && s.CreatedAt.AddHours(5).Month == pktNow.Month);
+}
+
+<div class="admin-header">
+    <div>
+        <h1 class="section-title" style="margin-bottom: 0.25rem;">
+            <i class="bi bi-envelope-paper"></i> Newsletter
+        </h1>
+        <p style="color: var(--text-3); font-size: 0.85rem; margin: 0;">People who joined the list from the footer signup.</p>
+    </div>
+    <div class="admin-header-actions">
+        @if (Model.Any())
+        {
+            <a href="/Admin/ExportSubscribers" class="btn-glass" data-noajax><i class="bi bi-download"></i> Export CSV</a>
+        }
+        <a href="/Admin/Products" class="btn-glass"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-envelope-plus"></i></div>
+        <p>No subscribers yet. The signup form lives in the footer of every store page.</p>
+    </div>
+}
+else
+{
+    <div class="orders-stats-row subs-stats-row">
+        <div class="ostat-card">
+            <span class="ostat-num">@Model.Count</span>
+            <span class="ostat-label">Total subscribers</span>
+        </div>
+        <div class="ostat-card">
+            <span class="ostat-num">@thisMonth</span>
+            <span class="ostat-label">Joined this month</span>
+        </div>
+    </div>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <caption class="visually-hidden">Newsletter subscribers</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Subscribed</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var subscriber in Model)
+                {
+                    <tr>
+                        <td><a href="mailto:@subscriber.Email">@subscriber.Email</a></td>
+                        <td class="cell-sub">@subscriber.CreatedAt.AddHours(5).ToString("dd MMM yyyy, HH:mm") PKT</td>
+                        <td class="admin-actions">
+                            <form method="post" action="/Admin/DeleteSubscriber/@subscriber.Id" style="display:inline" data-submit-guard data-guard-quiet
+                                  onsubmit="return confirm('Remove this subscriber from the list?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-remove" title="Remove" aria-label="Remove @subscriber.Email"><i class="bi bi-trash3"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

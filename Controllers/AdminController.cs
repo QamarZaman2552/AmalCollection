@@ -449,7 +449,58 @@ namespace ShoppingApp.Controllers
             return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
 
-        // ─── Update Order Status ──────────────────────────────────
+        // ─── Newsletter subscribers ───────────────────────────────────────
+        public IActionResult Subscribers()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+            var subscribers = _db.NewsletterSubscribers
+                .OrderByDescending(s => s.CreatedAt)
+                .ToList();
+            return View(subscribers);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteSubscriber(int id)
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            var subscriber = _db.NewsletterSubscribers.Find(id);
+            if (subscriber != null)
+            {
+                _db.NewsletterSubscribers.Remove(subscriber);
+                _db.SaveChanges();
+                TempData["Success"] = "Subscriber removed.";
+            }
+            return RedirectToAction("Subscribers");
+        }
+
+        [HttpGet]
+        public IActionResult ExportSubscribers()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            var subscribers = _db.NewsletterSubscribers
+                .OrderByDescending(s => s.CreatedAt)
+                .ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Email,Subscribed (PKT)");
+            foreach (var s in subscribers)
+            {
+                sb.Append(Cell(s.Email)).Append(',')
+                  .Append(Cell(s.CreatedAt.AddHours(5).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)))
+                  .AppendLine();
+            }
+
+            var bytes = Encoding.UTF8.GetPreamble()
+                .Concat(Encoding.UTF8.GetBytes(sb.ToString()))
+                .ToArray();
+            var fileName = $"amal-subscribers-{DateTime.UtcNow.AddHours(5):yyyy-MM-dd}.csv";
+            return File(bytes, "text/csv; charset=utf-8", fileName);
+        }
+
+        // Update Order Status
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status)

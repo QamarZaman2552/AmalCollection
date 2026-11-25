@@ -253,6 +253,30 @@ namespace ShoppingApp.Migrations
                     b.ToTable("HeroSlides");
                 });
 
+            modelBuilder.Entity("ShoppingApp.Models.NewsletterSubscriber", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_NewsletterSubscribers_Email");
+
+                    b.ToTable("NewsletterSubscribers");
+                });
+
             modelBuilder.Entity("ShoppingApp.Models.Order", b =>
                 {
                     b.Property<int>("Id")

@@ -2189,6 +2189,7 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
 .ostat-card:hover { border-color: var(--accent); }
 .ostat-num  { font-size: 2rem; font-weight: 800; color: var(--accent-2); }
 .ostat-label { font-size: 0.82rem; color: var(--text-3); font-weight: 500; }
+.subs-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 560px; }
 
 /* ─── Admin low-stock warning (Products page) ─────────── */
 .low-stock-panel {

@@ -23,6 +23,7 @@ namespace ShoppingApp.Data
         public DbSet<Review> Reviews { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
+        public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -117,6 +118,11 @@ namespace ShoppingApp.Data
             modelBuilder.Entity<PasswordResetToken>()
                 .HasIndex(t => new { t.UserId, t.Token })
                 .HasDatabaseName("IX_PasswordResetTokens_UserId_Token");
+
+            modelBuilder.Entity<NewsletterSubscriber>()
+                .HasIndex(s => s.Email)
+                .IsUnique()
+                .HasDatabaseName("IX_NewsletterSubscribers_Email");
 
             // Seed admin user (password: Admin@123)
             modelBuilder.Entity<User>().HasData(new User

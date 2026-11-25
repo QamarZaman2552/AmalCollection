@@ -29,6 +29,11 @@
     if (string.IsNullOrWhiteSpace(contactEmail))
         contactEmail = "hello@amalcollection.pk";
 
+    // One-shot message from the newsletter form's no-JS fallback.
+    var newsletterMsg = TempData["NewsletterMessage"] as string;
+    var newsletterOk = TempData["NewsletterOk"] as bool? ?? false;
+    var newsletterMsgClass = newsletterMsg == null ? "" : newsletterOk ? " is-ok" : " is-error";
+
     var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
     var ogTitle = ViewData["OgTitle"] as string ?? "Amal Collection – Ladies Suits";
     var ogDescription = ViewData["OgDescription"] as string
@@ -322,6 +327,22 @@
     <!-- ─── Footer ───────────────────────────────────────── -->
     <footer class="footer py-5">
         <div class="container">
+            <div class="footer-newsletter" id="newsletter">
+                <div class="footer-newsletter__copy">
+                    <h2 class="footer-newsletter__title">New suits, first look</h2>
+                    <p class="footer-newsletter__sub">Join the list for early access to new collections and the occasional offer. One short email, no spam.</p>
+                </div>
+                <form class="footer-newsletter__form" method="post" action="/Newsletter/Subscribe" data-newsletter>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                    <div class="footer-newsletter__row">
+                        <label class="visually-hidden" for="newsletterEmail">Email address</label>
+                        <input type="email" id="newsletterEmail" name="email" placeholder="Your email address" autocomplete="email" required maxlength="254" />
+                        <button type="submit" class="btn-gold">Subscribe</button>
+                    </div>
+                    <p class="footer-newsletter__msg@(newsletterMsgClass)" id="newsletterMsg" role="status" aria-live="polite">@newsletterMsg</p>
+                </form>
+            </div>
             <div class="row g-4 mb-4">
                 <div class="col-12 col-lg-4">
                     <div class="footer-brand">Amal<em>Collection</em></div>
@@ -450,6 +471,7 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/newsletter.js" asp-append-version="true"></script>
     <script src="~/js/submit-guard.js" asp-append-version="true"></script>
     <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
     <script src="~/js/pwa.js" asp-append-version="true"></script>

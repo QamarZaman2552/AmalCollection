@@ -1822,6 +1822,89 @@ html.announce-dismissed .announce { display: none; }
   font-size: 0.8rem;
   color: var(--text-2);
 }
+
+/* ─── Footer newsletter ────────────────────────────── */
+.footer-newsletter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-bottom: 1.75rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.footer-newsletter__copy { max-width: 460px; }
+.footer-newsletter__title {
+  font-family: var(--font-head);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 0.35rem;
+  color: var(--text);
+}
+.footer-newsletter__sub {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+.footer-newsletter__form { flex: 1 1 340px; max-width: 460px; }
+.footer-newsletter__row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.footer-newsletter__row:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(var(--gold-rgb), 0.16);
+}
+.footer-newsletter__row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  outline: none;
+}
+.footer-newsletter__row input::placeholder { color: var(--text-3); }
+.footer-newsletter__row .btn-gold {
+  flex-shrink: 0;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  /* The lighter brand gold is too pale for white 12px text; use the ink shade. */
+  background: var(--gold-ink);
+}
+.footer-newsletter__row .btn-gold:hover { background: #5f4a1e; }
+.footer-newsletter__row .btn-gold[disabled] { opacity: 0.7; cursor: wait; }
+.footer-newsletter__msg {
+  min-height: 1.2em;
+  margin: 0.45rem 0 0;
+  padding-left: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+.footer-newsletter__msg.is-ok { color: var(--green); }
+.footer-newsletter__msg.is-error { color: var(--red); }
+
+@media (max-width: 767.98px) {
+  .footer-newsletter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+  }
+  .footer-newsletter__copy,
+  .footer-newsletter__form { max-width: none; }
+  .footer-newsletter__title { font-size: 1.15rem; }
+}
+
 .pay-badge {
   padding: 4px 12px;
   border: 1px solid var(--border);
