@@ -2190,6 +2190,70 @@ body.light-mode .mobile-search-icon { color: var(--text-2); }
 .ostat-num  { font-size: 2rem; font-weight: 800; color: var(--accent-2); }
 .ostat-label { font-size: 0.82rem; color: var(--text-3); font-weight: 500; }
 
+/* ─── Admin low-stock warning (Products page) ─────────── */
+.low-stock-panel {
+  background: #fff8ec;
+  border: 1px solid #f0d9ac;
+  border-left: 4px solid #c2410c;
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+.low-stock-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.8rem;
+}
+.low-stock-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #8a3a0c;
+}
+.low-stock-panel__title .bi { color: #c2410c; }
+.low-stock-panel__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.low-stock-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.low-stock-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.7rem;
+  background: #fff;
+  border: 1px solid #e8d3ae;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.low-stock-chip:hover { border-color: #c2410c; box-shadow: 0 2px 8px rgba(194,65,12,0.12); }
+.low-stock-chip.is-out { background: #fdf1f1; border-color: #e7b4b4; }
+.low-stock-chip__qty {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #8a5310;
+  white-space: nowrap;
+}
+.low-stock-chip.is-out .low-stock-chip__qty { color: var(--red); }
+.low-stock-more {
+  align-self: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8a3a0c;
+  white-space: nowrap;
+}
+.low-stock-more:hover { color: #c2410c; }
+
 .admin-order-card {
   background: var(--bg-2);
   border: 1px solid var(--border);

@@ -16,7 +16,42 @@
     </div>
 </div>
 
-<div class="admin-table-wrap">
+@{
+    var lowStock = ViewBag.LowStock as System.Collections.Generic.List<ShoppingApp.Models.Product>;
+    var lowStockOut = lowStock?.Count(p => p.Stock <= 0) ?? 0;
+}
+@if (lowStock != null && lowStock.Count > 0)
+{
+    <section class="low-stock-panel" aria-labelledby="lowStockHeading">
+        <div class="low-stock-panel__head">
+            <div>
+                <h2 class="low-stock-panel__title" id="lowStockHeading">
+                    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                    Low stock
+                </h2>
+                <p class="low-stock-panel__sub">
+                    @lowStock.Count product@(lowStock.Count == 1 ? "" : "s") at 5 units or fewer@(lowStockOut > 0 ? $" — {lowStockOut} already out of stock" : "").
+                </p>
+            </div>
+            <a class="low-stock-more" href="#productsTable" data-noajax>View all products</a>
+        </div>
+        <div class="low-stock-chips">
+            @foreach (var p in lowStock.Take(6))
+            {
+                <a class="low-stock-chip @(p.Stock <= 0 ? "is-out" : "")" href="/Admin/Edit/@p.Id">
+                    <span class="low-stock-chip__name">@p.Name</span>
+                    <span class="low-stock-chip__qty">@(p.Stock <= 0 ? "Out of stock" : $"{p.Stock} left")</span>
+                </a>
+            }
+            @if (lowStock.Count > 6)
+            {
+                <a class="low-stock-more" href="#productsTable" data-noajax>+@(lowStock.Count - 6) more</a>
+            }
+        </div>
+    </section>
+}
+
+<div class="admin-table-wrap" id="productsTable">
     <table class="admin-table">
         <caption class="visually-hidden">Products</caption>
         <thead>

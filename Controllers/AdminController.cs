@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShoppingApp.Data;
@@ -36,6 +38,9 @@ namespace ShoppingApp.Controllers
 
         private static readonly string[] AllSizes = { "XS", "S", "M", "L", "XL", "XXL", "Unstitched" };
 
+        // Products at or below this stock level are surfaced on the products page.
+        private const int LowStockThreshold = 5;
+
         private void EnsurePromoLinkViewBag()
         {
             var products = _db.Products.OrderBy(p => p.Name).ToList();
@@ -59,6 +64,12 @@ namespace ShoppingApp.Controllers
         {
             if (!IsAdmin) return RedirectToAction("Login", "Auth");
             var products = _db.Products.OrderByDescending(p => p.CreatedAt).ToList();
+            // Anything at five units or fewer needs a restock decision; zero goes red.
+            ViewBag.LowStock = products
+                .Where(p => p.Stock <= LowStockThreshold)
+                .OrderBy(p => p.Stock)
+                .ThenBy(p => p.Name)
+                .ToList();
             return View(products);
         }
 
@@ -365,6 +376,77 @@ namespace ShoppingApp.Controllers
                 .ToList();
 
             return View(orders);
+        }
+
+        // ─── Export orders as CSV ─────────────────────────────────────────
+        [HttpGet]
+        public IActionResult ExportOrders()
+        {
+            if (!IsAdmin) return RedirectToAction("Login", "Auth");
+
+            var orders = _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Order #,Date (PKT),Customer,Email,Phone,Address,Payment,Items,Quantity,Subtotal,Delivery,Total,Status");
+
+            foreach (var o in orders)
+            {
+                var items = string.Join("; ", o.OrderItems.Select(oi =>
+                {
+                    var variant = string.Join(" / ", new[] { oi.Size, oi.Color }.Where(v => !string.IsNullOrWhiteSpace(v)));
+                    var name = oi.Product?.Name ?? "Product";
+                    return variant.Length > 0 ? $"{name} ({variant}) x{oi.Quantity}" : $"{name} x{oi.Quantity}";
+                }));
+                var customer = o.User?.FullName ?? o.GuestName ?? "Guest";
+                var email = o.User?.Email ?? o.GuestEmail;
+                var phone = o.User?.Phone ?? o.GuestPhone;
+
+                sb.Append(Cell(o.Id.ToString(CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(o.CreatedAt.AddHours(5).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(customer)).Append(',')
+                  .Append(Cell(email)).Append(',')
+                  .Append(Cell(phone)).Append(',')
+                  .Append(Cell(o.DeliveryAddress)).Append(',')
+                  .Append(Cell(o.PaymentMethod)).Append(',')
+                  .Append(Cell(items)).Append(',')
+                  .Append(Cell(o.OrderItems.Sum(oi => oi.Quantity).ToString(CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(o.Subtotal.ToString("0.00", CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(o.DeliveryCharge.ToString("0.00", CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(o.TotalAmount.ToString("0.00", CultureInfo.InvariantCulture))).Append(',')
+                  .Append(Cell(o.Status))
+                  .AppendLine();
+            }
+
+            // BOM keeps Excel from reading the file as the system code page.
+            var bytes = Encoding.UTF8.GetPreamble()
+                .Concat(Encoding.UTF8.GetBytes(sb.ToString()))
+                .ToArray();
+            var fileName = $"amal-orders-{DateTime.UtcNow.AddHours(5):yyyy-MM-dd}.csv";
+            return File(bytes, "text/csv; charset=utf-8", fileName);
+        }
+
+        /// <summary>
+        /// Quotes one CSV cell and neutralises spreadsheet formulas and bidi text.
+        /// </summary>
+        private static string Cell(string? value)
+        {
+            value ??= "";
+
+            // Spreadsheet apps execute cells that start with any of these.
+            if (value.Length > 0 && (value[0] is '=' or '+' or '-' or '@' or '\t' or '\r'))
+                value = "'" + value;
+
+            // Anchor right-to-left text so Excel keeps the columns left to right.
+            if (value.Length > 0 && ((value[0] >= '\u0590' && value[0] <= '\u08FF') || value[0] is '\u200F' or '\u061C'))
+                value = "\u200E" + value;
+
+            value = value.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
 
         // ─── Update Order Status ──────────────────────────────────
