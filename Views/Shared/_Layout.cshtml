@@ -418,6 +418,36 @@
         </div>
     </footer>
 
+    <!-- ═══ Mobile Bottom Nav ═══ -->
+    <nav class="mobile-bottom-nav" aria-label="Quick shopping">
+        <a class="mbn-item" href="/" data-mbn="home">
+            <i class="bi bi-house-door" aria-hidden="true"></i>
+            <span>Home</span>
+        </a>
+        <a class="mbn-item" href="/#products" data-mbn="shop">
+            <i class="bi bi-shop" aria-hidden="true"></i>
+            <span>Shop</span>
+        </a>
+        <button type="button" class="mbn-item" data-mbn-search aria-label="Search products">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <span>Search</span>
+        </button>
+        <a class="mbn-item" href="/Wishlist" data-mbn="wishlist" aria-label="Wishlist">
+            <span class="mbn-icon-wrap">
+                <i class="bi bi-heart" aria-hidden="true"></i>
+                <span class="mbn-badge" data-mbn-wishlist hidden>0</span>
+            </span>
+            <span>Wishlist</span>
+        </a>
+        <a class="mbn-item" href="/Cart" data-mbn="cart" data-noajax aria-label="Cart">
+            <span class="mbn-icon-wrap">
+                <i class="bi bi-bag" aria-hidden="true"></i>
+                <span class="mbn-badge" data-mbn-cart hidden>0</span>
+            </span>
+            <span>Cart</span>
+        </a>
+    </nav>
+
     <!-- ─── WhatsApp Float ───────────────────────────────── -->
     @if (!string.IsNullOrWhiteSpace(waDigits))
     {
@@ -475,6 +505,7 @@
     <script src="~/js/submit-guard.js" asp-append-version="true"></script>
     <script src="~/js/ajax-nav.js" asp-append-version="true"></script>
     <script src="~/js/pwa.js" asp-append-version="true"></script>
+    <script src="~/js/bottom-nav.js" asp-append-version="true"></script>
 
     <script>
         // Lock pinch zoom only — do NOT block normal touch scroll
