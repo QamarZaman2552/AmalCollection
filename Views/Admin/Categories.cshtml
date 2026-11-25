@@ -14,17 +14,17 @@
 </div>
 
 <div class="form-card" style="margin-bottom:1.5rem;">
-    <h3 style="margin-bottom:1rem;font-size:1rem;">Add Category</h3>
+    <h2 style="margin-bottom:1rem;font-size:1rem;">Add Category</h2>
     <form method="post" action="/Admin/AddCategory" class="admin-form" data-submit-guard data-guard-label="Adding category…">
         @Html.AntiForgeryToken()
         <div class="form-grid-2">
             <div class="form-group">
-                <label>Name *</label>
-                <input type="text" name="name" required placeholder="e.g. Summer Suit" />
+                <label for="newCategoryName">Name *</label>
+                <input type="text" id="newCategoryName" name="name" required placeholder="e.g. Summer Suit" />
             </div>
             <div class="form-group">
-                <label>Sort Order</label>
-                <input type="number" name="sortOrder" value="0" min="0" />
+                <label for="newCategorySort">Sort Order</label>
+                <input type="number" id="newCategorySort" name="sortOrder" value="0" min="0" />
             </div>
         </div>
         <button type="submit" class="btn-primary">Add Category</button>
@@ -52,8 +52,8 @@
                     <td>
                         <form method="post" action="/Admin/EditCategory/@c.Id" class="admin-form" style="display:flex;gap:0.5rem;align-items:center;" data-submit-guard data-guard-quiet>
                             @Html.AntiForgeryToken()
-                            <input type="text" name="name" value="@c.Name" style="max-width:180px;" />
-                            <input type="number" name="sortOrder" value="@c.SortOrder" style="width:60px;" />
+                            <input type="text" name="name" value="@c.Name" style="max-width:180px;" aria-label="Category name" />
+                            <input type="number" name="sortOrder" value="@c.SortOrder" style="width:60px;" aria-label="Sort order" />
                             <label style="display:flex;gap:0.3rem;align-items:center;font-size:0.8rem;">
                                 <input type="checkbox" name="isActive" value="true" checked="@c.IsActive" style="width:auto;" />
                                 <input type="hidden" name="isActive" value="false" /> Active

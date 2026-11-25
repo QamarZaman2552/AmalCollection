@@ -61,7 +61,7 @@
                         <div class="cart-item">
                             <img src="@ImageUrl.Src(item.Product?.ImagePath, 160)" alt="@item.Product?.Name" width="80" height="80" loading="lazy" decoding="async" onerror="this.src='/images/placeholder.jpg'" class="cart-item-img" />
                             <div class="cart-item-info">
-                                <h3>@item.Product?.Name</h3>
+                                <h2 class="cart-item-name">@item.Product?.Name</h2>
                                 <div class="cart-item-cat">@item.Product?.Category · @item.Product?.Fabric</div>
                                 @if (!string.IsNullOrEmpty(item.Size) || !string.IsNullOrEmpty(item.Color))
                                 {
@@ -83,13 +83,13 @@
                                 <form method="post" action="/Cart/UpdateQuantity" class="qty-form">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="cartItemId" value="@item.Id" />
-                                    <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" onchange="this.form.requestSubmit()" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="0" max="@item.Product?.Stock" class="qty-input" aria-label="Quantity for @item.Product?.Name" onchange="this.form.requestSubmit()" />
                                 </form>
                                 <div class="cart-item-subtotal">PKR @((item.Product!.FinalPrice * item.Quantity).ToString("N0"))</div>
                                 <form method="post" action="/Cart/Remove">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="cartItemId" value="@item.Id" />
-                                    <button type="submit" class="btn-remove" aria-label="Remove"><i class="bi bi-x-lg"></i></button>
+                                    <button type="submit" class="btn-remove" aria-label="Remove @item.Product?.Name from cart"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
                                 </form>
                             </div>
                         </div>

@@ -16,7 +16,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Amal Collection – Admin Panel" />
     <meta name="robots" content="noindex, nofollow" />
     <title>@ViewData["Title"] – Amal Collection</title>
@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="~/css/print.css" media="print" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="light-mode @ViewData["BodyClass"]">
+<body class="light-mode admin-body @ViewData["BodyClass"]">
     <a href="#adminContent" class="skip-link">Skip to content</a>
     <div class="admin-layout">
         <!-- ─── Sidebar ──────────────────────────────────── -->

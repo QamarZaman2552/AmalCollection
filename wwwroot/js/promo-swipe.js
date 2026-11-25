@@ -33,11 +33,16 @@
             c.classList.toggle('is-back', !isTop);
             c.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
             if (isTop) {
+                // Only the card in front is reachable by keyboard/screen readers
+                c.removeAttribute('aria-hidden');
+                c.removeAttribute('tabindex');
                 c.style.transform     = 'none';
                 c.style.opacity       = '1';
                 c.style.zIndex        = '100';
                 c.style.pointerEvents = 'auto';
             } else {
+                c.setAttribute('aria-hidden', 'true');
+                c.setAttribute('tabindex', '-1');
                 const depth = cards.length - 1 - i;
                 const rot = depth % 2 === 1 ? -8 : 8;
                 c.style.transform     = 'scale(' + (1 + depth * 0.055) + ') rotate(' + rot + 'deg)';

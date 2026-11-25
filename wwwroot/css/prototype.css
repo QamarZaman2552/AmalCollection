@@ -118,7 +118,7 @@ html.announce-dismissed .announce { display: none; }
   display: inline-block;
   padding: 4px 0;
 }
-.ac-brand em { font-style: normal; color: var(--gold); font-weight: 900; }
+.ac-brand em { font-style: normal; color: var(--gold-ink); font-weight: 900; }
 
 .ac-toggler {
   border: 1px solid var(--border) !important;
@@ -1779,7 +1779,7 @@ html.announce-dismissed .announce { display: none; }
   font-weight: 700;
   margin-bottom: 12px;
 }
-.footer-brand em { font-style: normal; color: var(--gold); }
+.footer-brand em { font-style: normal; color: var(--gold-ink); }
 .footer-about {
   font-size: 0.88rem;
   color: var(--text-2);
@@ -1803,7 +1803,7 @@ html.announce-dismissed .announce { display: none; }
   border-color: var(--gold);
   color: #fff;
 }
-.footer h4 {
+.footer .footer-col-title {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -1820,7 +1820,7 @@ html.announce-dismissed .announce { display: none; }
 .footer-bottom {
   border-top: 1px solid var(--border);
   font-size: 0.8rem;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 .pay-badge {
   padding: 4px 12px;
@@ -1829,6 +1829,7 @@ html.announce-dismissed .announce { display: none; }
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
+  color: var(--text-2);
   background: var(--card);
 }
 
@@ -2705,7 +2706,7 @@ body.pd-lb-open { overflow: hidden; }
     max-width: 320px;
   }
   .footer-social { justify-content: center; }
-  .footer h4 { margin-bottom: 12px; }
+  .footer .footer-col-title { margin-bottom: 12px; }
   .footer ul { padding-left: 0; list-style: none; margin-bottom: 0; }
   .footer ul li { margin-bottom: 8px; }
   .footer-bottom {
@@ -3121,7 +3122,7 @@ body.light-mode .btn-primary:hover {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--gold);
+  color: var(--gold-ink);
   margin-top: 1.1rem;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--border);

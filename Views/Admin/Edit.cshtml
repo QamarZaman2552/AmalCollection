@@ -18,12 +18,12 @@
         <div class="form-grid-2">
             <div class="form-section-title"><i class="bi bi-info-circle"></i> Basic Information</div>
             <div class="form-group">
-                <label>Product Name *</label>
-                <input type="text" name="Name" value="@Model.Name" required />
+                <label for="prodName">Product Name *</label>
+                <input type="text" id="prodName" name="Name" value="@Model.Name" required />
             </div>
             <div class="form-group">
-                <label>Category</label>
-                <select name="Category">
+                <label for="prodCategory">Category</label>
+                <select id="prodCategory" name="Category">
                     <option value="">Select category</option>
                     @foreach (var c in categories.Where(x => x.IsActive))
                     {
@@ -42,20 +42,20 @@
                     }
                 </select>
                 <div style="margin-top:0.4rem;">
-                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
+                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold-ink);">+ Manage categories</a>
                 </div>
             </div>
             <div class="form-group">
-                <label>Season</label>
-                <select name="Season">
+                <label for="prodSeason">Season</label>
+                <select id="prodSeason" name="Season">
                     <option value="">—</option>
                     <option value="Summer" selected="@(Model.Season == "Summer")">Summer</option>
                     <option value="Winter" selected="@(Model.Season == "Winter")">Winter</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Fabric</label>
-                <select name="Fabric">
+                <label for="prodFabric">Fabric</label>
+                <select id="prodFabric" name="Fabric">
                     <option value="">—</option>
                     @foreach (var f in new[] { "Lawn", "Cotton", "Chiffon", "Khaddar", "Wool", "Cambric", "Jacquard" })
                     {
@@ -65,8 +65,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Stitched / Unstitched</label>
-                <select name="StitchedType">
+                <label for="prodStitchedType">Stitched / Unstitched</label>
+                <select id="prodStitchedType" name="StitchedType">
                     <option value="">—</option>
                     @foreach (var s in new[] { "Stitched", "Semi-Stitched", "Unstitched" })
                     {
@@ -76,36 +76,36 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Pieces (2 / 3)</label>
-                <input type="number" name="Pieces" value="@(Model.Pieces?.ToString() ?? "")" min="1" max="5" />
+                <label for="prodPieces">Pieces (2 / 3)</label>
+                <input type="number" id="prodPieces" name="Pieces" value="@(Model.Pieces?.ToString() ?? "")" min="1" max="5" />
             </div>
 
             <div class="form-section-title"><i class="bi bi-cash-coin"></i> Pricing &amp; Stock</div>
             <div class="form-group">
-                <label>Price (PKR) *</label>
-                <input type="number" name="Price" value="@Model.Price" required min="0" step="0.01" />
+                <label for="prodPrice">Price (PKR) *</label>
+                <input type="number" id="prodPrice" name="Price" value="@Model.Price" required min="0" step="0.01" />
             </div>
             <div class="form-group">
-                <label>Discount (%)</label>
-                <input type="number" name="Discount" value="@Model.Discount" min="0" max="100" />
+                <label for="prodDiscount">Discount (%)</label>
+                <input type="number" id="prodDiscount" name="Discount" value="@Model.Discount" min="0" max="100" />
             </div>
             <div class="form-group">
-                <label>Stock</label>
-                <input type="number" name="Stock" value="@Model.Stock" min="0" />
+                <label for="prodStock">Stock</label>
+                <input type="number" id="prodStock" name="Stock" value="@Model.Stock" min="0" />
             </div>
             <div class="form-group">
-                <label>Brand</label>
-                <input type="text" name="Brand" value="@Model.Brand" />
+                <label for="prodBrand">Brand</label>
+                <input type="text" id="prodBrand" name="Brand" value="@Model.Brand" />
             </div>
 
             <div class="form-section-title"><i class="bi bi-palette"></i> Colors, Sizes &amp; Delivery</div>
             <div class="form-group">
-                <label>Colors (comma separated)</label>
-                <input type="text" name="Colors" value="@Model.Colors" placeholder="e.g. Sand, Charcoal" />
+                <label for="prodColors">Colors (comma separated)</label>
+                <input type="text" id="prodColors" name="Colors" value="@Model.Colors" placeholder="e.g. Sand, Charcoal" />
             </div>
             <div class="form-group">
-                <label>Sizes (comma separated)</label>
-                <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L" list="sizesList" />
+                <label for="prodSizes">Sizes (comma separated)</label>
+                <input type="text" id="prodSizes" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L" list="sizesList" />
                 <datalist id="sizesList">
                     @foreach (var s in allSizes)
                     {
@@ -120,8 +120,8 @@
                     Free delivery
                 </label>
                 <div id="deliveryChargeWrap" style="display:@(Model.IsFreeDelivery ? "none" : "block"); flex:1; min-width:180px;">
-                    <label>Delivery charge (PKR)</label>
-                    <input type="number" name="DeliveryCharge" value="@(Model.DeliveryCharge?.ToString() ?? "")" min="0" step="1" />
+                    <label for="prodDeliveryCharge">Delivery charge (PKR)</label>
+                    <input type="number" id="prodDeliveryCharge" name="DeliveryCharge" value="@(Model.DeliveryCharge?.ToString() ?? "")" min="0" step="1" />
                 </div>
             </div>
         </div>
@@ -129,8 +129,8 @@
         <div class="form-grid-2">
             <div class="form-section-title"><i class="bi bi-image"></i> Description &amp; Images</div>
             <div class="form-group" style="grid-column: span 2;">
-                <label>Description</label>
-                <textarea name="Description" rows="3">@Model.Description</textarea>
+                <label for="prodDescription">Description</label>
+                <textarea id="prodDescription" name="Description" rows="3">@Model.Description</textarea>
             </div>
             <div class="form-group" style="grid-column: span 2;">
                 <label>Current Images (@images.Count / 5)</label>
@@ -147,7 +147,7 @@
                         }
                     </div>
                 }
-                <input type="file" name="imageFiles" accept="image/*" multiple />
+                <input type="file" id="prodImages" name="imageFiles" accept="image/*" multiple aria-label="Add product images" />
                 <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First new image becomes cover if no cover exists. Max 5 total.</div>
             </div>
         </div>

@@ -436,7 +436,13 @@ function initHeroSlider() {
   }
   function go(i) {
     cur = (i + slides.length) % slides.length;
-    slides.forEach((s, idx) => s.classList.toggle('active', idx === cur));
+    slides.forEach((s, idx) => {
+      const on = idx === cur;
+      s.classList.toggle('active', on);
+      // Hidden slides must leave the tab order and the screen-reader tree.
+      if (on) { s.removeAttribute('aria-hidden'); s.removeAttribute('inert'); }
+      else { s.setAttribute('aria-hidden', 'true'); s.setAttribute('inert', ''); }
+    });
     dots.forEach((d, idx) => d.classList.toggle('active', idx === cur));
     if (num) num.textContent = String(cur + 1).padStart(2, '0');
     restartBar();

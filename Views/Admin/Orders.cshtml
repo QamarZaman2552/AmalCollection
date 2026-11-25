@@ -169,7 +169,7 @@ else
                             <form method="post" action="/Admin/UpdateStatus/@order.Id" class="status-update-form" data-submit-guard data-guard-label="Saving…">
                                 @Html.AntiForgeryToken()
                                 @{ var st2 = order.Status; }
-                                <select name="status" class="aorder-status-select">
+                                <select name="status" class="aorder-status-select" aria-label="Order status for order #@order.Id">
                                     @if (st2 == "pending")   { <option value="pending"   selected>Pending</option>   } else { <option value="pending">Pending</option>   }
                                     @if (st2 == "confirmed") { <option value="confirmed" selected>Confirmed</option> } else { <option value="confirmed">Confirmed</option> }
                                     @if (st2 == "shipped")   { <option value="shipped"   selected>Shipped</option>   } else { <option value="shipped">Shipped</option>   }

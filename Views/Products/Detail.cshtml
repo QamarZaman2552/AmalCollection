@@ -443,13 +443,13 @@
                         <input type="hidden" name="productId" value="@Model.Id" />
                         <div class="star-picker" id="starPicker">
                             <span class="sp-label">Your Rating:</span>
-                            <div class="sp-stars" id="spStars">
+                            <div class="sp-stars" id="spStars" role="group" aria-label="Your rating">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)"><i class="bi bi-star-fill"></i></button>
+                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)" aria-label="@i out of 5" aria-pressed="false"><i class="bi bi-star-fill" aria-hidden="true"></i></button>
                                 }
                             </div>
-                            <span class="sp-hint" id="spHint">Click a star</span>
+                            <span class="sp-hint" id="spHint" aria-live="polite">Click a star</span>
                             <input type="hidden" name="rating" id="ratingInput" value="0" required />
                         </div>
                         <div class="form-group">
@@ -472,13 +472,13 @@
                         <input type="hidden" name="productId" value="@Model.Id" />
                         <div class="star-picker" id="starPicker">
                             <span class="sp-label">Your Rating:</span>
-                            <div class="sp-stars" id="spStars">
+                            <div class="sp-stars" id="spStars" role="group" aria-label="Your rating">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)"><i class="bi bi-star-fill"></i></button>
+                                    <button type="button" class="sp-star" data-val="@i" onclick="setRating(@i)" aria-label="@i out of 5" aria-pressed="false"><i class="bi bi-star-fill" aria-hidden="true"></i></button>
                                 }
                             </div>
-                            <span class="sp-hint" id="spHint">Click a star</span>
+                            <span class="sp-hint" id="spHint" aria-live="polite">Click a star</span>
                             <input type="hidden" name="rating" id="ratingInput" value="0" required />
                         </div>
                         <div class="form-group">
@@ -926,6 +926,7 @@ function setRating(val) {
     document.getElementById('spHint').textContent = ratingLabels[val];
     document.querySelectorAll('.sp-star').forEach(function (s, idx) {
         s.classList.toggle('active', idx < val);
+        s.setAttribute('aria-pressed', idx < val ? 'true' : 'false');
     });
 }
 document.querySelectorAll('.sp-star').forEach(function (star, idx) {

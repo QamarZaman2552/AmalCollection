@@ -118,11 +118,14 @@
 
 <!-- ═══ HERO SLIDER ═══ -->
 <section class="hero" id="heroSlider">
+    @* One stable page heading; the rotating slide titles below are plain text so
+       the outline never gains four competing h1s. *@
+    <h1 class="visually-hidden">Ladies Suits — Amal Collection</h1>
     <div class="hero-track">
         @{ int slideIdx = 0; }
         @foreach (var slide in heroSlides)
         {
-            <div class="hero-slide @(slideIdx == 0 ? "active" : "")">
+            <div class="hero-slide @(slideIdx == 0 ? "active" : "")" aria-hidden="@(slideIdx == 0 ? null : "true")" inert="@(slideIdx == 0 ? null : "inert")">
                 <div class="hero-img">
                     <img src="@ImageUrl.Src(slide.ImagePath, 1440)"
                          srcset="@ImageUrl.SrcSet(slide.ImagePath, ImageUrl.BannerWidths)"
@@ -135,7 +138,7 @@
                 <div class="hero-panel">
                     <div class="hero-text">
                         <div class="hero-kicker">@(string.IsNullOrEmpty(slide.Tagline) ? slide.CategoryLabel : slide.Tagline)</div>
-                        <h1 class="hero-title">@(string.IsNullOrEmpty(slide.Title) ? "Ladies Suits" : slide.Title)</h1>
+                        <p class="hero-title">@(string.IsNullOrEmpty(slide.Title) ? "Ladies Suits" : slide.Title)</p>
                         @if (!string.IsNullOrEmpty(slide.CategoryLabel) && !string.Equals(slide.CategoryLabel, slide.Tagline, StringComparison.OrdinalIgnoreCase))
                         {
                             <p class="hero-desc">@slide.CategoryLabel @(!string.IsNullOrEmpty(slide.Hashtag) ? $"· {slide.Hashtag}" : "")</p>
@@ -203,13 +206,21 @@
                             promoHref = "/Products/Detail/" + card.ProductId.Value;
                         else if (!string.IsNullOrWhiteSpace(card.CategoryName))
                             promoHref = "/?category=" + Uri.EscapeDataString(card.CategoryName) + "#products";
+
+                        // Back-of-deck cards hide their text, so the image alt must carry
+                        // the link name on its own (otherwise the link has no accessible name).
+                        var promoAlt = string.IsNullOrWhiteSpace(card.BrandName)
+                            ? "Featured deal"
+                            : card.BrandName + " deal";
+                        if (card.DiscountPercent > 0)
+                            promoAlt += " — " + card.DiscountPercent + "% off";
                         <a class="promo-card" data-index="@i" href="@promoHref">
 
                             <img class="promo-card__img"
                                  src="@ImageUrl.Src(card.ImagePath, 480)"
                                  srcset="@ImageUrl.SrcSet(card.ImagePath, ImageUrl.CardWidths)"
                                  sizes="(max-width: 767px) 60vw, 240px"
-                                 alt="@card.BrandName"
+                                 alt="@promoAlt"
                                  loading="lazy" decoding="async"
                                  draggable="false" />
 
@@ -395,7 +406,8 @@
                             @if (selectedMaxPrice.HasValue) { <input type="hidden" name="maxPrice" value="@Inv(selectedMaxPrice.Value)" /> }
                             @if (inStockOnly) { <input type="hidden" name="inStock" value="true" /> }
                             @if (onSaleOnly) { <input type="hidden" name="onSale" value="true" /> }
-                            <select name="sort" class="sort-select" onchange="this.form.requestSubmit()">
+                            <label class="visually-hidden" for="sortSelect">Sort products</label>
+                            <select name="sort" id="sortSelect" class="sort-select" onchange="this.form.requestSubmit()">
                                 @foreach (var opt in sortOptions)
                                 {
                                     if (opt.Value == selectedSort)

@@ -64,11 +64,11 @@
                     <td>
                         @if (user.Role == "admin")
                         {
-                            <span class="payment-badge" style="background: rgba(128,90,213,0.15); color: var(--accent-2);">ADMIN</span>
+                            <span class="payment-badge" style="background: rgba(128,90,213,0.15); color: #4b3a75;">ADMIN</span>
                         }
                         else
                         {
-                            <span class="payment-badge" style="background: rgba(52,211,153,0.12); color: #34d399;">CUSTOMER</span>
+                            <span class="payment-badge" style="background: rgba(52,211,153,0.12); color: #116b38;">CUSTOMER</span>
                         }
                     </td>
                     <td class="cell-sub">@user.CreatedAt.AddHours(5).ToString("dd MMM yy")</td>
@@ -93,11 +93,11 @@
                                 @Html.AntiForgeryToken()
                                 @if (user.IsLocked)
                                 {
-                                    <button type="submit" class="btn-save-status" style="background:#34d399;"><i class="bi bi-check2"></i> Activate</button>
+                                    <button type="submit" class="btn-save-status" style="background:#116b38;"><i class="bi bi-check2"></i> Activate</button>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="btn-save-status" style="background:#ff6b6b;"><i class="bi bi-x-lg"></i> Deactivate</button>
+                                    <button type="submit" class="btn-save-status" style="background:#c93a3a;"><i class="bi bi-x-lg"></i> Deactivate</button>
                                 }
                             </form>
                             <form method="post" action="/Admin/DeleteUser/@user.Id" data-submit-guard data-guard-quiet onsubmit="return confirm('PERMANENTLY delete @user.FullName and ALL their data (orders, cart, reviews)?');" style="margin-top:6px;">

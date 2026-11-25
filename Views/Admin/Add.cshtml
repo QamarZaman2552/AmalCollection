@@ -15,12 +15,12 @@
         <div class="form-grid-2">
             <div class="form-section-title"><i class="bi bi-info-circle"></i> Basic Information</div>
             <div class="form-group">
-                <label>Product Name *</label>
-                <input type="text" name="Name" required placeholder="e.g. Printed Lawn 3-Piece Suit" />
+                <label for="prodName">Product Name *</label>
+                <input type="text" id="prodName" name="Name" required placeholder="e.g. Printed Lawn 3-Piece Suit" />
             </div>
             <div class="form-group">
-                <label>Category</label>
-                <select name="Category">
+                <label for="prodCategory">Category</label>
+                <select id="prodCategory" name="Category">
                     <option value="">Select category</option>
                     @foreach (var c in categories.Where(x => x.IsActive))
                     {
@@ -28,20 +28,20 @@
                     }
                 </select>
                 <div style="margin-top:0.4rem;">
-                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold);">+ Manage categories</a>
+                    <a href="/Admin/Categories" style="font-size:0.8rem;color:var(--gold-ink);">+ Manage categories</a>
                 </div>
             </div>
             <div class="form-group">
-                <label>Season</label>
-                <select name="Season">
+                <label for="prodSeason">Season</label>
+                <select id="prodSeason" name="Season">
                     <option value="">—</option>
                     <option value="Summer">Summer</option>
                     <option value="Winter">Winter</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Fabric</label>
-                <select name="Fabric">
+                <label for="prodFabric">Fabric</label>
+                <select id="prodFabric" name="Fabric">
                     <option value="">—</option>
                     <option>Lawn</option>
                     <option>Cotton</option>
@@ -53,8 +53,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Stitched / Unstitched</label>
-                <select name="StitchedType">
+                <label for="prodStitchedType">Stitched / Unstitched</label>
+                <select id="prodStitchedType" name="StitchedType">
                     <option value="">—</option>
                     <option value="Stitched">Stitched</option>
                     <option value="Semi-Stitched">Semi-Stitched</option>
@@ -62,36 +62,36 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Pieces (2 / 3)</label>
-                <input type="number" name="Pieces" min="1" max="5" placeholder="e.g. 3" />
+                <label for="prodPieces">Pieces (2 / 3)</label>
+                <input type="number" id="prodPieces" name="Pieces" min="1" max="5" placeholder="e.g. 3" />
             </div>
 
             <div class="form-section-title"><i class="bi bi-cash-coin"></i> Pricing &amp; Stock</div>
             <div class="form-group">
-                <label>Price (PKR) *</label>
-                <input type="number" name="Price" required min="0" step="0.01" placeholder="e.g. 2499" />
+                <label for="prodPrice">Price (PKR) *</label>
+                <input type="number" id="prodPrice" name="Price" required min="0" step="0.01" placeholder="e.g. 2499" />
             </div>
             <div class="form-group">
-                <label>Discount (%)</label>
-                <input type="number" name="Discount" min="0" max="100" value="0" />
+                <label for="prodDiscount">Discount (%)</label>
+                <input type="number" id="prodDiscount" name="Discount" min="0" max="100" value="0" />
             </div>
             <div class="form-group">
-                <label>Stock *</label>
-                <input type="number" name="Stock" required min="0" value="0" />
+                <label for="prodStock">Stock *</label>
+                <input type="number" id="prodStock" name="Stock" required min="0" value="0" />
             </div>
             <div class="form-group">
-                <label>Brand</label>
-                <input type="text" name="Brand" value="Amal" placeholder="e.g. Amal" />
+                <label for="prodBrand">Brand</label>
+                <input type="text" id="prodBrand" name="Brand" value="Amal" placeholder="e.g. Amal" />
             </div>
 
             <div class="form-section-title"><i class="bi bi-palette"></i> Colors, Sizes &amp; Delivery</div>
             <div class="form-group">
-                <label>Colors (comma separated)</label>
-                <input type="text" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
+                <label for="prodColors">Colors (comma separated)</label>
+                <input type="text" id="prodColors" name="Colors" placeholder="e.g. Sand, Charcoal, White" />
             </div>
             <div class="form-group">
-                <label>Sizes (comma separated)</label>
-                <input type="text" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
+                <label for="prodSizes">Sizes (comma separated)</label>
+                <input type="text" id="prodSizes" name="Sizes" placeholder="e.g. XS, S, M, L, XL, XXL" list="sizesList" />
                 <datalist id="sizesList">
                     @foreach (var s in allSizes)
                     {
@@ -106,8 +106,8 @@
                     Free delivery
                 </label>
                 <div id="deliveryChargeWrap" style="display:none; flex:1; min-width:180px;">
-                    <label>Delivery charge (PKR)</label>
-                    <input type="number" name="DeliveryCharge" min="0" step="1" placeholder="e.g. 200" />
+                    <label for="prodDeliveryCharge">Delivery charge (PKR)</label>
+                    <input type="number" id="prodDeliveryCharge" name="DeliveryCharge" min="0" step="1" placeholder="e.g. 200" />
                 </div>
             </div>
         </div>
@@ -115,12 +115,12 @@
         <div class="form-grid-2">
             <div class="form-section-title"><i class="bi bi-image"></i> Description &amp; Images</div>
             <div class="form-group" style="grid-column: span 2;">
-                <label>Description</label>
-                <textarea name="Description" rows="3" placeholder="Product description…"></textarea>
+                <label for="prodDescription">Description</label>
+                <textarea id="prodDescription" name="Description" rows="3" placeholder="Product description…"></textarea>
             </div>
             <div class="form-group" style="grid-column: span 2;">
-                <label>Product Images (up to 5)</label>
-                <input type="file" name="imageFiles" accept="image/*" multiple />
+                <label for="prodImages">Product Images (up to 5)</label>
+                <input type="file" id="prodImages" name="imageFiles" accept="image/*" multiple />
                 <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.3rem;">First image = cover. Max 5 images.</div>
             </div>
         </div>
